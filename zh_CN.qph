@@ -1,0 +1,1676 @@
+<!DOCTYPE QPH>
+<QPH sourcelanguage="en" language="zh_CN">
+<phrase>
+    <source>&lt;p&gt;The program is provided AS IS with NO WARRANTY OF ANY KIND.&lt;/p&gt;</source>
+    <target>&lt;p&gt;本程序不提供任何担保。&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>About</source>
+    <target>关于</target>
+</phrase>
+<phrase>
+    <source>General</source>
+    <target>基本信息</target>
+</phrase>
+<phrase>
+    <source>General Info</source>
+    <target>基本信息</target>
+</phrase>
+<phrase>
+    <source>Thanks</source>
+    <target>致谢</target>
+</phrase>
+<phrase>
+    <source>License</source>
+    <target>授权</target>
+</phrase>
+<phrase>
+    <source>Bug Report</source>
+    <target>报告漏洞</target>
+</phrase>
+<phrase>
+    <source>Help</source>
+    <target>帮助</target>
+</phrase>
+<phrase>
+    <source>Config</source>
+    <target>配置</target>
+</phrase>
+<phrase>
+    <source>Quit</source>
+    <target>退出</target>
+</phrase>
+<phrase>
+    <source>Style</source>
+    <target>样式</target>
+</phrase>
+<phrase>
+    <source>Language</source>
+    <target>语言</target>
+</phrase>
+<phrase>
+    <source>Palette</source>
+    <target>配色</target>
+</phrase>
+<phrase>
+    <source>Use style&apos;s standard palette</source>
+    <target>使用主题样式标准配色</target>
+</phrase>
+<phrase>
+    <source>Plastique Style</source>
+    <target>Plastique 样式</target>
+</phrase>
+<phrase>
+    <source>Cleanlooks Style</source>
+    <target>Cleanlooks 样式</target>
+</phrase>
+<phrase>
+    <source>System Information</source>
+    <target>系统信息</target>
+</phrase>
+<phrase>
+    <source>System Config</source>
+    <target>系统配置</target>
+</phrase>
+<phrase>
+    <source>MainWindow</source>
+    <target>主窗口</target>
+</phrase>
+<phrase>
+    <source>&amp;System</source>
+    <target>系统(&amp;S)</target>
+</phrase>
+<phrase>
+    <source>&amp;View</source>
+    <target>视图(&amp;V)</target>
+</phrase>
+<phrase>
+    <source>&amp;Help</source>
+    <target>帮助(&amp;H)</target>
+</phrase>
+<phrase>
+    <source>System</source>
+    <target>系统</target>
+</phrase>
+<phrase>
+    <source>&amp;Quit</source>
+    <target>退出(&amp;Q)</target>
+</phrase>
+<phrase>
+    <source>Invalid Operation</source>
+    <target>无效操作</target>
+</phrase>
+<phrase>
+    <source>OS</source>
+    <target>操作系统</target>
+</phrase>
+<phrase>
+    <source>User</source>
+    <target>用户</target>
+</phrase>
+<phrase>
+    <source>Backup</source>
+    <target>备份</target>
+</phrase>
+<phrase>
+    <source>Clean</source>
+    <target>清理</target>
+</phrase>
+<phrase>
+    <source>My Documents</source>
+    <target>我的文档</target>
+</phrase>
+<phrase>
+    <source>Devices</source>
+    <target>设备</target>
+</phrase>
+<phrase>
+    <source>User Manager</source>
+    <target>用户管理器</target>
+</phrase>
+<phrase>
+    <source>Add New User</source>
+    <target>添加新用户</target>
+</phrase>
+<phrase>
+    <source>&amp;Window</source>
+    <target>窗口(&amp;W)</target>
+</phrase>
+<phrase>
+    <source>Use Style&apos;s Palette</source>
+    <target>使用样式标准配色</target>
+</phrase>
+<phrase>
+    <source>Deleting %1</source>
+    <target>正在删除 %1</target>
+</phrase>
+<phrase>
+    <source>Temporary files deleted.</source>
+    <target>已经删除临时文件。</target>
+</phrase>
+<phrase>
+    <source>System Infomation File Already Exists!</source>
+    <target>系统信息文件已经存在！</target>
+</phrase>
+<phrase>
+    <source>Rescan the system?</source>
+    <target>重新扫描系统？</target>
+</phrase>
+<phrase>
+    <source>File &apos;</source>
+    <target>文件 &apos;</target>
+</phrase>
+<phrase>
+    <source>Scanning....</source>
+    <target>正在扫描....</target>
+</phrase>
+<phrase>
+    <source>Yes</source>
+    <target>是</target>
+</phrase>
+<phrase>
+    <source>No</source>
+    <target>否</target>
+</phrase>
+<phrase>
+    <source>Done.</source>
+    <target>完成。</target>
+</phrase>
+<phrase>
+    <source>All Files (*);;Excel Files (*.xls);;Word Files (*.doc)</source>
+    <target>所有文件 (*);;Excel (*.xls);;Word (*.doc)</target>
+</phrase>
+<phrase>
+    <source>Error</source>
+    <target>错误</target>
+</phrase>
+<phrase>
+    <source>Name</source>
+    <target>姓名</target>
+</phrase>
+<phrase>
+    <source>Dept</source>
+    <target>部门</target>
+</phrase>
+<phrase>
+    <source>Email</source>
+    <target>邮件</target>
+</phrase>
+<phrase>
+    <source>Error!</source>
+    <target>错误！</target>
+</phrase>
+<phrase>
+    <source>No database driver found</source>
+    <target>未找到数据库驱动</target>
+</phrase>
+<phrase>
+    <source>This application requires at least one Qt database driver.
+ Please check the documentation about how to build the Qt SQL plugins.</source>
+    <target>本程序需要至少一种Qt数据库驱动.请查看关于Qt数据库插件的文档。</target>
+</phrase>
+<phrase>
+    <source>Database &apos;%1&apos; open failed!</source>
+    <target>打开数据库 &apos;%1&apos; 失败！</target>
+</phrase>
+<phrase>
+    <source>Error: No Data Fetched! Empty Database!</source>
+    <target>错误：未获取数据!数据库为空！</target>
+</phrase>
+<phrase>
+    <source>Upload the system information to server</source>
+    <target>上传系统信息到服务器</target>
+</phrase>
+<phrase>
+    <source>Upload</source>
+    <target>上传</target>
+</phrase>
+<phrase>
+    <source>Operation Canceled</source>
+    <target>操作被取消</target>
+</phrase>
+<phrase>
+    <source>Data had been uploaded to server!</source>
+    <target>数据已经被上传到服务器！</target>
+</phrase>
+<phrase>
+    <source>Error: %1</source>
+    <target>错误:：%1</target>
+</phrase>
+<phrase>
+    <source>Done! Data has been uploaded to server!</source>
+    <target>完成！数据被成功上传到服务器！</target>
+</phrase>
+<phrase>
+    <source>Select files to be backup</source>
+    <target>选择要备份的文件</target>
+</phrase>
+<phrase>
+    <source>All Files (*);;DBX Files (*.dbx)</source>
+    <target>所有文件 (*);;DBX (*.dbx)</target>
+</phrase>
+<phrase>
+    <source>Select target directory</source>
+    <target>选择目标目录</target>
+</phrase>
+<phrase>
+    <source>Operation &apos;My Documents Backup&apos; canceled!</source>
+    <target>&apos;备份我的文档&apos; 操作已取消！</target>
+</phrase>
+<phrase>
+    <source>Done. Press F8 key to upload the data to server!</source>
+    <target>完成。按 F8 键上传数据到服务器！</target>
+</phrase>
+<phrase>
+    <source>Source and target directory should not be the same!</source>
+    <target>源目录和目标目录不能相同！</target>
+</phrase>
+<phrase>
+    <source>Copying %1</source>
+    <target>正在复制 %1</target>
+</phrase>
+<phrase>
+    <source>Operation &apos;My Documents Backup&apos; Done.</source>
+    <target>&apos;备份我的文档&apos; 操作已完成。</target>
+</phrase>
+<phrase>
+    <source>Can not remove the target file %1</source>
+    <target>无法移除目标文件 %1</target>
+</phrase>
+<phrase>
+    <source>Fatal Error: %1</source>
+    <target>严重错误:：%1</target>
+</phrase>
+<phrase>
+    <source>Fatal Error</source>
+    <target>严重错误</target>
+</phrase>
+<phrase>
+    <source>Init Application Info</source>
+    <target>初始化应用程序信息</target>
+</phrase>
+<phrase>
+    <source>Query</source>
+    <target>查询</target>
+</phrase>
+<phrase>
+    <source>Add</source>
+    <target>添加</target>
+</phrase>
+<phrase>
+    <source>Database (*.db *.mdb);;All Files (*.*)</source>
+    <target>数据库文件(*.db *.mdb);;所有文件(*.*)</target>
+</phrase>
+<phrase>
+    <source>Can not fetch any table from the database!</source>
+    <target>无法从数据库获取任何数据表！</target>
+</phrase>
+<phrase>
+    <source>Network Database</source>
+    <target>网络数据库</target>
+</phrase>
+<phrase>
+    <source>Database Name</source>
+    <target>数据库名称</target>
+</phrase>
+<phrase>
+    <source>Database Driver</source>
+    <target>数据库驱动</target>
+</phrase>
+<phrase>
+    <source>Auto Select</source>
+    <target>自动选择</target>
+</phrase>
+<phrase>
+    <source>Host Name Or IP Address Of The Database Server</source>
+    <target>数据库服务器的主机名或IP地址</target>
+</phrase>
+<phrase>
+    <source>Port Of The Database Server</source>
+    <target>数据库服务器端口</target>
+</phrase>
+<phrase>
+    <source>Default</source>
+    <target>默认</target>
+</phrase>
+<phrase>
+    <source>User Name Of The Database Server</source>
+    <target>数据库服务器用户名</target>
+</phrase>
+<phrase>
+    <source>Password</source>
+    <target>密码</target>
+</phrase>
+<phrase>
+    <source>Local Database File</source>
+    <target>本地数据库文件</target>
+</phrase>
+<phrase>
+    <source>Database File Path</source>
+    <target>数据库文件路径</target>
+</phrase>
+<phrase>
+    <source>Click To Select The Database File</source>
+    <target>点击选择数据库文件</target>
+</phrase>
+<phrase>
+    <source>&amp;Browse</source>
+    <target>浏览(&amp;B)</target>
+</phrase>
+<phrase>
+    <source>Database File Path:</source>
+    <target>数据库文件路径：</target>
+</phrase>
+<phrase>
+    <source>&amp;OK</source>
+    <target>确定(&amp;O)</target>
+</phrase>
+<phrase>
+    <source>Can not connect to database server! Upload failed!</source>
+    <target>无法连接数据库！上传失败！</target>
+</phrase>
+<phrase>
+    <source>Authentication Failed</source>
+    <target>认证失败</target>
+</phrase>
+<phrase>
+    <source>Error: Authentication Failed!</source>
+    <target>错误：认证失败！</target>
+</phrase>
+<phrase>
+    <source>Windows XP Style</source>
+    <target>Windows XP 样式</target>
+</phrase>
+<phrase>
+    <source>System Default</source>
+    <target>系统默认</target>
+</phrase>
+<phrase>
+    <source>Can not connect to database server!</source>
+    <target>无法连接到数据库服务器！</target>
+</phrase>
+<phrase>
+    <source>User Info</source>
+    <target>用户信息</target>
+</phrase>
+<phrase>
+    <source>&amp;Login</source>
+    <target>登陆(&amp;L)</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;Author: %1&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.gnu.org/copyleft/lesser.html&quot;&gt;LGPL&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Email: %2&lt;/p&gt;</source>
+    <target>&lt;p&gt;作者：%1&lt;/p&gt;&lt;p&gt;授权： &lt;a href=&quot;http://www.gnu.org/copyleft/lesser.html&quot;&gt;LGPL&lt;/a&gt;&lt;/p&gt;&lt;p&gt;电子邮件： %2&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;&lt;center&gt;The program is provided AS IS with NO WARRANTY OF ANY KIND.&lt;/center&gt;&lt;/p&gt;</source>
+    <target>&lt;p&gt;&lt;center&gt;本程序不提供任何形式的担保。&lt;/center&gt;&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>Dangerous Operation</source>
+    <target>危险操作</target>
+</phrase>
+<phrase>
+    <source>&lt;font color=red&gt;Really delete data?&lt;/font&gt;</source>
+    <target>&lt;font color=red&gt;确定要删除数据？&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>Invalid database &apos;%1&apos;!</source>
+    <target>数据库 &apos;%1&apos;无效！</target>
+</phrase>
+<phrase>
+    <source>Empty string is not accepted!</source>
+    <target>不接受空字符串！</target>
+</phrase>
+<phrase>
+    <source>Unable to find table &lt;b&gt;&apos;%1&apos;&lt;/b&gt; in database &lt;b&gt;&apos;%2&apos;&lt;/b&gt;!</source>
+    <target>无法在数据库 &lt;b&gt;&apos;%2&apos;&lt;/b&gt;中找到数据表 &lt;b&gt;&apos;%1&apos;&lt;/b&gt;！</target>
+</phrase>
+<phrase>
+    <source>Comma(&apos;,&apos;)</source>
+    <target>逗号(&apos;,&apos;)</target>
+</phrase>
+<phrase>
+    <source>Vertical(&apos;|&apos;)</source>
+    <target>竖线(&apos;|&apos;)</target>
+</phrase>
+<phrase>
+    <source>Other</source>
+    <target>其它</target>
+</phrase>
+<phrase>
+    <source>Print</source>
+    <target>打印</target>
+</phrase>
+<phrase>
+    <source>Data File Path:</source>
+    <target>数据文件路径：</target>
+</phrase>
+<phrase>
+    <source>%1All(*.*)</source>
+    <target>%1所有文件(*.*)</target>
+</phrase>
+<phrase>
+    <source>New Separator</source>
+    <target>新分隔符</target>
+</phrase>
+<phrase>
+    <source>New Separator:</source>
+    <target>新分隔符：</target>
+</phrase>
+<phrase>
+    <source>&lt;b&gt;File already exists!&lt;br&gt;Overwrite?&lt;/b&gt;</source>
+    <target>&lt;b&gt;文件已经存在！&lt;br&gt;覆盖它？&lt;/b&gt;</target>
+</phrase>
+<phrase>
+    <source>File &apos;%1&apos; does not exist!</source>
+    <target>文件 &apos;%1&apos; 不存在！</target>
+</phrase>
+<phrase>
+    <source>Can not open file &apos;%1&apos;!</source>
+    <target>无法打开文件&apos;%1&apos;！</target>
+</phrase>
+<phrase>
+    <source>Print Document</source>
+    <target>打印文档</target>
+</phrase>
+<phrase>
+    <source>No available drivers found!</source>
+    <target>没有找到可用的数据库驱动！</target>
+</phrase>
+<phrase>
+    <source>Default Port:3050</source>
+    <target>默认端口：3050</target>
+</phrase>
+<phrase>
+    <source>Default Port:50000</source>
+    <target>默认端口：50000</target>
+</phrase>
+<phrase>
+    <source>Default Port:3306</source>
+    <target>默认端口：3306</target>
+</phrase>
+<phrase>
+    <source>Default Port:1433</source>
+    <target>默认端口：1433</target>
+</phrase>
+<phrase>
+    <source>Database Server Port</source>
+    <target>数据库服务器端口</target>
+</phrase>
+<phrase>
+    <source>&amp;Database:</source>
+    <target>数据库(&amp;D)：</target>
+</phrase>
+<phrase>
+    <source>&lt;b&gt;Please fill in every required information!&lt;/b&gt;</source>
+    <target>&lt;b&gt;请填写每一项必要的信息！&lt;/b&gt;</target>
+</phrase>
+<phrase>
+    <source>&lt;b&gt;No database file found in your specified path !&lt;br&gt;Please check out and try again !&lt;/b&gt;</source>
+    <target>&lt;b&gt;未能在指定的路径找到数据库文件!&lt;br&gt;请检查后重试！&lt;/b&gt;</target>
+</phrase>
+<phrase>
+    <source>Default Port:5432</source>
+    <target>默认端口：5432</target>
+</phrase>
+<phrase>
+    <source>Database Connecter</source>
+    <target>数据库连接器</target>
+</phrase>
+<phrase>
+    <source>D&amp;river:</source>
+    <target>驱动(&amp;R)：</target>
+</phrase>
+<phrase>
+    <source>&amp;Hostname:</source>
+    <target>服务器(&amp;H)：</target>
+</phrase>
+<phrase>
+    <source>Database Type:</source>
+    <target>数据库类型：</target>
+</phrase>
+<phrase>
+    <source>Database Type</source>
+    <target>数据库类型</target>
+</phrase>
+<phrase>
+    <source>Database connection &apos;%1&apos; has been opened!</source>
+    <target>数据库连接 &apos;%1&apos;已经打开！</target>
+</phrase>
+<phrase>
+    <source>&lt;font color=red&gt;Sorry,I can&apos;t find your name!&lt;br&gt;  Please check out your name.&lt;/font&gt;</source>
+    <target>&lt;font color=red&gt;对不起，找不到您的用户名！&lt;br&gt; 请检查您的用户名。&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>&lt;font color=red&gt;Sorry,Password incorrect!&lt;br&gt;  Please check out your password.&lt;/font&gt;</source>
+    <target>&lt;font color=red&gt;对不起，密码错误！&lt;br&gt;  请检查您的密码。&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>Cannot access the specified server: &lt;font color=red&gt;Permission Denied!&lt;/font&gt;</source>
+    <target>无法访问指定的服务器：&lt;font color=red&gt;拒绝访问！&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>Privilege Required</source>
+    <target>要求提供授权</target>
+</phrase>
+<phrase>
+    <source>Access Code:</source>
+    <target>访问代码：</target>
+</phrase>
+<phrase>
+    <source>&lt;b&gt;How can I help you?&lt;br&gt; I don&apos;t know how to do that, I don&apos;t know!&lt;/b&gt;</source>
+    <target>&lt;b&gt;叫我怎么帮您呢？&lt;br&gt; 我不知道该怎么做！&lt;/b&gt;</target>
+</phrase>
+<phrase>
+    <source>What&apos;s your password?</source>
+    <target>您老的密码是？</target>
+</phrase>
+<phrase>
+    <source>What&apos;s your name?</source>
+    <target>请问您老贵姓？</target>
+</phrase>
+<phrase>
+    <source> Not accomplished !</source>
+    <target>未完成！</target>
+</phrase>
+<phrase>
+    <source>Default(English)</source>
+    <target>默认(English)</target>
+</phrase>
+<phrase>
+    <source>SQL Explorer</source>
+    <target>SQL 浏览器</target>
+</phrase>
+<phrase>
+    <source>Database file  %1  does not exists !</source>
+    <target>数据库文件 %1 不存在！</target>
+</phrase>
+<phrase>
+    <source>Database file  %1  can not be read or written !</source>
+    <target>数据库文件 %1 无法读取或写入！</target>
+</phrase>
+<phrase>
+    <source>Metadata</source>
+    <target>元数据</target>
+</phrase>
+<phrase>
+    <source>Query Result</source>
+    <target>查询结果</target>
+</phrase>
+<phrase>
+    <source>Confirm</source>
+    <target>确认</target>
+</phrase>
+<phrase>
+    <source>Database:%1</source>
+    <target>数据库：%1</target>
+</phrase>
+<phrase>
+    <source>Table:%2</source>
+    <target>数据表：%2</target>
+</phrase>
+<phrase>
+    <source>&lt;font color=red&gt;Table &apos;%1&apos; had been deleted or modified!&lt;/font&gt;</source>
+    <target>&lt;font color=red&gt;数据表 &apos;%1&apos; 已经被修改或删除！&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>Unknown</source>
+    <target>未知</target>
+</phrase>
+<phrase>
+    <source>Untitled</source>
+    <target>无标题</target>
+</phrase>
+<phrase>
+    <source>Database:</source>
+    <target>数据库：</target>
+</phrase>
+<phrase>
+    <source>Table:</source>
+    <target>数据表：</target>
+</phrase>
+<phrase>
+    <source>Show Metadata</source>
+    <target>显示元数据</target>
+</phrase>
+<phrase>
+    <source>Rows:</source>
+    <target>行数：</target>
+</phrase>
+<phrase>
+    <source>Paging</source>
+    <target>分页</target>
+</phrase>
+<phrase>
+    <source>Limit Rows:</source>
+    <target>行数限定：</target>
+</phrase>
+<phrase>
+    <source>Database Explorer</source>
+    <target>数据库浏览器</target>
+</phrase>
+<phrase>
+    <source>SQL Console</source>
+    <target>SQL 终端</target>
+</phrase>
+<phrase>
+    <source>&apos; Missing!</source>
+    <target>&apos; 丢失！</target>
+</phrase>
+<phrase>
+    <source>Error! File &apos;%1&apos; missing!</source>
+    <target>错误！文件 &apos;%1&apos; 丢失！</target>
+</phrase>
+<phrase>
+    <source>File Already Exists!</source>
+    <target>文件已经存在！</target>
+</phrase>
+<phrase>
+    <source>File &apos;%1&apos; Already Exists!&lt;br&gt;Overwrite it?</source>
+    <target>文件 &apos;%1&apos; 已经存在！&lt;br&gt;是否覆盖？</target>
+</phrase>
+<phrase>
+    <source>Fatal Error!</source>
+    <target>严重错误！</target>
+</phrase>
+<phrase>
+    <source>Database Connection Failed! Upload Failed!</source>
+    <target>连接数据库失败！上传失败！</target>
+</phrase>
+<phrase>
+    <source>Error! Can not upload data to server!</source>
+    <target>错误！无法上传数据到服务器！</target>
+</phrase>
+<phrase>
+    <source>OS Version:</source>
+    <target>系统版本：</target>
+</phrase>
+<phrase>
+    <source>Logical Drives:</source>
+    <target>逻辑驱动器：</target>
+</phrase>
+<phrase>
+    <source>Copmuter Name:</source>
+    <target>计算机名称：</target>
+</phrase>
+<phrase>
+    <source>Workgroup:</source>
+    <target>工作组：</target>
+</phrase>
+<phrase>
+    <source>Installation Date:</source>
+    <target>安装日期：</target>
+</phrase>
+<phrase>
+    <source>User Name:</source>
+    <target>用户名：</target>
+</phrase>
+<phrase>
+    <source>Is Admin:</source>
+    <target>管理员：</target>
+</phrase>
+<phrase>
+    <source>Folder Size(MB):</source>
+    <target>文件夹大小(MB)：</target>
+</phrase>
+<phrase>
+    <source>Biggest .dbx(MB):</source>
+    <target>最大文件(MB)：</target>
+</phrase>
+<phrase>
+    <source>Temp Files(MB):</source>
+    <target>临时文件(MB)：</target>
+</phrase>
+<phrase>
+    <source>IE Temp Files(MB):</source>
+    <target>IE临时文件(MB)：</target>
+</phrase>
+<phrase>
+    <source>OE Folder:</source>
+    <target>OE存储位置：</target>
+</phrase>
+<phrase>
+    <source>Video Card:</source>
+    <target>显卡：</target>
+</phrase>
+<phrase>
+    <source>MAC Address:</source>
+    <target>网卡物理地址：</target>
+</phrase>
+<phrase>
+    <source>IP Address:</source>
+    <target>IP地址：</target>
+</phrase>
+<phrase>
+    <source>Adapter 1:</source>
+    <target>适配器1：</target>
+</phrase>
+<phrase>
+    <source>Adapter 2:</source>
+    <target>适配器2：</target>
+</phrase>
+<phrase>
+    <source>Network Info:</source>
+    <target>网络信息：</target>
+</phrase>
+<phrase>
+    <source>Motherboard:</source>
+    <target>主板：</target>
+</phrase>
+<phrase>
+    <source>Chipset:</source>
+    <target>芯片：</target>
+</phrase>
+<phrase>
+    <source>Memory(MB):</source>
+    <target>内存(MB)：</target>
+</phrase>
+<phrase>
+    <source>Audio Card:</source>
+    <target>声卡：</target>
+</phrase>
+<phrase>
+    <source>Notice:&lt;br&gt;</source>
+    <target>注意：&lt;br&gt;</target>
+</phrase>
+<phrase>
+    <source>1.SQLite can only execute one statement one time!&lt;br&gt;</source>
+    <target>1.SQLite一次只能执行一条指令！&lt;br&gt;</target>
+</phrase>
+<phrase>
+    <source>2. &apos;CTRL&apos; + &apos;/&apos; : Auto completions!&lt;br&gt;</source>
+    <target>2.&apos;CTRL&apos; + &apos;/&apos; ：自动完成！&lt;br&gt;</target>
+</phrase>
+<phrase>
+    <source>Database Connection Failed! Query Failed!</source>
+    <target>连接数据库失败！查询失败！</target>
+</phrase>
+<phrase>
+    <source>This Function Is For Fucking M$ Windows Only!</source>
+    <target>本功能仅在该死的M$操作系统上可用！</target>
+</phrase>
+<phrase>
+    <source>User List</source>
+    <target>用户列表</target>
+</phrase>
+<phrase>
+    <source>SQL Data Explorer</source>
+    <target>SQL 数据浏览器</target>
+</phrase>
+<phrase>
+    <source>&amp;Insert Row</source>
+    <target>插入行(&amp;I)</target>
+</phrase>
+<phrase>
+    <source>Inserts a new row</source>
+    <target>插入新行</target>
+</phrase>
+<phrase>
+    <source>Delete the selected Row(s)</source>
+    <target>删除选中的行</target>
+</phrase>
+<phrase>
+    <source>Import</source>
+    <target>导入</target>
+</phrase>
+<phrase>
+    <source>&amp;Print</source>
+    <target>打印(&amp;P)</target>
+</phrase>
+<phrase>
+    <source>Print Preview</source>
+    <target>打印预览</target>
+</phrase>
+<phrase>
+    <source>Export Settings</source>
+    <target>导出设置</target>
+</phrase>
+<phrase>
+    <source>Data</source>
+    <target>数据</target>
+</phrase>
+<phrase>
+    <source>Rows:</source>
+    <target>行：</target>
+</phrase>
+<phrase>
+    <source>All</source>
+    <target>所有</target>
+</phrase>
+<phrase>
+    <source>Selected</source>
+    <target>选中的</target>
+</phrase>
+<phrase>
+    <source>Column:</source>
+    <target>列：</target>
+</phrase>
+<phrase>
+    <source>Format:</source>
+    <target>格式：</target>
+</phrase>
+<phrase>
+    <source>Notes:</source>
+    <target>备注：</target>
+</phrase>
+<phrase>
+    <source>File &amp;Path:</source>
+    <target>文件路径：</target>
+</phrase>
+<phrase>
+    <source>Print Settings</source>
+    <target>打印设置</target>
+</phrase>
+<phrase>
+    <source>Header:</source>
+    <target>页眉：</target>
+</phrase>
+<phrase>
+    <source>Footer:</source>
+    <target>页脚：</target>
+</phrase>
+<phrase>
+    <source>Execute</source>
+    <target>执行</target>
+</phrase>
+<phrase>
+    <source>&amp;Cancel</source>
+    <target>取消(&amp;C)</target>
+</phrase>
+<phrase>
+    <source>Database List</source>
+    <target>数据库列表</target>
+</phrase>
+<phrase>
+    <source>Open Table In New TabPage</source>
+    <target>在新标签页中打开表</target>
+</phrase>
+<phrase>
+    <source>Refresh</source>
+    <target>刷新</target>
+</phrase>
+<phrase>
+    <source>Connect Database</source>
+    <target>连接数据库</target>
+</phrase>
+<phrase>
+    <source>Disconnect</source>
+    <target>断开连接</target>
+</phrase>
+<phrase>
+    <source>Login...</source>
+    <target>登陆....</target>
+</phrase>
+<phrase>
+    <source>&amp;Name:</source>
+    <target>姓名(&amp;N)：</target>
+</phrase>
+<phrase>
+    <source>I am a professional DBA</source>
+    <target>我是专业的数据库管理员</target>
+</phrase>
+<phrase>
+    <source>&amp;Clear</source>
+    <target>清理(&amp;C)</target>
+</phrase>
+<phrase>
+    <source>Submit</source>
+    <target>提交</target>
+</phrase>
+<phrase>
+    <source>Be Careful!</source>
+    <target>小心！</target>
+</phrase>
+<phrase>
+    <source>&amp;Password:</source>
+    <target>密码(&amp;P)：</target>
+</phrase>
+<phrase>
+    <source>Add Page</source>
+    <target>添加页</target>
+</phrase>
+<phrase>
+    <source>Close Page</source>
+    <target>关闭页</target>
+</phrase>
+<phrase>
+    <source>&amp;Delete Row(s)</source>
+    <target>删除行(&amp;D)</target>
+</phrase>
+<phrase>
+    <source>&amp;Export</source>
+    <target>导出(&amp;E)</target>
+</phrase>
+<phrase>
+    <source>&amp;Separator:</source>
+    <target>分隔符(&amp;S)：</target>
+</phrase>
+<phrase>
+    <source>File &amp;Path:</source>
+    <target>文件路径(&amp;P)：</target>
+</phrase>
+<phrase>
+    <source>Cannot write file %1:&lt;br&gt;%2.</source>
+    <target>无法写文件 %1：&lt;br&gt;%2。</target>
+</phrase>
+<phrase>
+    <source>An error occurred when opening the database!&lt;br&gt; %1</source>
+    <target>打开数据库时发生错误！&lt;br&gt;%1</target>
+</phrase>
+<phrase>
+    <source>An error occurred when querying the database!&lt;br&gt; %1</source>
+    <target>查询数据库时发生错误！&lt;br&gt;%1</target>
+</phrase>
+<phrase>
+    <source>Really close the connection? &lt;br&gt; %1</source>
+    <target>确定要关闭连接？&lt;br&gt;%1</target>
+</phrase>
+<phrase>
+    <source>Scanner is running! &lt;br&gt; Exit the system?</source>
+    <target>扫描器正在运行！&lt;br&gt;确定要退出系统？</target>
+</phrase>
+<phrase>
+    <source>Can not upload data to server! &lt;br&gt; %1</source>
+    <target>无法上传数据到服务器！&lt;br&gt;%1</target>
+</phrase>
+<phrase>
+    <source>3. &apos;CTRL&apos; + &apos;Mouse Wheel&apos; or &apos;[&apos; or &apos;]&apos; : Zoom in or out! &lt;br&gt;</source>
+    <target>3. &apos;CTRL&apos; + &apos;鼠标滚轮&apos; 或者 &apos;[&apos; 或者 &apos;]&apos; ：缩放！&lt;br&gt;</target>
+</phrase>
+<phrase>
+    <source>Port:</source>
+    <target>端口：</target>
+</phrase>
+<phrase>
+    <source>Database &amp;Type:</source>
+    <target>数据库类型(&amp;T)：</target>
+</phrase>
+<phrase>
+    <source>Open Table In New TabPage</source>
+    <target>在新标签页中打开数据表</target>
+</phrase>
+<phrase>
+    <source>&lt;p &gt;Tooltips:&lt;/p&gt;&lt;p &gt;1.SQLite can only execute one statement one time!&lt;/p&gt;&lt;p &gt;2. &apos;CTRL&apos; + &apos;/&apos; : Auto completions! &lt;/p&gt;&lt;p &gt;3. &apos;CTRL&apos; + &apos;Mouse Wheel&apos; or &apos;[&apos; or &apos;]&apos; : Zoom in or out! &lt;/p&gt;</source>
+    <target>&lt;p &gt;提示：&lt;/p&gt;&lt;p &gt;1.SQLite 每次只能执行一条指令！&lt;/p&gt;&lt;p &gt;2. &apos;CTRL&apos; + &apos;/&apos; ：自动完成！ &lt;/p&gt;&lt;p &gt;3. &apos;CTRL&apos; + &apos;Mouse Wheel&apos; 或者 &apos;[&apos; 或者 &apos;]&apos; ：缩放！ &lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>Main Window</source>
+    <target>主窗口</target>
+</phrase>
+<phrase>
+    <source>Show Minimized</source>
+    <target>最小化</target>
+</phrase>
+<phrase>
+    <source>Shows the widget minimized, as an icon.</source>
+    <target>最小化显示为一个图标。</target>
+</phrase>
+<phrase>
+    <source>Show Maximized</source>
+    <target>最大化</target>
+</phrase>
+<phrase>
+    <source>Shows the widget maximized.</source>
+    <target>最大化显示。</target>
+</phrase>
+<phrase>
+    <source>Show Normal</source>
+    <target>还原</target>
+</phrase>
+<phrase>
+    <source>Restores the widget after it has been maximized or minimized.</source>
+    <target>在组件最大化或最小化之后将其还原显示。</target>
+</phrase>
+<phrase>
+    <source>Show Full-Screen</source>
+    <target>全屏显示</target>
+</phrase>
+<phrase>
+    <source>Shows the widget in full-screen mode.</source>
+    <target>全屏显示组件。</target>
+</phrase>
+<phrase>
+    <source>Software</source>
+    <target>软件</target>
+</phrase>
+<phrase>
+    <source>System Users:</source>
+    <target>系统用户：</target>
+</phrase>
+<phrase>
+    <source>Current User</source>
+    <target>当前用户：</target>
+</phrase>
+<phrase>
+    <source>Hardware</source>
+    <target>硬件</target>
+</phrase>
+<phrase>
+    <source>Memory:</source>
+    <target>内存(MB)：</target>
+</phrase>
+<phrase>
+    <source>Manufacturing Date</source>
+    <target>生产日期</target>
+</phrase>
+<phrase>
+    <source>Service NO.:</source>
+    <target>服务编号：</target>
+</phrase>
+<phrase>
+    <source>Upload to database</source>
+    <target>上传到数据库</target>
+</phrase>
+<phrase>
+    <source>&amp;Upload</source>
+    <target>上传(&amp;U)</target>
+</phrase>
+<phrase>
+    <source>Scan system</source>
+    <target>扫描系统</target>
+</phrase>
+<phrase>
+    <source>&amp;Scan</source>
+    <target>扫描(&amp;S)</target>
+</phrase>
+<phrase>
+    <source>Location</source>
+    <target>位置</target>
+</phrase>
+<phrase>
+    <source>SQL Explorer Plugin</source>
+    <target>SQL 浏览器插件</target>
+</phrase>
+<phrase>
+    <source>&lt;font color = &apos;red&apos;&gt;&lt;b&gt;It may cause unexpected behavior!&lt;/b&gt;&lt;/font&gt;</source>
+    <target>&lt;font color = &apos;red&apos;&gt;&lt;b&gt;它可能造成不可预料的后果！&lt;/b&gt;&lt;/font&gt;</target>
+</phrase>
+<phrase>
+    <source>Warning: Dangerous Operations</source>
+    <target>警告：危险操作</target>
+</phrase>
+<phrase>
+    <source>&amp;Continue</source>
+    <target>继续(&amp;C)</target>
+</phrase>
+<phrase>
+    <source>&amp;Abort</source>
+    <target>终止(&amp;A)</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;Make sure you are familiar with database systems, SQL and the operating mechanism of this plugin!&lt;/p&gt;</source>
+    <target>&lt;p&gt;请确保你熟知数据库系统、SQL及本插件的运作机理！&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>System Information Plugin</source>
+    <target>系统信息插件</target>
+</phrase>
+<phrase>
+    <source>Question</source>
+    <target>询问</target>
+</phrase>
+<phrase>
+    <source>Do you want to initialize the settings?</source>
+    <target>你要初始化设置吗？</target>
+</phrase>
+<phrase>
+    <source>Initialize user&apos;s settings</source>
+    <target>初始化用户设置</target>
+</phrase>
+<phrase>
+    <source>Job Inprogress</source>
+    <target>工作进度</target>
+</phrase>
+<phrase>
+    <source>Job Inprogress! Application will exit later!</source>
+    <target>工作进行中！程序稍后退出！</target>
+</phrase>
+<phrase>
+    <source>&lt;b&gt;&lt;font color=red&gt;User &apos;%1&apos; already exists!&lt;/font&gt;&lt;/b&gt;&lt;br&gt; Do you want to enable &apos;AutoAdminLogon&apos; with this account?</source>
+    <target>&lt;b&gt;&lt;font color=red&gt;用户 &apos;%1&apos; 已存在！&lt;/font&gt;&lt;/b&gt;&lt;br&gt; 你想要让该用户自动登陆吗？</target>
+</phrase>
+<phrase>
+    <source>DongGuan  No. 3 Branch FTY.</source>
+    <target>东莞三厂</target>
+</phrase>
+<phrase>
+    <source>YingDe   LEATHER PRODUCTS FTY.</source>
+    <target>英德厂</target>
+</phrase>
+<phrase>
+    <source>Select the location</source>
+    <target>选择所在位置</target>
+</phrase>
+<phrase>
+    <source>Location:</source>
+    <target>位置：</target>
+</phrase>
+<phrase>
+    <source>Add user to local system</source>
+    <target>添加用户到本地系统</target>
+</phrase>
+<phrase>
+    <source>Done</source>
+    <target>完成</target>
+</phrase>
+<phrase>
+    <source>User &apos;%1&apos; has been successfully added to the system!</source>
+    <target>用户&apos;%1&apos;已经成功地添加到本地系统！</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;&lt;b&gt;Some errors occured while adding user &apos;%1&apos; to the system!&lt;/b&gt;&lt;/p&gt;</source>
+    <target>&lt;p&gt;&lt;b&gt;添加用户&apos;%1&apos;到本地系统时发生了一些错误！&lt;/b&gt;&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;&lt;b&gt;Some errors occured while initializing the settings!&lt;/b&gt;&lt;/p&gt;</source>
+    <target>&lt;p&gt;&lt;b&gt;初始化系统设置时发生了一些错误！&lt;/b&gt;&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>Initialization Done</source>
+    <target>初始化完成</target>
+</phrase>
+<phrase>
+    <source>Initialization Done!</source>
+    <target>初始化完成！</target>
+</phrase>
+<phrase>
+    <source>User Manager For Sitoy</source>
+    <target>时代用户管理</target>
+</phrase>
+<phrase>
+    <source>&amp;Plug-ins</source>
+    <target>插件(&amp;P)</target>
+</phrase>
+<phrase>
+    <source>Plug-ins</source>
+    <target>插件</target>
+</phrase>
+<phrase>
+    <source>Ctrl+S: Upload    F5: Scan    Ctrl+Return: Query</source>
+    <target>Ctrl+S: 上传    F5: 扫描    Ctrl+Return: 查询</target>
+</phrase>
+<phrase>
+    <source>Reading Reports....</source>
+    <target>正在读取报告....</target>
+</phrase>
+<phrase>
+    <source>Done. Press &apos;Ctrl+S&apos; to upload the data to server!</source>
+    <target>完成。请按&apos;Ctrl+S&apos;上传数据到服务器！</target>
+</phrase>
+<phrase>
+    <source>Record &apos;%1&apos; already exists in server 200.200.200.2!&lt;br&gt;Update it?</source>
+    <target>记录&apos;%1&apos;已经在服务器200.200.200.2上存在！是否更新？</target>
+</phrase>
+<phrase>
+    <source>Record &apos;%1&apos; already exists!</source>
+    <target>记录&apos;%1&apos;已经存在！</target>
+</phrase>
+<phrase>
+    <source>Record &apos;%1&apos; does not exist!</source>
+    <target>记录&apos;%1&apos;不存在！</target>
+</phrase>
+<phrase>
+    <source>Can not upload data to server 200.200.200.2! &lt;br&gt; %1</source>
+    <target>无法上传数据到服务器200.200.200.2！ &lt;br&gt; %1</target>
+</phrase>
+<phrase>
+    <source>Error! Can not upload data to server 200.200.200.2!</source>
+    <target>错误！无法上传数据到服务器200.200.200.2！</target>
+</phrase>
+<phrase>
+    <source>Data has been uploaded to server 200.200.200.2!</source>
+    <target>数据已上传到服务器 200.200.200.2！</target>
+</phrase>
+<phrase>
+    <source>Done! Data has been uploaded to server 200.200.200.2!</source>
+    <target>完成！数据被成功上传到服务器200.200.200.2！</target>
+</phrase>
+<phrase>
+    <source>Duplicate No.!</source>
+    <target>编号重复！</target>
+</phrase>
+<phrase>
+    <source>Error! Duplicate No.!</source>
+    <target>错误！编号重复！</target>
+</phrase>
+<phrase>
+    <source>Record does not exist!</source>
+    <target>记录不存在！</target>
+</phrase>
+<phrase>
+    <source>Invalid Property NO.!</source>
+    <target>无效的资产编号！</target>
+</phrase>
+<phrase>
+    <source>Property NO. Required! </source>
+    <target>要求提供资产编号！</target>
+</phrase>
+<phrase>
+    <source>Department Information Required!</source>
+    <target>要求提供部门信息！</target>
+</phrase>
+<phrase>
+    <source>Service Number Required!</source>
+    <target>要求提供服务编号！</target>
+</phrase>
+<phrase>
+    <source>Devices Information Required! </source>
+    <target>要求提供设备信息！</target>
+</phrase>
+<phrase>
+    <source>Record Already Exists!</source>
+    <target>记录已经存在！</target>
+</phrase>
+<phrase>
+    <source>Record &apos;%1&apos; Already Exists!&lt;br&gt;Update it?</source>
+    <target>记录 &apos;%1&apos; 已经存在！&lt;br&gt;是否更新？</target>
+</phrase>
+<phrase>
+    <source>Tab(&apos;	&apos;)</source>
+    <target>制表符(&apos;	&apos;)</target>
+</phrase>
+<phrase>
+    <source>Invalid computer name!</source>
+    <target>无效的计算机名称！</target>
+</phrase>
+<phrase>
+    <source>Join workgroup ...</source>
+    <target>加入工作组....</target>
+</phrase>
+<phrase>
+    <source>Application has expired!</source>
+    <target>程序已过期！</target>
+</phrase>
+<phrase>
+    <source>Show Record Count</source>
+    <target>显示记录数量</target>
+</phrase>
+<phrase>
+    <source>Too Many Records</source>
+    <target>记录太多！</target>
+</phrase>
+<phrase>
+    <source>Record Count</source>
+    <target>记录数量</target>
+</phrase>
+<phrase>
+    <source>Previous Page</source>
+    <target>上一页</target>
+</phrase>
+<phrase>
+    <source>Current Page</source>
+    <target>当前页</target>
+</phrase>
+<phrase>
+    <source>Total Pages</source>
+    <target>总页数</target>
+</phrase>
+<phrase>
+    <source>Next Page</source>
+    <target>下一页</target>
+</phrase>
+<phrase>
+    <source>Loading Plugins</source>
+    <target>正在载入插件</target>
+</phrase>
+<phrase>
+    <source>System Management</source>
+    <target>系统管理</target>
+</phrase>
+<phrase>
+    <source>Target</source>
+    <target>目标</target>
+</phrase>
+<phrase>
+    <source>Computer Name:</source>
+    <target>计算机名称：</target>
+</phrase>
+<phrase>
+    <source>Users:</source>
+    <target>用户：</target>
+</phrase>
+<phrase>
+    <source>Verify</source>
+    <target>验证</target>
+</phrase>
+<phrase>
+    <source>Programs</source>
+    <target>程序</target>
+</phrase>
+<phrase>
+    <source>Show Admin</source>
+    <target>显示Admin</target>
+</phrase>
+<phrase>
+    <source>USB SD</source>
+    <target>USB存储设备</target>
+</phrase>
+<phrase>
+    <source>administrators</source>
+    <target>管理员</target>
+</phrase>
+<phrase>
+    <source>Local Administration Tools</source>
+    <target>本地管理工具</target>
+</phrase>
+<phrase>
+    <source>MMC</source>
+    <target>控制台</target>
+</phrase>
+<phrase>
+    <source>Other</source>
+    <target>其它</target>
+</phrase>
+<phrase>
+    <source>MMC</source>
+    <target>管理控制台</target>
+</phrase>
+<phrase>
+    <source>Other</source>
+    <target>其它程序</target>
+</phrase>
+<phrase>
+    <source>Add Admin</source>
+    <target>添加管理员</target>
+</phrase>
+<phrase>
+    <source>Add user to local admin group</source>
+    <target>添加用户到本地管理员组</target>
+</phrase>
+<phrase>
+    <source>Delete Admin</source>
+    <target>删除管理员</target>
+</phrase>
+<phrase>
+    <source>Delete user from local admin group</source>
+    <target>从本地管理员组删除用户</target>
+</phrase>
+<phrase>
+    <source>Control Center</source>
+    <target>控制中心</target>
+</phrase>
+<phrase>
+    <source>Query</source>
+    <target>查询</target>
+</phrase>
+<phrase>
+    <source>Department:</source>
+    <target>部门：</target>
+</phrase>
+<phrase>
+    <source>USB &amp;SD:</source>
+    <target>USB存储设备：</target>
+</phrase>
+<phrase>
+    <source>Enabled</source>
+    <target>被启用</target>
+</phrase>
+<phrase>
+    <source>Disabled</source>
+    <target>被禁用</target>
+</phrase>
+<phrase>
+    <source>Remote Management</source>
+    <target>远程管理</target>
+</phrase>
+<phrase>
+    <source>Update All Clients&apos; Info</source>
+    <target>更新所有客户端信息</target>
+</phrase>
+<phrase>
+    <source>Check Update</source>
+    <target>检查更新</target>
+</phrase>
+<phrase>
+    <source>Setup USB Storage Devices </source>
+    <target>设置USB存储设备</target>
+</phrase>
+<phrase>
+    <source>&amp;Computer Name:</source>
+    <target>计算机名称(&amp;C)：</target>
+</phrase>
+<phrase>
+    <source>&amp;OS Version:</source>
+    <target>操作系统版本(&amp;O)：</target>
+</phrase>
+<phrase>
+    <source>&amp;Workgroup:</source>
+    <target>工作组(&amp;W)：</target>
+</phrase>
+<phrase>
+    <source>&amp;User Name:</source>
+    <target>用户名(&amp;U)：</target>
+</phrase>
+<phrase>
+    <source>&amp;MAC Address:</source>
+    <target>MAC地址(&amp;M)：</target>
+</phrase>
+<phrase>
+    <source>&amp;IP Address:</source>
+    <target>IP地址(&amp;I)：</target>
+</phrase>
+<phrase>
+    <source>USB &amp;SD:</source>
+    <target>USB存储设备(&amp;S)：</target>
+</phrase>
+<phrase>
+    <source>&amp;Programs:</source>
+    <target>程序(&amp;P)：</target>
+</phrase>
+<phrase>
+    <source>CMD</source>
+    <target>命令提示符</target>
+</phrase>
+<phrase>
+    <source>Regedit</source>
+    <target>注册表编辑器</target>
+</phrase>
+<phrase>
+    <source>Export</source>
+    <target>导出</target>
+</phrase>
+<phrase>
+    <source>Export Data</source>
+    <target>导出数据</target>
+</phrase>
+<phrase>
+    <source>Print</source>
+    <target>打印</target>
+</phrase>
+<phrase>
+    <source>Print Data</source>
+    <target>打印数据</target>
+</phrase>
+<phrase>
+    <source>The Network is not available! Remote Management is not available!</source>
+    <target>网络不可用！无法使用远程管理功能！</target>
+</phrase>
+<phrase>
+    <source>Server Found</source>
+    <target>发现服务器</target>
+</phrase>
+<phrase>
+    <source>Disable USB SD</source>
+    <target>禁用USB存储设备</target>
+</phrase>
+<phrase>
+    <source>Enable USB SD</source>
+    <target>启用USB存储设备</target>
+</phrase>
+<phrase>
+    <source>Disable Programs</source>
+    <target>禁用程序</target>
+</phrase>
+<phrase>
+    <source>Enable Programs</source>
+    <target>启用程序</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;Please make sure that these processes run as admin are closed! Or that raises the issue of security!&lt;/p&gt;</source>
+    <target>&lt;p&gt;请确认以管理员身份启动的程序都已经关闭！否则会造成安全隐患！&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>Warning</source>
+    <target>警告</target>
+</phrase>
+<phrase>
+    <source>Do you really want to &lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; the USB SD on the computer?</source>
+    <target>你真的想要在这台电脑上 &lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; USB存储设备？</target>
+</phrase>
+<phrase>
+    <source>Do you really want to &lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; the Programes on the computer?</source>
+    <target>你真的想要在这台电脑上 &lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; 程序？</target>
+</phrase>
+<phrase>
+    <source>Select The User</source>
+    <target>选取用户</target>
+</phrase>
+<phrase>
+    <source>Do you really want to &lt;font color = &apos;red&apos;&gt;add &lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; to local administrators group? </source>
+    <target>你真的想要将&lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt; 添加&lt;/font&gt;到本地管理员组？</target>
+</phrase>
+<phrase>
+    <source>Do you really want to &lt;font color = &apos;red&apos;&gt;delete &lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; from local administrators group? </source>
+    <target>你真的想要将 &lt;font color = &apos;red&apos;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/font&gt; 从本地管理员组中&lt;font color = &apos;red&apos;&gt;删除&lt;/font&gt;？</target>
+</phrase>
+<phrase>
+    <source>Select an EXE File to run as admin:</source>
+    <target>选择一个将要以管理员身份运行的程序：</target>
+</phrase>
+<phrase>
+    <source>EXE (*.exe);;All(*.*)</source>
+    <target>可执行程序 (*.exe);;所有文件(*.*)</target>
+</phrase>
+<phrase>
+    <source>The client information and the record on the server do not match!</source>
+    <target>客户端信息与服务器上的记录不匹配！</target>
+</phrase>
+<phrase>
+    <source>Timeout! No response from client!</source>
+    <target>超时！客户端无回应！</target>
+</phrase>
+<phrase>
+    <source>Message</source>
+    <target>消息</target>
+</phrase>
+<phrase>
+    <source>Provisional Licence</source>
+    <target>临时许可</target>
+</phrase>
+<phrase>
+    <source>Perpetual License</source>
+    <target>永久许可</target>
+</phrase>
+<phrase>
+    <source>Select Licence Type</source>
+    <target>选择许可类型</target>
+</phrase>
+<phrase>
+    <source>Licence Type:</source>
+    <target>许可类型：</target>
+</phrase>
+<phrase>
+    <source>Verify Client Info</source>
+    <target>验证客户端信息</target>
+</phrase>
+<phrase>
+    <source>enable</source>
+    <target>启用</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;Message From Computer &lt;b&gt;%1&lt;/b&gt; :&lt;/p&gt;</source>
+    <target>&lt;p&gt;来自计算机 &lt;b&gt;%1&lt;/b&gt; 的消息：&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>Local Computer</source>
+    <target>本机</target>
+</phrase>
+<phrase>
+    <source>Remote Desktop</source>
+    <target>远程桌面</target>
+</phrase>
+<phrase>
+    <source>Clients List</source>
+    <target>客户端列表</target>
+</phrase>
+<phrase>
+    <source>Add Page</source>
+    <target>添加标签页</target>
+</phrase>
+<phrase>
+    <source>Close Page</source>
+    <target>关闭标签页</target>
+</phrase>
+<phrase>
+    <source>Can not switch to the language &apos;%1&apos;!</source>
+    <target>无法切换到指定语言 &apos;%1&apos;！</target>
+</phrase>
+<phrase>
+    <source>Can not write client info file &apos;</source>
+    <target>无法写客户端信息文件 &apos;</target>
+</phrase>
+<phrase>
+    <source>&apos;!</source>
+    <target>&apos;！</target>
+</phrase>
+<phrase>
+    <source>Client Info File &apos;</source>
+    <target>客户端信息文件 &apos;</target>
+</phrase>
+<phrase>
+    <source>&apos; Missing!</source>
+    <target>&apos; 丟失！</target>
+</phrase>
+<phrase>
+    <source>&amp;Users:</source>
+    <target>用户(&amp;U)：</target>
+</phrase>
+<phrase>
+    <source>System Info</source>
+    <target>系统信息</target>
+</phrase>
+<phrase>
+    <source>Scan</source>
+    <target>扫描</target>
+</phrase>
+<phrase>
+    <source>Rescan</source>
+    <target>重新扫描</target>
+</phrase>
+<phrase>
+    <source>Save</source>
+    <target>保存</target>
+</phrase>
+<phrase>
+    <source>Memory:</source>
+    <target>内存：</target>
+</phrase>
+<phrase>
+    <source>Monitor:</source>
+    <target>显示器：</target>
+</phrase>
+<phrase>
+    <source>Local Management</source>
+    <target>本机管理</target>
+</phrase>
+<phrase>
+    <source>It&apos;s dangerous to close the database connection which was connected in other place!</source>
+    <target>关闭在其它地方生成的数据库连接具有危险性！</target>
+</phrase>
+<phrase>
+    <source>&lt;p&gt;It is also highly recommended that you close all other plugins first! &lt;/p&gt;</source>
+    <target>&lt;p&gt;建议你先关闭其它所有插件！&lt;/p&gt;</target>
+</phrase>
+<phrase>
+    <source>DongGuan No. 1 Branch FTY.</source>
+    <target>东莞一厂</target>
+</phrase>
+<phrase>
+    <source>DongGuan No. 2 Branch FTY.</source>
+    <target>东莞二厂</target>
+</phrase>
+<phrase>
+    <source>DongGuan No. 4 Branch FTY.</source>
+    <target>东莞四厂</target>
+</phrase>
+</QPH>

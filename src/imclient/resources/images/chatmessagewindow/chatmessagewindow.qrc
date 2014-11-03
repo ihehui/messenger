@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="/chatmessagewindow">
+    <file>image.png</file>
+    <file>imagedownloading.gif</file>
+    <file>imagedownloadingfailed.png</file>
+  </qresource>
+  <qresource prefix="/messageeditor">
+    <file>messageeditor/face.png</file>
+    <file>messageeditor/file.png</file>
+    <file>messageeditor/font.png</file>
+    <file>messageeditor/insertimage.png</file>
+    <file>messageeditor/screenshot.png</file>
+    <file>messageeditor/textanchor.png</file>
+    <file>messageeditor/textbold.png</file>
+    <file>messageeditor/textcenter.png</file>
+    <file>messageeditor/textitalic.png</file>
+    <file>messageeditor/textjustify.png</file>
+    <file>messageeditor/textleft.png</file>
+    <file>messageeditor/textright.png</file>
+    <file>messageeditor/textsubscript.png</file>
+    <file>messageeditor/textsuperscript.png</file>
+    <file>messageeditor/textunder.png</file>
+  </qresource>
+</RCC>

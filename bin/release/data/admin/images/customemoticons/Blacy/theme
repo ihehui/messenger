@@ -1,0 +1,35 @@
+Name=blacy
+Description=nice black smiley
+Icon=big_smile.png
+Author=ondrass
+
+[default]
+amazing.png		:| :-|
+anger.png		:@ :-@
+bad_egg.png		>:) >:-)
+bad_smile.png		;-) ;)
+beaten.png		:ouch: :-! :!
+big_smile.png		:) :-)
+black_heart.png		<3 (L) (l) 
+cry.png			:,( :,-(:'( :'-( 
+electric_shock.png	:8 :-8 
+exciting.png		:D :-D :d :-d
+eyes_droped.png		o_o O_O
+girl.png		:flower:
+greedy.png		:P~ :-P~ :p~ :-p~
+grimace.png		:P :-P :p :-p
+haha.png		:LOL: :lol: lol LOL
+happy.png		^^ ^_^
+horror.png		:o :-o :O :-O
+money.png 		($$$) $-) $) $_$
+nothing.png		o:) o:-) O:) O:-)
+nothing_to_say.png	-_- '-_-
+red_heart.png		<33 :love:
+scorn.png		>:/ >:-/
+secret_smile.png	8) 8-) (-: (:
+shame.png		:[ :-[
+shocked.png		o_O O_o
+super_man.png		:superman:
+unhappy.png		:( :-(
+victory.png		:victory:
+what.png		:innocent:

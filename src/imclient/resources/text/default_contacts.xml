@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widgetbox version="2009.09.11">
+
+    <category id="admin" name="Administrator">
+
+        <categoryentry id = "hehui" name="HeHui" icon="win/editvlayout.png">
+            <ui>
+                <widget class="QWidget">
+                    <property name="objectName">
+                        <string notr="true">verticalLayoutWidget</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout">
+                    </layout>
+                </widget>
+            </ui>
+        </categoryentry>
+
+        <categoryentry id = "admin" name="Admin" icon="win/edithlayout.png">
+            <ui>
+                <widget class="QWidget">
+                    <property name="objectName">
+                        <string notr="true">verticalLayoutWidget</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout">
+                    </layout>
+                </widget>
+            </ui>
+        </categoryentry>
+
+
+    </category>
+
+    <category id="user" name="User">
+
+       <categoryentry id="user1" name="User1" icon="widgets/spacer.png">
+            <ui>
+                <widget class="QWidget">
+                    <property name="objectName">
+                        <string notr="true">verticalLayoutWidget</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout">
+                    </layout>
+                </widget>
+            </ui>
+        </categoryentry>
+
+       <categoryentry  id="user2" name="User2" icon="widgets/vspacer.png">
+            <ui>
+                <widget class="QWidget">
+                    <property name="objectName">
+                        <string notr="true">verticalLayoutWidget</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout">
+                    </layout>
+                </widget>
+            </ui>
+       </categoryentry>
+
+    </category>
+
+
+</widgetbox>

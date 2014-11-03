@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/face">
+        <file>0.png</file>
+        <file>0away.png</file>
+        <file>0busy.png</file>
+        <file>0off.png</file>
+        <file>1.png</file>
+        <file>1away.png</file>
+        <file>1busy.png</file>
+        <file>1off.png</file>
+        <file>2.png</file>
+        <file>2away.png</file>
+        <file>2busy.png</file>
+        <file>2off.png</file>
+        <file>3.png</file>
+        <file>3away.png</file>
+        <file>3busy.png</file>
+        <file>3off.png</file>
+        <file>4.png</file>
+        <file>4away.png</file>
+        <file>4busy.png</file>
+        <file>4off.png</file>
+        <file>5.png</file>
+        <file>5away.png</file>
+        <file>5busy.png</file>
+        <file>5off.png</file>
+    </qresource>
+</RCC>

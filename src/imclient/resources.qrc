@@ -1,0 +1,35 @@
+<RCC>
+  <qresource prefix="/">
+    <file>resources/images/previous.png</file>
+    <file>resources/images/next.png</file>
+    <file>resources/images/password.png</file>
+    <file>resources/images/tools.png</file>
+    <file>resources/images/about.png</file>
+    <file>resources/images/app.png</file>
+    <file>resources/images/bugreport.png</file>
+    <file>resources/images/configure.png</file>
+    <file>resources/images/contact_female.png</file>
+    <file>resources/images/contact_male.png</file>
+    <file>resources/images/contacts.png</file>
+    <file>resources/images/email.png</file>
+    <file>resources/images/help.png</file>
+    <file>resources/images/locked.png</file>
+    <file>resources/images/metadatainfo.png</file>
+    <file>resources/images/splash.png</file>
+    <file>resources/images/find.png</file>
+    <file>resources/images/logo_400_80.png</file>
+    <file>resources/images/logo_128_128.png</file>
+    <file>resources/images/verifying.gif</file>
+    <file>resources/images/systemmessage.png</file>
+    <file>resources/images/away.png</file>
+    <file>resources/images/busy.png</file>
+    <file>resources/images/invisible.png</file>
+    <file>resources/images/group.png</file>
+    <file>resources/images/closetab.png</file>
+    <file>resources/images/addtab.png</file>
+  </qresource>
+  <qresource prefix="/text">
+    <file>resources/text/sample.html</file>
+    <file>resources/text/userdata.sql</file>
+  </qresource>
+</RCC>

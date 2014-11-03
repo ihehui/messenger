@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowUIClass</class>
+ <widget class="QMainWindow" name="MainWindowUIClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>301</width>
+    <height>543</height>
+   </rect>
+  </property>
+  <property name="whatsThis">
+   <string>Main Window</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="HEHUI::LoginWidget" name="loginPage"/>
+      <widget class="QWidget" name="mainPage">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QFrame" name="userInfoFrame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0" rowspan="3">
+            <widget class="QToolButton" name="toolButtonUserFace">
+             <property name="minimumSize">
+              <size>
+               <width>48</width>
+               <height>48</height>
+              </size>
+             </property>
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>User</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/resources/images/app.png</normaloff>:/resources/images/app.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>48</width>
+               <height>48</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <property name="autoRepeat">
+              <bool>false</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="labelUserNickName">
+             <property name="text">
+              <string>Nick Name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="labelUserID">
+             <property name="text">
+              <string>User ID</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFrame" name="mainFrame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QTabWidget" name="tabWidget">
+             <property name="tabPosition">
+              <enum>QTabWidget::West</enum>
+             </property>
+             <property name="tabShape">
+              <enum>QTabWidget::Rounded</enum>
+             </property>
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <widget class="QWidget" name="contactsListTab">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <attribute name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/resources/images/contacts.png</normaloff>:/resources/images/contacts.png</iconset>
+              </attribute>
+              <attribute name="title">
+               <string>Contacts</string>
+              </attribute>
+              <layout class="QGridLayout" name="gridLayout_5">
+               <item row="0" column="0">
+                <widget class="QToolBox" name="contactsToolBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::TabFocus</enum>
+                 </property>
+                 <property name="currentIndex">
+                  <number>0</number>
+                 </property>
+                 <widget class="QWidget" name="pageContacts">
+                  <property name="geometry">
+                   <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>237</width>
+                    <height>292</height>
+                   </rect>
+                  </property>
+                  <attribute name="label">
+                   <string>Contacts</string>
+                  </attribute>
+                  <layout class="QGridLayout" name="gridLayoutPageContacts">
+                   <property name="leftMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="spacing">
+                    <number>1</number>
+                   </property>
+                  </layout>
+                 </widget>
+                 <widget class="QWidget" name="groupPage">
+                  <property name="geometry">
+                   <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>98</width>
+                    <height>76</height>
+                   </rect>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <attribute name="label">
+                   <string>Groups</string>
+                  </attribute>
+                  <layout class="QGridLayout" name="teamPageGridLayout">
+                   <property name="leftMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="spacing">
+                    <number>1</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QListWidget" name="listWidgetGroups">
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::CustomContextMenu</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                 <widget class="QWidget" name="recentChatsPage">
+                  <property name="geometry">
+                   <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>98</width>
+                    <height>76</height>
+                   </rect>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <attribute name="label">
+                   <string>Recent Chats</string>
+                  </attribute>
+                  <layout class="QGridLayout" name="recentChatsPageGridLayout">
+                   <property name="leftMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="spacing">
+                    <number>1</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QTreeWidget" name="treeWidgetRecentChats">
+                     <property name="editTriggers">
+                      <set>QAbstractItemView::NoEditTriggers</set>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>22</width>
+                       <height>22</height>
+                      </size>
+                     </property>
+                     <property name="textElideMode">
+                      <enum>Qt::ElideMiddle</enum>
+                     </property>
+                     <property name="indentation">
+                      <number>0</number>
+                     </property>
+                     <property name="rootIsDecorated">
+                      <bool>false</bool>
+                     </property>
+                     <attribute name="headerVisible">
+                      <bool>false</bool>
+                     </attribute>
+                     <column>
+                      <property name="text">
+                       <string>Recent Chats</string>
+                      </property>
+                     </column>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="toolsTab">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <attribute name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/resources/images/tools.png</normaloff>:/resources/images/tools.png</iconset>
+              </attribute>
+              <attribute name="title">
+               <string>Tools</string>
+              </attribute>
+              <layout class="QGridLayout" name="gridLayout_9">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <property name="spacing">
+                <number>6</number>
+               </property>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QFrame" name="toolsFrame">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QToolButton" name="toolButtonSerach">
+             <property name="toolTip">
+              <string>Search</string>
+             </property>
+             <property name="statusTip">
+              <string>Search</string>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/resources/images/find.png</normaloff>:/resources/images/find.png</iconset>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QToolButton" name="emailToolButton">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/resources/images/email.png</normaloff>:/resources/images/email.png</iconset>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="5">
+            <widget class="QToolButton" name="lockToolButton">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/resources/images/locked.png</normaloff>:/resources/images/locked.png</iconset>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>301</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="actionShowMinimized"/>
+    <addaction name="actionShowMaximized"/>
+    <addaction name="actionShowFullScreen"/>
+    <addaction name="actionShowNormal"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionBugReport"/>
+    <addaction name="actionAboutQt"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <widget class="QMenu" name="menuSubWindows">
+     <property name="title">
+      <string>Subwindows</string>
+     </property>
+    </widget>
+    <addaction name="actionCloseSubWindow"/>
+    <addaction name="actionCloseAllSubWindows"/>
+    <addaction name="separator"/>
+    <addaction name="actionTitleSubWindows"/>
+    <addaction name="actionCascadeSubWindows"/>
+    <addaction name="separator"/>
+    <addaction name="actionNextSubWindow"/>
+    <addaction name="actionPreviousSubWindow"/>
+    <addaction name="separator"/>
+    <addaction name="menuSubWindows"/>
+   </widget>
+   <widget class="QMenu" name="menu_System">
+    <property name="title">
+     <string>&amp;System</string>
+    </property>
+    <addaction name="actionQuit"/>
+   </widget>
+   <addaction name="menu_System"/>
+   <addaction name="menuView"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit</string>
+   </property>
+   <property name="statusTip">
+    <string>Quit</string>
+   </property>
+   <property name="whatsThis">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionLanguageDefaultEnglish">
+   <property name="text">
+    <string>Default(English)</string>
+   </property>
+   <property name="statusTip">
+    <string>Default(English)</string>
+   </property>
+   <property name="whatsThis">
+    <string>Default(English)</string>
+   </property>
+  </action>
+  <action name="actionStylePlastique">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plastique</string>
+   </property>
+   <property name="toolTip">
+    <string>Plastique Style</string>
+   </property>
+   <property name="statusTip">
+    <string>Plastique Style</string>
+   </property>
+   <property name="whatsThis">
+    <string>Plastique Style</string>
+   </property>
+  </action>
+  <action name="actionStyleCleanlooks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cleanlooks</string>
+   </property>
+   <property name="toolTip">
+    <string>Cleanlooks Style</string>
+   </property>
+   <property name="statusTip">
+    <string>Cleanlooks Style</string>
+   </property>
+   <property name="whatsThis">
+    <string>Cleanlooks Style</string>
+   </property>
+  </action>
+  <action name="actionUseStylesPalette">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Style's Palette</string>
+   </property>
+   <property name="statusTip">
+    <string>Use Style's Palette</string>
+   </property>
+   <property name="whatsThis">
+    <string>Use Style's Palette</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/about.png</normaloff>:/resources/images/about.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About</string>
+   </property>
+   <property name="statusTip">
+    <string>About</string>
+   </property>
+   <property name="whatsThis">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionBugReport">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/bugreport.png</normaloff>:/resources/images/bugreport.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bug Report</string>
+   </property>
+   <property name="toolTip">
+    <string>Bug Report</string>
+   </property>
+   <property name="statusTip">
+    <string>Bug Report</string>
+   </property>
+   <property name="whatsThis">
+    <string>Bug Report</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/help.png</normaloff>:/resources/images/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="statusTip">
+    <string>Help</string>
+   </property>
+   <property name="whatsThis">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionSystemConfigure">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/configure.png</normaloff>:/resources/images/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>System Configure</string>
+   </property>
+   <property name="toolTip">
+    <string>System Configure</string>
+   </property>
+   <property name="statusTip">
+    <string>System Configure</string>
+   </property>
+   <property name="whatsThis">
+    <string>System Configure</string>
+   </property>
+  </action>
+  <action name="actionCloseSubWindow">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close Window</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the active window</string>
+   </property>
+   <property name="statusTip">
+    <string>Close the active window</string>
+   </property>
+   <property name="whatsThis">
+    <string>Close the active window</string>
+   </property>
+  </action>
+  <action name="actionCloseAllSubWindows">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close All Windows</string>
+   </property>
+   <property name="toolTip">
+    <string>Close all the windows</string>
+   </property>
+   <property name="statusTip">
+    <string>Close all the windows</string>
+   </property>
+   <property name="whatsThis">
+    <string>Close all the windows</string>
+   </property>
+  </action>
+  <action name="actionTitleSubWindows">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Arranges all child windows in a tile pattern.</string>
+   </property>
+   <property name="statusTip">
+    <string>Arranges all child windows in a tile pattern.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Arranges all child windows in a tile pattern.</string>
+   </property>
+  </action>
+  <action name="actionCascadeSubWindows">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Cascade</string>
+   </property>
+   <property name="toolTip">
+    <string>Arranges all the child windows in a cascade pattern.</string>
+   </property>
+   <property name="statusTip">
+    <string>Arranges all the child windows in a cascade pattern.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Arranges all the child windows in a cascade pattern.</string>
+   </property>
+  </action>
+  <action name="actionNextSubWindow">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Next</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the focus to the next window</string>
+   </property>
+   <property name="statusTip">
+    <string>Move the focus to the next window</string>
+   </property>
+   <property name="whatsThis">
+    <string>Move the focus to the next window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionPreviousSubWindow">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Previous</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the focus to the previous window</string>
+   </property>
+   <property name="statusTip">
+    <string>Move the focus to the previous window</string>
+   </property>
+   <property name="whatsThis">
+    <string>Move the focus to the previous window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionShowMinimized">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Minimized</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows the widget minimized, as an icon.</string>
+   </property>
+   <property name="statusTip">
+    <string>Shows the widget minimized, as an icon.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Shows the widget minimized, as an icon.</string>
+   </property>
+  </action>
+  <action name="actionShowMaximized">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Maximized</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows the widget maximized.</string>
+   </property>
+   <property name="statusTip">
+    <string>Shows the widget maximized.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Shows the widget maximized.</string>
+   </property>
+  </action>
+  <action name="actionShowNormal">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Normal</string>
+   </property>
+   <property name="toolTip">
+    <string>Restores the widget after it has been maximized or minimized.</string>
+   </property>
+   <property name="statusTip">
+    <string>Restores the widget after it has been maximized or minimized.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Restores the widget after it has been maximized or minimized.</string>
+   </property>
+  </action>
+  <action name="actionShowFullScreen">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Full-Screen</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows the widget in full-screen mode.</string>
+   </property>
+   <property name="statusTip">
+    <string>Shows the widget in full-screen mode.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Shows the widget in full-screen mode.</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+   <property name="toolTip">
+    <string>About Qt</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HEHUI::LoginWidget</class>
+   <extends>QWidget</extends>
+   <header>../login/loginwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>contactsToolBox</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>toolButtonSerach</tabstop>
+  <tabstop>emailToolButton</tabstop>
+  <tabstop>lockToolButton</tabstop>
+  <tabstop>toolButtonUserFace</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowUIClass</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>352</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowMaximized</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowUIClass</receiver>
+   <slot>showMaximized()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowMinimized</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowUIClass</receiver>
+   <slot>showMinimized()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowNormal</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowUIClass</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowFullScreen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowUIClass</receiver>
+   <slot>showFullScreen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
