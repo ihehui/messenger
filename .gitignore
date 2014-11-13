@@ -6,10 +6,17 @@
 *.la
 *.lai
 *.so
-*.dll
-*.dylib
+**.dylib
 *.obj
+*.dll
+*.lib
 *.exe
+*.embed.manifest
+*.exp
+*.exe_manifest.rc
+*.exe_manifest.res
+*.pdb
+*.ilk
 
 # Qt-es
 /.qmake.cache
@@ -20,8 +27,10 @@
 moc_*.cpp
 qrc_*.cpp
 ui_*.h
+*_resource.rc
 Makefile*
 *-build-*
+
 
 # QtCreator
 *.autosave
