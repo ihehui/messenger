@@ -116,23 +116,6 @@ bool Login::canLogin(){
 
 bool Login::verifyUser() {
 
-
-    //	DatabaseConnecter dc(this);
-    //	if(!dc.isDatabaseOpened(REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME,
-    //						REMOTE_SITOY_COMPUTERS_DB_DRIVER,
-    //						REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST,
-    //						REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT,
-    //						REMOTE_SITOY_COMPUTERS_DB_USER_NAME,
-    //						REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD,
-    //						REMOTE_SITOY_COMPUTERS_DB_NAME,
-    //						HEHUI::MYSQL
-    //						)){
-    //
-    //		QMessageBox::critical(getParentWidget(), tr("Fatal Error"), tr("Database Connection Failed! Query Failed!"));
-    //		qCritical() << QString("Error: Database Connection Failed! Query Failed!");
-    //		return false;
-    //	}
-
     DatabaseConnecter dc(this);
     QString userPrivateDataFilePath = Settings::instance()->getCurrentUserPrivateDataFilePath();
     if(!dc.isDatabaseOpened(LOCAL_USERDATA_DB_CONNECTION_NAME,

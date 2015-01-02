@@ -1840,7 +1840,7 @@ bool ContactsManager::openDatabase(bool reopen){
                                            userPrivateDataFilePath,
                                            HEHUI::SQLITE);
         if (err.type() != QSqlError::NoError) {
-            qCritical() << QString("An error occurred when opening the database on '%1'! %2").arg(REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST).arg(err.text());
+            qCritical() << QString("An error occurred when opening the database! %1").arg(err.text());
             return false;
         }
 
