@@ -76,7 +76,7 @@ public:
     static QString defaultBlacklistContactGroupName();
     static quint32 defaultBlacklistContactGroupID();
 
-    QByteArray encryptedPassword() const;
+//    QByteArray encryptedPassword() const;
     
     void addUpdatedPersonalInfoProperty(IM::PropertyIDOfUser propertyID, const QString &value, bool summaryInfo);
     QString getUpdateSQLStatement(bool summaryInfo) const;

@@ -128,13 +128,13 @@ bool ServerManagerWindow::isIPAddressValid(){
             ui.toolButtonSearchServer->show();
             ui.toolButtonAddServer->setEnabled(false);
             ui.toolButtonAddServer->hide();
-            ui.spinBoxPort->setValue(IM_SERVER_IPMC_LISTENING_PORT);
+            //ui.spinBoxPort->setValue(IM_SERVER_IPMC_LISTENING_PORT);
         }else{
             ui.toolButtonAddServer->setEnabled(true);
             ui.toolButtonAddServer->show();
             ui.toolButtonSearchServer->setEnabled(false);
             ui.toolButtonSearchServer->hide();
-            ui.spinBoxPort->setValue(IM_SERVER_RTP_LISTENING_PORT);
+            //ui.spinBoxPort->setValue(IM_SERVER_RTP_LISTENING_PORT);
         }
         return true;
     }else{

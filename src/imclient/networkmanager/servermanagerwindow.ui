@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
-    <height>366</height>
+    <width>553</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,13 +30,6 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelIP">
-        <property name="text">
-         <string>IP:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEditIP">
         <property name="minimumSize">
@@ -47,6 +40,13 @@
         </property>
         <property name="text">
          <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelIP">
+        <property name="text">
+         <string>IP:</string>
         </property>
        </widget>
       </item>
@@ -103,6 +103,13 @@
         <property name="text">
          <string>Search</string>
         </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/resources/images/find.png</normaloff>:/resources/images/find.png</iconset>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
        </widget>
       </item>
       <item row="0" column="6">
@@ -124,6 +131,13 @@
         </property>
         <property name="text">
          <string>Add</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/resources/images/addtab.png</normaloff>:/resources/images/addtab.png</iconset>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
        </widget>
       </item>
@@ -149,8 +163,15 @@
        <property name="text">
         <string>Add</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/resources/images/addtab.png</normaloff>:/resources/images/addtab.png</iconset>
+       </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
       </widget>
      </item>
@@ -173,6 +194,13 @@
        </property>
        <property name="text">
         <string>Delete</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/resources/images/closetab.png</normaloff>:/resources/images/closetab.png</iconset>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
       </widget>
      </item>
@@ -209,6 +237,13 @@
        <property name="text">
         <string>Test</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/resources/images/verifying.gif</normaloff>:/resources/images/verifying.gif</iconset>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
       </widget>
      </item>
     </layout>
@@ -216,6 +251,8 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

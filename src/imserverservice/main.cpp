@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         QStringList databaseTypes;
         databaseTypes<<"Other"<<"MYSQL"<<"SQLITE"<<"POSTGRESQL"<<"FIREBIRD"<<"DB2"<<"ORACLE"<<"M$ SQLSERVER"<<"M$ ACCESS";
 
-        HEHUI::Settings settings(APP_NAME, APP_VERSION, SETTINGS_FILE_NAME, "./");
+        HEHUI::Settings settings(SETTINGS_FILE_NAME, "./");
         qWarning()<<"Current Database Info:";
         qWarning()<<"\tDatabase type: "<<databaseTypes.at(settings.getDBType());
         qWarning()<<"\tDriver: "<<settings.getDBDriver();

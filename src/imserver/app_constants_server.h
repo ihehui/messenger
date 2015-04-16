@@ -13,7 +13,7 @@
 
 
 #ifndef SETTINGS_FILE_NAME
-#define SETTINGS_FILE_NAME	"Server"
+#define SETTINGS_FILE_NAME	"server"
 #endif
 
 #ifndef APP_NAME

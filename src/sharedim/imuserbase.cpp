@@ -31,7 +31,7 @@
 
 
 #include "imuserbase.h"
-#include "HHSharedCore/hcryptography.h"
+//#include "HHSharedCore/hcryptography.h"
 
 
 namespace HEHUI {
@@ -142,11 +142,9 @@ void IMUserBase::init(){
 
 }
 
-QByteArray IMUserBase::encryptedPassword() const{
-
-    return Cryptography::MD5(Cryptography::SHA1(getPassword().toUtf8()));
-
-}
+//QByteArray IMUserBase::encryptedPassword() const{
+//    return Cryptography::MD5(Cryptography::SHA1(getPassword().toUtf8()));
+//}
 
 void IMUserBase::addUpdatedPersonalInfoProperty(IM::PropertyIDOfUser propertyID, const QString &value, bool summaryInfo){
 

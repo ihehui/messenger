@@ -1,4 +1,4 @@
-﻿#include <QDir>
+#include <QDir>
 #include <QFile>
 #include <QMainWindow>
 
@@ -9,8 +9,8 @@
 
 namespace HEHUI {
 
-Settings::Settings(const QString &appName, const QString &appVersion, const QString fileBaseName, const QString fileDirPath, QObject* o )
-    : SettingsBase(appName, appVersion, fileBaseName, fileDirPath, o )
+Settings::Settings(const QString fileBaseName, const QString fileDirPath, QObject* o )
+    : SettingsBase(fileBaseName, fileDirPath, o )
 {
 
     //beginGroup( mProgramVersion );

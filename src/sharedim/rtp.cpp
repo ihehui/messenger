@@ -53,7 +53,7 @@ void RTP::startServers(const QHostAddress &localAddress, quint16 localPort, bool
         ok = m_tcpServer->listen();
     }
     if(!ok){
-        err += " " + m_tcpServer->serverErrorString();
+        err += " " + m_tcpServer->errorString();
     }
 
     if(errorMessage){
@@ -114,7 +114,7 @@ TCPServer * RTP::startTCPServer(const QHostAddress &address, quint16 port, bool 
 
     if(!m_tcpServer->isListening()){
         if(errorMessage){
-            *errorMessage = m_tcpServer->serverErrorString();
+            *errorMessage = m_tcpServer->errorString();
         }
         delete m_tcpServer;
         m_tcpServer = 0;

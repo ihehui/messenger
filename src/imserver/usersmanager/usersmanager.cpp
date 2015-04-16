@@ -1744,7 +1744,7 @@ bool UsersManager::openDatabase(bool reopen){
         //                                            REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD,
         //                                            REMOTE_SITOY_COMPUTERS_DB_NAME,
         //                                            HEHUI::MYSQL);
-        HEHUI::Settings settings(APP_NAME, APP_VERSION, SETTINGS_FILE_NAME, "./");
+        HEHUI::Settings settings(SETTINGS_FILE_NAME, "./");
         DatabaseUtility databaseUtility;
         err = databaseUtility.openDatabase(Server_DB_CONNECTION_NAME,
                                            settings.getDBDriver(),

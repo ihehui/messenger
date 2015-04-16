@@ -23,7 +23,7 @@ class SERVERLIB_API Settings : public SettingsCore
 	Q_OBJECT
 
 public:
-    Settings( const QString &appName = APP_NAME, const QString &appVersion = APP_VERSION, const QString fileBaseName = APP_NAME, const QString fileDirPath = QCoreApplication::applicationDirPath(), QObject *parent = 0 );
+    Settings(const QString fileBaseName = APP_NAME, const QString fileDirPath = QCoreApplication::applicationDirPath(), QObject *parent = 0 );
     ~Settings();
 
 

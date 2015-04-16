@@ -288,7 +288,7 @@ bool IMServer::openDatabase(bool reopen){
         //                                            REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD,
         //                                            REMOTE_SITOY_COMPUTERS_DB_NAME,
         //                                            HEHUI::MYSQL);
-        Settings settings(APP_NAME, APP_VERSION, SETTINGS_FILE_NAME, "./");
+        Settings settings(SETTINGS_FILE_NAME, "./");
         err = databaseUtility->openDatabase(Server_DB_CONNECTION_NAME,
                                             settings.getDBDriver(),
                                             settings.getDBServerHost(),
