@@ -63,9 +63,6 @@ ApplyForRegistrationWidget::ApplyForRegistrationWidget(QWidget *parent) :
     m_registrationModeInfoResponseReceived = false;
     m_registrationResultReceived = false;
 
-    m_registrationMode = IM::RM_ServerCreateUserIDOnly;
-    m_requireActivation = false;
-
     
     //emit requestRegistrationServerInfo();
     QTimer::singleShot(5000, this, SLOT(requestRegistrationServerInfoTimeout()));
@@ -90,56 +87,94 @@ void ApplyForRegistrationWidget::changeEvent(QEvent *e)
     }
 }
 
-void ApplyForRegistrationWidget::slotProcessRegistrationServerInfo(quint8 errorTypeCode, bool canRegister, const QString &extraMessage, quint8 regMode, const QString &regServerAddress, bool requireActivation){
+void ApplyForRegistrationWidget::slotProcessRegistrationPacket(const RgeistrationPacket &packet){
+
+    RgeistrationPacket::PacketInfoType InfoType = RgeistrationPacket::PacketInfoType(type);
+
+    switch (InfoType) {
+    case RgeistrationPacket::REGISTRATION_SERVER_INFO:
+    {
+        slotProcessRegistrationServerInfo(packet.ServerInfo.regMode, packet.ServerInfo.message, packet.ServerInfo.address);
+    }
+        break;
+
+    case RgeistrationPacket::REGISTRATION_INFO:
+    {
+
+    }
+        break;
+
+    case RgeistrationPacket::REGISTRATION_RESULT:
+    {
+        slotProcessRegistrationResult();
+    }
+        break;
+
+
+    default:
+        break;
+    }
+
+
+
+}
+
+void ApplyForRegistrationWidget::slotProcessRegistrationServerInfo(quint8 regMode, const QString &extraMessage, const QString &regServerAddress){
     qDebug()<<"--ApplyForRegistrationWidget::slotProcessRegistrationServerInfo(...)";
 
     m_registrationModeInfoResponseReceived = true;
 
-    if(!canRegister){
+    user->setRegistrationServerAddressInfo(regServerAddress);
+
+    switch(regMode){
+    case quint8(RgeistrationPacket::REG_MODE_USER_CREATE_ALL):
+        break;
+    case quint8(RgeistrationPacket::REG_MODE_SERVER_CREATE_ALL):
+    {
+        ui.labelUserID->hide();
+        ui.lineEditUserID->hide();
+        ui.labelUserIDInfo->hide();
+        ui.labelPassword->hide();
+        ui.lineEditPassword->hide();
+        ui.labelPasswordInfo->hide();
+        ui.labelRetypePassword->hide();
+        ui.lineEditRetypePassword->hide();
+        ui.labelRetypedPasswordInfo->hide();
+    }
+        break;
+    case quint8(RgeistrationPacket::REG_MODE_SERVER_CREATE_ID):
+    {
+        ui.labelUserID->hide();
+        ui.lineEditUserID->hide();
+        ui.labelUserIDInfo->hide();
+    }
+        break;
+    case quint8(RgeistrationPacket::REG_MODE_SERVER_CREATE_PASSWORD):
+    {
+        ui.labelPassword->hide();
+        ui.lineEditPassword->hide();
+        ui.labelPasswordInfo->hide();
+        ui.labelRetypePassword->hide();
+        ui.lineEditRetypePassword->hide();
+        ui.labelRetypedPasswordInfo->hide();
+    }
+        break;
+    case quint8(RgeistrationPacket::REG_MODE_SERVER_HTTP):
+    {
+        if(regServerAddress.startsWith("http://", Qt::CaseInsensitive) || regServerAddress.startsWith("https://", Qt::CaseInsensitive)){
+            QDesktopServices::openUrl(regServerAddress);
+            emit canceled();
+            return;
+        }
+    }
+         break;
+    case quint8(RgeistrationPacket::REG_MODE_CLOSED):
+    {
         QString msg = tr("<p><font color='red'>Request Denied By Server!</font></p>%1").arg(extraMessage);
         ui.labelInfo->setText(msg);
         return;
     }
 
-
-    if(regServerAddress.startsWith("http://", Qt::CaseInsensitive) || regServerAddress.startsWith("https://", Qt::CaseInsensitive)){
-        QDesktopServices::openUrl(regServerAddress);
-        emit canceled();
-        return;
-    }
-
-
-    m_registrationMode = IM::RegistrationMode(regMode);
-    user->setRegistrationServerAddressInfo(regServerAddress);
-    m_requireActivation = requireActivation;
-
-    switch(m_registrationMode){
-    case IM::RM_UserDefineAll:
-        break;
-    case IM::RM_ServerCreateAll:
-        ui.labelUserID->hide();
-        ui.lineEditUserID->hide();
-        ui.labelUserIDInfo->hide();
-        ui.labelPassword->hide();
-        ui.lineEditPassword->hide();
-        ui.labelPasswordInfo->hide();
-        ui.labelRetypePassword->hide();
-        ui.lineEditRetypePassword->hide();
-        ui.labelRetypedPasswordInfo->hide();
-        break;
-    case IM::RM_ServerCreateUserIDOnly:
-        ui.labelUserID->hide();
-        ui.lineEditUserID->hide();
-        ui.labelUserIDInfo->hide();
-        break;
-    case IM::RM_ServerCreatePasswordOnly:
-        ui.labelPassword->hide();
-        ui.lineEditPassword->hide();
-        ui.labelPasswordInfo->hide();
-        ui.labelRetypePassword->hide();
-        ui.lineEditRetypePassword->hide();
-        ui.labelRetypedPasswordInfo->hide();
-        break;
     default:
         break;
 

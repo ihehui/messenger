@@ -9,12 +9,9 @@
 
 #include "ui_loginwidget.h"
 #include "../imuser.h"
-//#include "../packetmanager/clientpacketsparser.h"
 
+#include "../../sharedim/impackets.h"
 
-//#include "../../shared/core/singleton.h"
-//#include "../../shared/core/utilities.h"
-//#include "../../shared/gui/databaseconnecter/databaseconnecterdialog.h"
 #include "HHSharedCore/hsingleton.h"
 #include "HHSharedCore/hutilities.h"
 //#include "HHSharedGUI/hdatabaseconnecter.h"
@@ -69,13 +66,13 @@ private:
 signals:
     void requestRegistrationServerInfo();
     void registration();
-    void signalRegistrationServerInfoReceived(quint8 errorTypeCode, bool canRegister, const QString &extraMessage, quint8 regMode, const QString &regServerAddress, bool requireActivation);
-    void signalRegistrationResultReceived(quint8 errorTypeCode, quint32 sysID, const QString &message);
+    void signalRegistrationPacketReceived(const RgeistrationPacket &packet);
+    //void signalRegistrationResultReceived(quint8 errorTypeCode, quint32 sysID, const QString &message);
 
     void signalRequestLogin(const QHostAddress &serverHostAddress, quint16 serverHostPort);
     void signalLookForServer(const QHostAddress &targetAddress, quint16 targetPort);
     void signalUserVerified();
-    void signalServerFound(const QString &serverAddress, quint16 serverRTPListeningPort, const QString &serverName, const QString &version);
+    void signalServerFound(const ServerDiscoveryPacket &packet);
 
     void signalKickedOff();
 

@@ -121,41 +121,19 @@ FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase() {
 
 
 
-void FileTransmissionPacketsParserBase::parseIncomingPacketData(Packet *packet){
+void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *packet){
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
 
-    //        if((packet->getTransmissionProtocol() == TP_UDP)
-    //            && (networkManager->isLocalAddress(packet->getPeerHostAddress()))
-    //            && (packet->getPeerHostPort() == localIPMCListeningPort)){
-    //            qDebug()<<"~~Packet is been discarded!";
-    //            return;
-    //        }else if((packet->getTransmissionProtocol() == TP_TCP)
-    //            && (packet->getPeerHostAddress() == networkManager->localTCPListeningAddress())
-    //            && (packet->getPeerHostPort() == networkManager->localTCPListeningPort())){
-    //            qDebug()<<"~~Packet is been discarded!";
-    //            return;
-    //        }
+    quint8 packetType = packet.getPacketType();
+    QString peerID = packet.getPeerID();
 
-    //    qDebug()<<"~~networkManager->localAddress():"<<networkManager->localTCPListeningAddress().toString();
-    //    qDebug()<<"~~packet->getPeerHostAddress():"<<packet->getPeerHostAddress();
-
-    QByteArray packetData = packet->getPacketData();
-    QDataStream in(&packetData, QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_4_8);
-
-    QString peerID = "";
-    in >> peerID;
-
-    QHostAddress peerAddress = packet->getPeerHostAddress();
-    quint16 peerPort = packet->getPeerHostPort();
-
-    quint8 packetType = packet->getPacketType();
-    int socketID = packet->getSocketID();
-
+    QHostAddress peerAddress = packet.getPeerHostAddress();
+    quint16 peerPort = packet.getPeerHostPort();
+    SOCKETID socketID = packet.getSocketID();
 
     switch(packetType){
 
-    case quint8(DataForwardRequestByClient):
+    case quint8(IM::CMD_DataForward):
     {
         QByteArray encryptedData;
         QString senderID = peerID;
@@ -194,8 +172,8 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(Packet *packet){
         ds.setVersion(QDataStream::Qt_4_8);
         QVariant v;
         ds >> v;
-        if (v.canConvert<Packet>()){
-            *packet = v.value<Packet>();
+        if (v.canConvert<PacketBase>()){
+            *packet = v.value<PacketBase>();
             //packet->setTransmissionProtocol(TP_UDT);
             packet->setSocketID(socketID);
 
@@ -210,223 +188,15 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(Packet *packet){
     }
         break;
 
-//-------------------------------------------------------------
-        //File TX
-    case quint8(RequestUploadFile):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
+        ////////////////////////////////////////////
+            case quint8(IM::CMD_FileTransfer):
+            {
+                //qDebug()<<"~~CMD_FileTransfer";
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5Sum;
-        QString fileName = "";
-        quint64 size = 0;
-        QString localFileSaveDir = "./";
-        stream >> fileMD5Sum >> fileName >> size >> localFileSaveDir ;
-
-        emit signalPeerRequestUploadFile(socketID, contactID, fileMD5Sum, fileName, size, localFileSaveDir);
-
-        qDebug()<<"~~RequestUploadFile";
-    }
-        break;
-
-    case quint8(CancelUploadFileRequest):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5Sum;
-        stream >> fileMD5Sum;
-
-        emit signalPeerCanceledUploadFileRequest(socketID, contactID, fileMD5Sum);
-
-        qDebug()<<"~~CancelUploadFileRequest";
-    }
-        break;
-
-    case quint8(RequestDownloadFile):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString fileName;
-        stream >> fileName;
-
-        emit signalContactRequestDownloadFile(socketID, contactID, fileName);
-
-        qDebug()<<"~~RequestDownloadFile";
-    }
-        break;
-
-    case quint8(CancelDownloadFileRequest):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString fileName;
-        stream >> fileName;
-
-        emit signalPeerCanceledDownloadFileRequest(socketID, contactID, fileName);
-
-        qDebug()<<"~~CancelDownloadFileRequest";
-    }
-        break;
-
-    case quint8(ResponseFileDownloadRequest):
-    {
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(peerID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString remoteFileName = "";
-        bool accepted = false;
-        stream >> remoteFileName >> accepted;
-        if(accepted){
-            QByteArray fileMD5Sum;
-            quint64 size = 0;
-            stream >> fileMD5Sum >> size;
-            emit signalFileDownloadRequestAccepted(socketID, peerID, remoteFileName, fileMD5Sum, size);
-        }else{
-            QString message;
-            stream >> message;
-            emit signalFileDownloadRequestDenied(socketID, peerID, remoteFileName, message);
-
-        }
-
-        qDebug()<<"~~ResponseFileDownloadRequest";
-    }
-    break;
-
-    case quint8(ResponseFileUploadRequest):
-    {
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(peerID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5Sum;
-        QString message = "";
-        bool accepted = false;
-        stream >> fileMD5Sum >> accepted >> message;
-        emit signalFileUploadRequestResponsed(socketID, peerID, fileMD5Sum, accepted, message);
-
-        qDebug()<<"~~ResponseFileUploadRequest";
-    }
-    break;
-
-    case quint8(RequestFileData):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5;
-        int startPieceIndex = 0, endPieceIndex = 0;
-        stream >> fileMD5 >> startPieceIndex >> endPieceIndex;
-
-        emit signalFileDataRequested(socketID, contactID, fileMD5, startPieceIndex, endPieceIndex);
-
-        qDebug()<<"~~RequestFileData";
-    }
-        break;
-    case quint8(FileData):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5, data, sha1;;
-        int pieceIndex = 0;
-        stream >> fileMD5 >> pieceIndex >> data >>sha1;
-
-        emit signalFileDataReceived(socketID, contactID, fileMD5, pieceIndex, data, sha1);
-
-        //qDebug()<<"~~FileData";
-    }
-        break;
-    case quint8(FileTXStatusChanged):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5;
-        quint8 status;
-        stream >> fileMD5 >> status;
-
-        emit signalFileTXStatusChanged(socketID, contactID, fileMD5, status);
-
-        qDebug()<<"~~FileTXStatusChanged";
-    }
-        break;
-    case quint8(FileTXError):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5;
-        quint8 errorCode;
-        QString message;
-        stream >> fileMD5 >> errorCode >> message;
-
-        emit signalFileTXError(socketID, contactID, fileMD5, errorCode, message);
-
-        qDebug()<<"~~FileTXStatusChanged";
-    }
-        break;
-
+                FileTransferPacket p(packet);
+                emit signalFileTransferPacketReceived(p);
+            }
+            break;
 
 
 
@@ -438,11 +208,10 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(Packet *packet){
         return;
     }
 
-    PacketHandlerBase::recylePacket(packet);
 
 }
 
-void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(Packet *packet){
+void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(PacketBase *packet){
     //TODO
 }
 

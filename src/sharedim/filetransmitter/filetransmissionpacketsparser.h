@@ -41,6 +41,7 @@
 #include "../constants_global_shared.h"
 #include "../resourcesmanager.h"
 #include "../imuserbase.h"
+#include "../impackets.h"
 
 #include "HHSharedCore/hcryptography.h"
 #include "HHSharedNetwork/hnetworkutilities.h"
@@ -57,9 +58,9 @@ public:
     virtual ~FileTransmissionPacketsParserBase();
 
 public slots:
-    void parseIncomingPacketData(Packet *packet);
+    void parseIncomingPacketData(PacketBase *packet);
 
-    virtual void parseOtherIncomingPacketData(Packet *packet);
+    virtual void parseOtherIncomingPacketData(PacketBase *packet);
 
     int connectToPeer(const QHostAddress &peerAddress, quint16 peerPort){
         QString errorMessage;
@@ -73,54 +74,25 @@ public slots:
     }
 
 
-    bool requestDataForward(int socketID, const QString &receiverID, const QByteArray &data, const QByteArray &sessionEncryptionKey){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestDataForward(int socketID, const QString &receiverID, const QByteArray &data){
 
-        packet->setPacketType(quint8(DataForwardRequestByClient));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << receiverID << data;
+        DataForwardPacket p(sessionEncryptionKey);
+        p.data = data;
+        p.receiver = receiverID;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKey, true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
+        QByteArray ba = p.toByteArray();
+        if(ba.isEmpty()){return false;}
 
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool forwardData(int socketID, const QByteArray &data, const QByteArray &sessionEncryptionKey){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool forwardData(int socketID, const QByteArray &data){
 
-        packet->setPacketType(quint8(ForwardedDataByServer));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << data;
+        DataForwardPacket p(sessionEncryptionKey);
+        p.data = data;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKey, true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
+        QByteArray ba = p.toByteArray();
+        if(ba.isEmpty()){return false;}
 
         return m_rtp->sendReliableData(socketID, &ba);
     }
@@ -128,321 +100,192 @@ public slots:
 
 
     ///////////////////////////////////////////////
-    bool requestUploadFile(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = ""){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath){
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileSystemInfoRequest;
+        packet.FileSystemInfoRequest.parentDirPath = parentDirPath;
 
-        packet->setPacketType(quint8(RequestUploadFile));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5Sum << fileName << size << remoteFileSaveDir;
-
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool cancelUploadFileRequest(int socketID, const QString &contactID, const QByteArray &fileMD5Sum){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool responseFileSystemInfo(SOCKETID socketID, const QString &baseDirPath, const QByteArray &fileSystemInfoData){
 
-        packet->setPacketType(quint8(CancelUploadFileRequest));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5Sum;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileSystemInfoResponse;
+        packet.FileSystemInfoResponse.baseDirPath = baseDirPath;
+        packet.FileSystemInfoResponse.fileSystemInfoData = fileSystemInfoData;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool requestDownloadFile(int socketID, const QString &contactID, const QString &remoteFileName){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestDeleteFiles(SOCKETID socketID, const QString &remoteBaseDir, const QStringList &remoteFiles){
 
-        packet->setPacketType(quint8(RequestDownloadFile));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << remoteFileName;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileDeletingRequest;
+        packet.FileDeletingRequest.baseDirPath = remoteBaseDir;
+        packet.FileDeletingRequest.files = remoteFiles;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool cancelDownloadFileRequest(int socketID, const QString &contactID, const QString &remoteFileName){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool responseDeletingFiles(SOCKETID socketID, const QString &baseDirPath, const QStringList &failedFiles){
 
-        packet->setPacketType(quint8(CancelDownloadFileRequest));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << remoteFileName;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileDeletingResponse;
+        packet.FileDeletingResponse.baseDirPath = baseDirPath;
+        packet.FileDeletingResponse.failedFiles = failedFiles;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool acceptFileDownloadRequest(int socketID, const QString &contactID, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestRenameFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &oldFileName, const QString &newFileName){
 
-        packet->setPacketType(quint8(ResponseFileDownloadRequest));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileName << true << fileMD5Sum << size;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileRenamingRequest;
+        packet.FileRenamingRequest.baseDirPath = remoteBaseDir;
+        packet.FileRenamingRequest.oldFileName = oldFileName;
+        packet.FileRenamingRequest.newFileName = newFileName;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool denyFileDownloadRequest(int socketID, const QString &contactID, const QString &fileName, const QString &message){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool responseRenamingFiles(SOCKETID socketID, const QString &baseDirPath, const QString &fileName, bool renamed, const QString &message){
 
-        packet->setPacketType(quint8(ResponseFileDownloadRequest));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileName << false << message;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileRenamingResponse;
+        packet.FileRenamingResponse.baseDirPath = baseDirPath;
+        packet.FileRenamingResponse.oldFileName = fileName;
+        packet.FileRenamingResponse.renamed = renamed;
+        packet.FileRenamingResponse.message = message;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool responseFileUploadRequest(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, bool accepted, const QString &message){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestUploadFile(SOCKETID socketID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = ""){
 
-        packet->setPacketType(quint8(ResponseFileUploadRequest));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5Sum << accepted << message;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileUploadingRequest;
+        packet.FileUploadingRequest.fileName = fileName;
+        packet.FileUploadingRequest.fileMD5Sum = fileMD5Sum;
+        packet.FileUploadingRequest.size = size;
+        packet.FileUploadingRequest.fileSaveDir = remoteFileSaveDir;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
+    bool requestDownloadFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &remoteFileName, const QString &localFileSaveDir){
 
-    bool requestFileData(int socketID, const QString &contactID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex){
-        qDebug()<<"--requestFileData(...) "<<" startPieceIndex:"<<startPieceIndex<<" endPieceIndex:"<<endPieceIndex;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileDownloadingRequest;
+        packet.FileDownloadingRequest.baseDir = remoteBaseDir;
+        packet.FileDownloadingRequest.fileName = remoteFileName;
+        packet.FileDownloadingRequest.dirToSaveFile = localFileSaveDir;
 
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
-
-        packet->setPacketType(quint8(RequestFileData));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5 << startPieceIndex << endPieceIndex;
-
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool sendFileData(int socketID, const QString &contactID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *sha1){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool responseFileDownloadRequest(SOCKETID socketID, bool accepted, const QString &baseDir, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size, const QString &pathToSaveFile){
 
-        packet->setPacketType(quint8(FileData));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5 << pieceIndex << *data << *sha1 ;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileDownloadingResponse;
+        packet.FileDownloadingResponse.accepted = accepted;
+        packet.FileDownloadingResponse.baseDir = baseDir;
+        packet.FileDownloadingResponse.fileName = fileName;
+        packet.FileDownloadingResponse.fileMD5Sum = fileMD5Sum;
+        packet.FileDownloadingResponse.size = size;
+        packet.FileDownloadingResponse.pathToSaveFile = pathToSaveFile;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool fileTXStatusChanged(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 status){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message){
 
-        packet->setPacketType(quint8(FileTXStatusChanged));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5 << status ;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileUploadingResponse;
+        packet.FileUploadingResponse.fileMD5Sum = fileMD5Sum;
+        packet.FileUploadingResponse.accepted = accepted;
+        packet.FileUploadingResponse.message = message;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
-    bool fileTXError(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString){
-        Packet *packet = PacketHandlerBase::getPacket(socketID);
+    bool requestFileData(SOCKETID socketID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex){
+        //qDebug()<<"--requestFileData(...) "<<" startPieceIndex:"<<startPieceIndex<<" endPieceIndex:"<<endPieceIndex;
 
-        packet->setPacketType(quint8(FileTXError));
-        packet->setTransmissionProtocol(TP_UDT);
-        QByteArray ba;
-        QDataStream out(&ba, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_8);
-        out << fileMD5 << errorCode << errorString ;
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileDataRequest;
+        packet.FileDataRequest.fileMD5 = fileMD5;
+        packet.FileDataRequest.startPieceIndex = startPieceIndex;
+        packet.FileDataRequest.endPieceIndex = endPieceIndex;
 
-        QByteArray encryptedData;
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithPeerHash.value(contactID), true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_myID << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-
-        return m_rtp->sendReliableData(socketID, &ba);
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
     }
 
+    bool sendFileData(SOCKETID socketID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *pieceMD5){
 
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileData;
+        packet.FileDataResponse.fileMD5 = fileMD5;
+        packet.FileDataResponse.pieceIndex = pieceIndex;
+        packet.FileDataResponse.data = *data;
+        packet.FileDataResponse.pieceMD5 = *pieceMD5;
 
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+    }
+
+    bool fileTXStatusChanged(SOCKETID socketID, const QByteArray &fileMD5, quint8 status){
+
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileTXStatus;
+        packet.FileTXStatus.fileMD5 = fileMD5;
+        packet.FileTXStatus.status = status;
+
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+    }
+
+    bool fileTXError(SOCKETID socketID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString){
+
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileTXError;
+        packet.FileTXError.fileMD5 = fileMD5;
+        packet.FileTXError.errorCode = errorCode;
+        packet.FileTXError.message = errorString;
+
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+    }
+
+    bool stopFileTX(SOCKETID socketID, const QString &remoteFileName, const QByteArray &fileMD5){
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FileTXStop;
+        packet.FileTXError.fileName = remoteFileName;
+        packet.FileTXError.fileMD5 = fileMD5;
+
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+    }
 
 
 
 signals:
+    void signalPeerDisconnected(const QString &peerID);
 
     ///////////////////////////
     //File TX
-    void signalPeerRequestUploadFile(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir);
-    void signalPeerCanceledUploadFileRequest(int socketID, const QString &contactID, const QByteArray &fileMD5Sum);
+    void signalFileTransferPacketReceived(const FileTransferPacket &packet);
 
-    void signalContactRequestDownloadFile(int socketID, const QString &contactID, const QString &fileName);
-    void signalPeerCanceledDownloadFileRequest(int socketID, const QString &contactID, const QString &fileName);
+//    void signalPeerRequestUploadFile(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir);
+//    void signalPeerCanceledUploadFileRequest(int socketID, const QString &contactID, const QByteArray &fileMD5Sum);
 
-    void signalFileDownloadRequestAccepted(int socketID, const QString &contactID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size);
-    void signalFileDownloadRequestDenied(int socketID, const QString &contactID, const QString &remoteFileName, const QString &message);
-    void signalFileUploadRequestResponsed(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, bool accepted, const QString &message);
+//    void signalContactRequestDownloadFile(int socketID, const QString &contactID, const QString &fileName);
+//    void signalPeerCanceledDownloadFileRequest(int socketID, const QString &contactID, const QString &fileName);
 
-    void signalFileDataRequested(int socketID, const QString &contactID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex);
-    void signalFileDataReceived(int socketID, const QString &contactID, const QByteArray &fileMD5, int pieceIndex, const QByteArray &data, const QByteArray &sha1);
-    void signalFileTXStatusChanged(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 status);
-    void signalFileTXError(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString);
+//    void signalFileDownloadRequestAccepted(int socketID, const QString &contactID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size);
+//    void signalFileDownloadRequestDenied(int socketID, const QString &contactID, const QString &remoteFileName, const QString &message);
+//    void signalFileUploadRequestResponsed(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, bool accepted, const QString &message);
 
-    void signalPeerDisconnected(const QString &peerID);
-
+//    void signalFileDataRequested(int socketID, const QString &contactID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex);
+//    void signalFileDataReceived(int socketID, const QString &contactID, const QByteArray &fileMD5, int pieceIndex, const QByteArray &data, const QByteArray &sha1);
+//    void signalFileTXStatusChanged(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 status);
+//    void signalFileTXError(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString);
 
     ///////////////////////////
     //void signalFileSystemInfoReceived(int socketID, const QString &parentDirPath, const QByteArray &fileSystemInfoData);

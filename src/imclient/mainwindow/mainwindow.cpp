@@ -349,12 +349,25 @@ void MainWindow::startNetwork(){
 
 
     clientPacketsParser = new IMClientPacketsParser(m_resourcesManager, this);
-    //    connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const QString&, quint16, const QString&, const QString&)), this, SLOT(serverFound(const QString& ,quint16, const QString&, const QString&)), Qt::QueuedConnection);
 
-    connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const QString&, quint16, const QString&, const QString&)), ui.loginPage, SIGNAL(signalServerFound(const QString& , quint16, const QString&, const QString&)), Qt::QueuedConnection);
+
+    connect(clientPacketsParser, SIGNAL(signalContactGroupsInfoPacketReceived(const ContactGroupsInfoPacket &)), this, SLOT(processContactGroupsInfoPacket(const ContactGroupsInfoPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalInterestGroupsInfoPacketReceived(const InterestGroupsInfoPacket &)), this, SLOT(processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalContactInfoPacketReceived(const ContactInfoPacket &)), this, SLOT(processContactInfoPacket(const ContactInfoPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const SearchInfoPacket &)), this, SLOT(processSearchInfoPacket(const ContactInfoPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalChatMessageReceivedFromContact(const ChatMessagePacket &)), this, SLOT(processChatMessagePacket(const ChatMessagePacket &)), Qt::QueuedConnection);
+
+
+
+
+
+
+
+
+    connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const ServerDiscoveryPacket &)), ui.loginPage, SIGNAL(signalServerFound(const ServerDiscoveryPacket &)), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(requestRegistrationServerInfo()), this, SLOT(requestRegistrationServerInfo()), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(registration()), this, SLOT(requestRegistration()), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalRegistrationServerInfoReceived(quint8, bool, const QString &, quint8, const QString &, bool)), ui.loginPage, SIGNAL(signalRegistrationServerInfoReceived(quint8, bool, const QString &, quint8, const QString &, bool)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), ui.loginPage, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString&)), ui.loginPage, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString&)), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(signalRequestLogin(const QHostAddress &, quint16 )), this, SLOT(requestLogin(const QHostAddress &, quint16)));
     connect(ui.loginPage, SIGNAL(signalLookForServer(const QHostAddress &, quint16 )), clientPacketsParser, SLOT(sendClientLookForServerPacket(const QHostAddress &, quint16)), Qt::QueuedConnection);
@@ -370,39 +383,17 @@ void MainWindow::startNetwork(){
 
     connect(clientPacketsParser, SIGNAL(signalContactStateChangedPacketReceived(const QString &, quint8, const QString &, quint16)), this, SLOT(slotProcessContactStateChanged(const QString &, quint8, const QString &, quint16)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalContactsOnlineInfoPacketReceived(const QString & )), this, SLOT(slotProcessContactsOnlineInfo(const QString & )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalUserInfoPacketReceived(const QString &)), this, SLOT(slotProcessUserInfo(const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalContactGroupsInfoPacketReceived(const QString &, quint32 )), this, SLOT(slotProcessContactGroupsInfo(const QString &, quint32 )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalContactsInfoVersionPacketReceived(const QString, quint32)), this, SLOT(slotProcessContactsInfoVersion(const QString, quint32)), Qt::QueuedConnection);
+
+
     connect(clientPacketsParser, SIGNAL(signalCreateOrDeleteContactGroupResultPacketReceived(quint32,const QString &,bool,bool)), this, SLOT(slotProcessCreateOrDeleteContactGroupResult(quint32, const QString &,bool,bool)), Qt::QueuedConnection);
 
 
-    //connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const QString &)), this, SLOT(slotProcessSearchContactsResult(const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalAddContactRequestFromUserPacketReceived(const QString &, const QString &, const QString &, const QString & )), this, SLOT(slotProcessContactRequestFromUser(const QString &, const QString &, const QString &, const QString & )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalAddContactResultPacketReceived(const QString &, const QString &, const QString &, int, quint8, const QString &, quint8 )), this, SLOT(slotProcessAddContactResult(const QString &, const QString &, const QString &, int, quint8, const QString &, quint8)), Qt::QueuedConnection);
-
-    connect(clientPacketsParser, SIGNAL(signalDeleteContactResultPacketReceived(const QString &, bool, bool)), this, SLOT(slotDeleteContactResultReceived(const QString &, bool, bool)), Qt::QueuedConnection);
 
 
-    connect(clientPacketsParser, SIGNAL(signalPersonalMessagePacketReceived(const QString &, const QString &)), this, SLOT(slotProcessPersonalMessage(const QString &, const QString &)), Qt::QueuedConnection);
-
-    connect(clientPacketsParser, SIGNAL(signalChatMessageReceivedFromContact(const QString &, const QString &, const QString &)), this, SLOT(slotProcessChatMessageReceivedFromContact(const QString &, const QString &, const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalChatMessageCachedOnServerReceived(const QStringList & )), this, SLOT(slotProcessChatMessageCachedOnServer(const QStringList & )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalImageDownloadResultReceived(const QString &, const QString &, const QByteArray & )), this, SLOT(slotProcessImageDownloadResult(const QString &, const QString &, const QByteArray & )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalImageDownloadRequestReceived(const QString &, const QString &)), this, SLOT(slotProcessImageDownloadRequest(const QString &, const QString &)), Qt::QueuedConnection);
 
 
-    connect(clientPacketsParser, SIGNAL(signalInterestGroupChatMessageReceivedFromContact(quint32, const QString &, const QString &, const QString &)), this, SLOT(slotProcessInterestGroupChatMessagesReceivedFromContact(quint32, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalInterestGroupChatMessagesCachedOnServerReceived(const QStringList & )), this, SLOT(slotProcessInterestGroupChatMessagesCachedOnServer(const QStringList & )), Qt::QueuedConnection);
 
     
-    connect(clientPacketsParser, SIGNAL(signalInterestGroupsListPacketReceived(const QString &, quint32 )), this, SLOT(slotProcessInterestGroupsList(const QString &, quint32 )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalInterestGroupInfoPacketReceived(const QString &, quint32 )), this, SLOT(slotProcessInterestGroupInfo(const QString &, quint32 )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalInterestGroupMembersInfoPacketReceived(const QString &, quint32, quint32 )), this, SLOT(slotProcessInterestGroupMembersInfo(const QString &, quint32, quint32 )), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalCreateInterestGroupResultPacketReceived(quint32, const QString &)), this, SLOT(slotProcessCreateInterestGroupResult(quint32, const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalDisbandInterestGroupResultPacketReceived(quint32, bool)), this, SLOT(slotProcessDisbandInterestGroupResult(quint32, bool)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalUserRequestJoinInterestGroupsPacketReceived(quint32, const QString &, const QString &, const QString &, const QString &)), this, SLOT(slotProcessUserRequestJoinInterestGroup(quint32, const QString &, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalUserJoinOrQuitInterestGroupPacketReceived(quint32, const QString &, bool)), this, SLOT(slotProcessUserJoinOrQuitInterestGroup(quint32, const QString &, bool)), Qt::QueuedConnection);
-
     
     //File TX
     connect(clientPacketsParser, SIGNAL(signalContactRequestUploadFile(const QString &, const QByteArray &, const QString &, quint64)), m_chatWindowManager, SLOT(contactRequestUploadFile(const QString &, const QByteArray &, const QString &,quint64)), Qt::QueuedConnection);
@@ -1075,7 +1066,7 @@ void MainWindow::showDeleteContactDialog(Contact *contact, bool blacklistMode){
     if(!m_deleteContactDialog){
         m_deleteContactDialog = new DeleteContactDialog(this);
         connect(m_deleteContactDialog, SIGNAL(signalRequestDeleteContact(const QString &, bool, bool)), this, SLOT(slotRequestDeleteContact(const QString &, bool, bool)));
-        connect(clientPacketsParser, SIGNAL(signalDeleteContactResultPacketReceived(const QString &, bool)), m_deleteContactDialog, SLOT(deleteContactResultReceivedFromServer(const QString &, bool)));
+        connect(this, SIGNAL(signalDeleteContactResultPacketReceived(const QString &, bool)), m_deleteContactDialog, SLOT(deleteContactResultReceivedFromServer(const QString &, bool)));
     }
 
     m_deleteContactDialog->setContact(contact, blacklistMode);
@@ -2271,33 +2262,6 @@ void MainWindow::getNewContactSettings(const QString &contactID){
     
 }
 
-void MainWindow::slotProcessPersonalMessage(const QString &userID, const QString &message){
-    qDebug()<<"--MainWindow::slotProcessPersonalMessage(...)";
-
-
-    //TODO:Update personal message to UI
-
-    if(userID.toLower() == m_myUserID.toLower()){
-        m_myself->setPersonalMessage(message);
-        m_myself->saveMyInfoToLocalDatabase();
-
-    }else{
-
-        Contact *ct = m_contactsManager->getUser(userID);
-        if(!ct){
-            return;
-        }
-
-        ct->setPersonalMessage(message);
-
-        m_contactsManager->saveContactInfoToDatabase(userID);
-
-    }
-
-
-
-}
-
 void MainWindow::slotSearch(){
     if(!search){
         search = new Search();
@@ -2308,7 +2272,8 @@ void MainWindow::slotSearch(){
         connect(search, SIGNAL(signalJoinInterestGroup(quint32, const QString&)), this, SLOT(joinInterestGroup(quint32, const QString&)));
 
 
-        connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const QString &)), search, SLOT(slotSearchContactsResultPacketReceived(const QString &)), Qt::QueuedConnection);
+        connect(this, SIGNAL(signalSearchContactsResultPacketReceived(const QString &)), search, SLOT(slotSearchContactsResultPacketReceived(const QString &)), Qt::QueuedConnection);
+
         connect(clientPacketsParser, SIGNAL(signalSearchInterestGroupsResultPacketReceived(const QString &)), search, SLOT(slotSearchInterestGroupsResultPacketReceived(const QString &)), Qt::QueuedConnection);
 
     }
@@ -2621,7 +2586,7 @@ void MainWindow::slotSendChatMessageToContact(Contact *contact, const QString &m
     if(!contact){return;}
     QString contactID = contact->getUserID();
     if(contact->getOnlineState() == IM::ONLINESTATE_OFFLINE || m_myself->isSyncAllChatMessagesToServer()){
-        clientPacketsParser->sendChatMessageToServer(m_socketConnectedToServer, contactID, message, imageNameList);
+        clientPacketsParser->sendChatMessageToContact(m_socketConnectedToServer, contactID, message, imageNameList);
     }else{
         clientPacketsParser->sendChatMessageToContact(contact->getSocketID(), contactID, message);
     }
@@ -2663,6 +2628,273 @@ void MainWindow::slotSendChatMessageToInterestGroup(InterestGroup *interestGroup
 
 
 }
+
+
+
+
+
+
+void MainWindow::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet){
+    ContactGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ContactGroupsInfoPacket::PIT_GROUPS_LIST:
+    {
+        slotProcessContactGroupsInfo();
+        slotProcessContactsInfoVersion();
+        out << GroupsList.groupsInfo << GroupsList.version;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_CHANGE_PARENT:
+    {
+        out << GroupParentInfo.groupID << GroupParentInfo.parentID;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_CREATION:
+    {
+        out << GroupCreationInfo.name << GroupCreationInfo.parentID << GroupCreationInfo.id;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_DELETION:
+    {
+        out << GroupDeletionInfo.id << GroupDeletionInfo.deleted;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_RENAMING:
+    {
+        out << GroupRenamingInfo.id << GroupRenamingInfo.newName;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+}
+
+void MainWindow::processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet){
+
+    InterestGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case InterestGroupsInfoPacket::PIT_GROUPS_LIST:
+    {
+        QString groups = packet.GroupsList.groups;
+        quint32 version = packet.GroupsList.version;
+        emit signalInterestGroupsListPacketReceived(groups, version);
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_INFO:
+    {
+        quint32 groupID = packet.GroupInfo.id;
+        QString interestGroupInfoStringFromServer = "";
+
+        slotProcessInterestGroupInfo();
+        slotProcessInterestGroupMembersInfo();
+
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_UPDATE_ANNOUNCEMENT:
+    {
+        out << GroupAnnouncementInfo.content << GroupAnnouncementInfo.admin;
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_CREATION:
+    {
+        slotProcessCreateInterestGroupResult();
+
+
+
+        out << GroupCreationInfo.name << GroupCreationInfo.type << GroupCreationInfo.created << GroupCreationInfo.id;
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_DELETION:
+    {
+        slotProcessDisbandInterestGroupResult();
+        out << GroupDeletionInfo.id << GroupDeletionInfo.deleted;
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION:
+    {
+        slotProcessUserJoinOrQuitInterestGroup();
+        out << MemberApplicationInfo.userID << MemberApplicationInfo.message << MemberApplicationInfo.approved << MemberApplicationInfo.admin;
+    }
+        break;
+
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_DELETION:
+    {
+        out << MemberDeletionInfo.userID << MemberDeletionInfo.blockForever << MemberDeletionInfo.admin;
+    }
+        break;
+
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_PROMOTION:
+    {
+        out << MemberPromotionInfo.userID << MemberPromotionInfo.promoted;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+}
+
+void MainWindow::processContactInfoPacket(const ContactInfoPacket &packet){
+
+    QString contactID = packet.ContactID;
+
+    ContactInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ContactInfoPacket::PIT_CONTACT_INFO:
+    {
+
+        quint8 isSummaryInfo = packet.info.isSummaryInfo;
+        QString infoString = packet.info.infoString;
+        if(contactID == myself->getUserID()){
+            m_myself->setPersonalInfoString(infoString, isSummaryInfo);
+            m_myself->saveMyInfoToLocalDatabase();
+        }else{
+            m_myself->setContactInfoString(contactID, infoString, isSummaryInfo);
+            m_myself->saveContactInfoToLocalDatabase(contactID);
+        }
+        slotProcessUserInfo(contactID);
+    }
+        break;
+    case ContactInfoPacket::PIT_GROUP_CHANGE:
+    {
+        in >> ContactChangeGroup.oldGroupID >> ContactChangeGroup.newGroupID;
+    }
+        break;
+
+    case ContactInfoPacket::PIT_FRIENDING_REQUEST:
+    {
+        slotProcessContactRequestFromUser();
+        in >> ContactFriendingRequest.message;
+    }
+        break;
+    case ContactInfoPacket::PIT_FRIENDING_RESULT:
+    {
+        slotProcessAddContactResult();
+        in >> ContactFriendingResult.message >> ContactFriendingResult.approved >> ContactFriendingResult.blocked;
+    }
+        break;
+    case ContactInfoPacket::PIT_CONTACT_DELETION:
+    {
+        slotDeleteContactResultReceived();
+        emit signalDeleteContactResultPacketReceived();
+
+        in >> ContactDeletionInfo.blockForever >> ContactDeletionInfo.deleted;
+    }
+        break;
+    case ContactInfoPacket::PIT_CONTACT_REMARK:
+    {
+        in >> ContactRemarkInfo.newRemarkName;
+    }
+        break;
+
+
+    default:
+        break;
+    }
+
+}
+
+void MainWindow::processSearchInfoPacket(const SearchInfoPacket &packet){
+
+    SearchInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case SearchInfoPacket::PIT_SEARCH_CONTACT_CONDITIONS:
+    {
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_CONTACT_RESULT:
+    {
+        emit signalSearchContactsResultPacketReceived(packet.SearchContactResult.result);
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_CONDITIONS:
+    {
+        out << SearchInterestGroupConditions.keyword;
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_RESULT:
+    {
+        out << SearchInterestGroupResult.result;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+
+}
+
+void MainWindow::processChatMessagePacket(const ChatMessagePacket &packet){
+    ChatMessagePacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE:
+    {
+        slotProcessChatMessageReceivedFromContact();
+       out << ContactChatMessage.contactID << ContactChatMessage.time << ContactChatMessage.message;
+    }
+        break;
+    case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGES_CACHED_ON_SERVER:
+    {
+        QStringList messages = packet.ContactChatMessagesCachedOnServer.messages.split(QString(UNIT_SEPARTOR));
+        slotProcessChatMessageCachedOnServer(messages);
+    }
+        break;
+    case ChatMessagePacket::PIT_CONTACT_CHAT_HISTORY_MESSAGES:
+    {
+        out << ContactChatHistoryMessages.contactID << ContactChatHistoryMessages.messages << ContactChatHistoryMessages.startime;
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGE:
+    {
+        slotProcessInterestGroupChatMessagesReceivedFromContact();
+       out << GroupChatMessage.groupID << GroupChatMessage.memberID << GroupChatMessage.time << GroupChatMessage.message;
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGES_CACHED_ON_SERVER:
+    {
+        QStringList messages = packet.GroupChatMessagesCachedOnServer.messages.split(QString(UNIT_SEPARTOR));
+        slotProcessInterestGroupChatMessagesCachedOnServer(messages);
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_HISTORY_MESSAGES:
+    {
+        out << GroupChatHistoryMessages.groupID << GroupChatHistoryMessages.messages << GroupChatHistoryMessages.startime;
+    }
+        break;
+    case ChatMessagePacket::PIT_CHAT_IMAGE:
+    {
+        bool isRequest = packet.ChatImage.isRequest;
+        QString imageName = packet.ChatImage.name;
+        QByteArray image = packet.ChatImage.image;
+        if(isRequest){
+            slotProcessImageDownloadRequest();
+
+        }else{
+
+        }
+
+    }
+        break;
+
+    default:
+        break;
+    }
+
+
+
+}
+
+
 
 void MainWindow::slotProcessInterestGroupsList(const QString &interestGroupsListFromServer, quint32 interestGroupsInfoVersionOnServer){
     qDebug()<<"--MainWindow::slotProcessInterestGroupsList(..) "<<"----interestGroupsListFromServer:"<<interestGroupsListFromServer;
@@ -2847,14 +3079,6 @@ void MainWindow::slotProcessDisbandInterestGroupResult(quint32 groupID, bool res
 
 }
 
-void MainWindow::slotProcessUserRequestJoinInterestGroup(quint32 groupID, const QString &verificationMessage, const QString &userID, const QString &nickName, const QString &face){
-
-    qDebug()<<"--MainWindow::slotProcessUserRequestJoinInterestGroup(...)"<<" groupID:"<<groupID<<" verificationMessage:"<<verificationMessage<<" userID:"<<userID;
-
-    //TODO
-
-
-}
 
 void MainWindow::slotProcessUserJoinOrQuitInterestGroup(quint32 groupID, const QString &memberID, bool join){
 
@@ -3227,12 +3451,18 @@ void MainWindow::requestRegistrationServerInfo(){
 
 void MainWindow::requestRegistration(){
 
+    QString regServerAddress = m_myself->getRegistrationServerAddressInfo();
+    if(regServerAddress.startsWith("http://", Qt::CaseInsensitive) || regServerAddress.startsWith("https://", Qt::CaseInsensitive)){
+        QDesktopServices::openUrl(regServerAddress);
+        return;
+    }
+
     //TODO
     int socketID = INVALID_SOCK_ID;
     QHostAddress svrAddress = QHostAddress::Null;
     quint32 svrPort = 0;
 
-    QStringList serverAddressInfo = m_myself->getRegistrationServerAddressInfo().split(":");
+    QStringList serverAddressInfo = regServerAddress.split(":");
     if(serverAddressInfo.size() == 2){
         svrAddress = QHostAddress(serverAddressInfo.at(0));
         svrPort = serverAddressInfo.at(1).toUInt();

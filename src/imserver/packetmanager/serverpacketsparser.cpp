@@ -112,7 +112,7 @@ ServerPacketsParser::~ServerPacketsParser() {
 
 
 
-void ServerPacketsParser::parseIncomingPacketData(Packet *packet){
+void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     //    qDebug()<<"----ServerPacketsParser::parseIncomingPacketData(Packet *packet)";
 
@@ -124,47 +124,33 @@ void ServerPacketsParser::parseIncomingPacketData(Packet *packet){
     QString peerID = "";
     in >> peerID;
 
+    packet->setPeerID(peerID);
+
     QHostAddress peerAddress = packet->getPeerHostAddress();
     quint16 peerPort = packet->getPeerHostPort();
     quint8 packetType = packet->getPacketType();
     int socketID = packet->getSocketID();
+
+    QByteArray sessionEncryptionKey = getUserSessionEncryptionKey(peerID);
 
     qDebug()<<"--ServerPacketsParser::parseIncomingPacketData(...) "<<" socketID:"<<socketID <<" peerID:"<<peerID<<" peerAddress:"<<peerAddress.toString()<<" peerPort:"<<peerPort<<" packetType:"<<packetType;
 
     PacketHandlerBase::recylePacket(packet);
 
     switch(packetType){
-    //    case quint8(HEHUI::HeartbeatPacket):
-    //    {
-    //        QString userID = peerID;
-    //        //in >> userID;
 
-    //        UserInfo *userInfo = getOnlineUserInfo(userID);
-    //        if(userInfo){
-    //            userInfo->updateRemainingOnlineStatusCheckingTimes(true);
-    //        }
+    case quint8(IM::CMD_ServerDiscovery):
+    {
+        qDebug()<<"~~ClientLookForServer";
+        ServerDiscoveryPacket p(packet, QByteArray());
+        sendServerDeclarePacket(peerAddress, peerPort);
+        //qDebug()<<"~~ClientLookForServer--"<<" peerAddress:"<<peerAddress.toString()<<"   peerPort:"<<peerPort;
+    }
+        break;
 
-    //        emit signalHeartbeatPacketReceived(packet->getPeerHostAddress().toString(), userID);
-    //        qWarning()<<"~~HeartbeatPacket--"<<" userID:"<<userID;
-    //    }
-    //    break;
-    //    case quint8(HEHUI::ConfirmationOfReceiptPacket):
-    //    {
-    //        quint16 packetSerialNumber1 = 0, packetSerialNumber2 = 0;
-    //        in >> packetSerialNumber1 >> packetSerialNumber2;
-    //        m_packetHandlerBase->removeWaitingForReplyPacket(packetSerialNumber1, packetSerialNumber2);
-    //        emit signalConfirmationOfReceiptPacketReceived(packetSerialNumber1, packetSerialNumber2);
-    //        //qDebug()<<"~~ConfirmationOfReceiptPacket--"<<"packetSerialNumber:"<<packetSerialNumber;
-    //    }
-    //    break;
-
-
-    case quint8(IM::DataForwardRequestByClient):
+    case quint8(IM::CMD_DataForward):
     {
         qDebug()<<"~~DataForwardRequestByClient";
-
-        QByteArray encryptedData;
-        QString senderID = peerID;
 
         UserInfo *senderInfo = getOnlineUserInfo(senderID);
         if(!senderInfo){
@@ -172,21 +158,13 @@ void ServerPacketsParser::parseIncomingPacketData(Packet *packet){
             return;
         }
 
-        in >> encryptedData;
+        DataForwardPacket p(packet, senderInfo->getSessionEncryptionKey());
+        if(!p.isValid()){
+            qCritical()<<"ERROR! Invalid Packet!";
+            return;
+        }
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, senderInfo->getSessionEncryptionKey(), false);
-        //TODO
-
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString receiverID = "";
-        QByteArray data;
-        stream >> receiverID >> data;
-
-
-        UserInfo *receiverInfo = getUserInfo(receiverID);
+        UserInfo *receiverInfo = getUserInfo(p.receiver);
         if(!receiverInfo){
             qCritical()<<"ERROR! Receiver Not Found!";
             return;
@@ -196,936 +174,100 @@ void ServerPacketsParser::parseIncomingPacketData(Packet *packet){
             return;
         }
 
-        forwardDataForward(m_userSocketsHash.key(receiverInfo), data, receiverInfo->getSessionEncryptionKey());
+        forwardData(m_userSocketsHash.key(receiverInfo), p.data, receiverInfo->getSessionEncryptionKey());
 
     }
         break;
 
-    case quint8(IM::ClientLookForServer):
+
+    case quint8(IM::CMD_Announcement):
     {
-        qDebug()<<"~~ClientLookForServer";
-
-        QString clientVersion = "";
-        in >> clientVersion;
-        //TODO:Version
-
-        sendServerDeclarePacket(peerAddress, peerPort);
-        //emit signalClientLookForServerPacketReceived(peerAddress, peerPort, peerName);
-        //qDebug()<<"~~ClientLookForServer--"<<" peerAddress:"<<peerAddress.toString()<<"   peerPort:"<<peerPort;
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_REGISTRATION_SERVER_INFO):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_REGISTRATION_SERVER_INFO";
-
-        QString clientVersion = "";
-        in >> clientVersion;
-
-
+        AnnouncementPacket p(packet, sessionEncryptionKey);
+        qDebug()<<"~~CMD_Announcement";
         //TODO
-        IM::ErrorType errorype = IM::ERROR_NoError;
-        bool canRegister = true;
-        QString extraMessage = "TEST";
-        IM::RegistrationMode regMode = IM::RM_UserDefineAll;
-        QString regServerAddress = "";
-        bool requireActivation = false;
-
-        sendRegistrationServerInfoPacket(socketID, quint8(errorype), extraMessage, canRegister, regMode, regServerAddress, requireActivation);
 
     }
         break;
 
-    case quint8(IM::CLIENT_REGISTRATION):
+    case quint8(IM::CMD_Rgeistration):
     {
-        qDebug()<<"~~CLIENT_REGISTRATION";
-        
-        QString userID = "", password = "";
-        in >> userID >> password;
-
-        IM::ErrorType errorype = IM::ERROR_UnKnownError;
-        QString message = "";
-        quint32 sysID = 0;
-        registerNewUser(userID, password, &errorype, &sysID, &message);
-        sendClientRegistrationResultPacket(socketID, quint8(errorype), sysID, message);
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_UPDATE_PASSWORD):
-    {
-
-        qDebug()<<"~~CLIENT_REQUEST_UPDATE_PASSWORD";
-
-        QString userID = peerID;
-        QByteArray encryptedNewPassword;
-        in >> encryptedNewPassword;
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedNewPassword)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString newPassword = "";
-        stream >> newPassword;
-
-        IM::ErrorType errorype = IM::ERROR_UnKnownError;
-        QString message = "";
-        updateUserPassword(userID, newPassword, &errorype, &message);
-        sendClientUpdatePasswordResultPacket(socketID, quint8(errorype), message);
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_LOGIN):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_LOGIN";
-
-        QString userID = peerID;
-
-        QString clientVersion = "";
-        in >> clientVersion;
-
-
-        IM::ErrorType errorType = IM::ERROR_UnKnownError;
-        if(canUserLogin(userID, clientVersion, &errorType)){
-            QHostAddress loginServerAddress = QHostAddress::Null;
-            quint16 loginServerPort = 0;
-            getUserLoginServer(userID, &loginServerAddress, &loginServerPort);
-            sendClientCanLoginPacket(socketID, userID, loginServerAddress, loginServerPort);
-        }else{
-            sendClientCanNotLoginPacket(socketID, userID, quint8(errorType));
-        }
-
-        //        emit signalUserRequestLoginPacketReceived(userID, clientVersion);
-        //qWarning()<<"~~CLIENT_REQUEST_LOGIN--"<<" peerAddress:"<<clientAddress.toString()<<"   peerPort:"<<clientPort;
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_LOGIN_INFO):
-    {
-        qDebug()<<"--CLIENT_LOGIN_INFO";
-
-        QString userID = peerID;
-        QByteArray encryptedPassword;
-        quint8 onlineStateCode = quint8(IM::ONLINESTATE_ONLINE);
-        QString deviceInfo = "";
-        in >> encryptedPassword >> onlineStateCode >> deviceInfo;
-        //        qDebug()<<"----onlineStateCode:"<<onlineStateCode;
-
-        IM::ErrorType errorType = IM::ERROR_UnKnownError;
-        UserInfo *userInfo = logUserIn(userID, encryptedPassword, IM::OnlineState(onlineStateCode), &errorType);
-        if(userInfo){
-
-            userInfo->setSocketID(socketID);
-
-            QByteArray sessionEncryptionKey = userInfo->getSessionEncryptionKey();
-            sendClientLoginSucceededPacket(socketID, userID, userInfo->encryptedPassword(), sessionEncryptionKey,
-                                           userInfo->getPersonalSummaryInfoVersion(),
-                                           userInfo->getPersonalDetailInfoVersion(),
-                                           userInfo->getPersonalContactGroupsVersion(),
-                                           userInfo->getInterestGroupInfoVersion(),
-                                           userInfo->getPersonalMessageInfoVersion()
-                                           );
-
-
-            //Send all contact groups info to user
-            sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
-
-            //Send all contacts version info to user
-            QString contactsInfoString = "";
-            if(getUserAllContactsInfoVersionFromDatabase(userInfo, &contactsInfoString)){
-                if(!contactsInfoString.trimmed().isEmpty()){
-                    sendPersonalContactsInfoVersionPacket(socketID, contactsInfoString, userInfo->getPersonalContactGroupsVersion(), sessionEncryptionKey);
-                }
-            }
-
-            //Send last login info
-            sendClientLastLoginInfoPacket(socketID, sessionEncryptionKey,
-                                          userInfo->getLastLoginExternalHostAddress(),
-                                          userInfo->getLastLoginTime().toString("yyyy-MM-dd hh:mm:ss"),
-                                          userInfo->getLastLogoutTime().toString("yyyy-MM-dd hh:mm:ss"),
-                                          userInfo->getLastLoginDeviceInfo());
-
-            //Send all online contacts list to user
-            sendContactsOnlineInfo(socketID, userInfo);
-
-            //Save login or logout info, send info to contacts
-            processUserOnlineStatusChanged(userInfo, onlineStateCode, peerAddress.toString(), peerPort, deviceInfo);
-
-
-            QStringList messagesCachedOnServer = cachedChatMessagesForIMUser(userInfo);
-            if(!messagesCachedOnServer.isEmpty()){
-                sendCachedChatMessagesPacket(socketID, messagesCachedOnServer, sessionEncryptionKey);
-            }
-
-            QList<QStringList> sentApplicationList, receivedApplicationList;
-            getFriendshipApplyRequest(userID, &sentApplicationList, &receivedApplicationList);
-            if(!sentApplicationList.isEmpty()){
-                foreach(QStringList infoList, sentApplicationList){
-                    QString receiverID = infoList.at(0);
-                    UserInfo *receiver = getUserInfo(receiverID);
-                    if(!receiver){continue;}
-                    UserInfo::FriendshipApplyResult faResult = UserInfo::FriendshipApplyResult(infoList.at(1).toUInt());
-                    QString message = infoList.at(2);
-                    if(faResult == UserInfo::FAR_ACCEPTED ){
-                        sendAddContactResultPacket(socketID, receiverID, receiver->getNickName(), receiver->getFace(), userInfo->groupIDThatContactBelongsTo(receiverID), IM::ERROR_NoError, message, receiver->getOnlineState(),  sessionEncryptionKey, peerAddress.toString(), userInfo->getLastLoginExternalHostPort() );
-                    }else{
-                        sendAddContactResultPacket(socketID, receiverID, receiver->getNickName(), receiver->getFace(), -1, IM::ERROR_RequestDenied, message, receiver->getOnlineState(), sessionEncryptionKey, peerAddress.toString(), userInfo->getLastLoginExternalHostPort() );
-                    }
-                }
-            }
-
-            if(!receivedApplicationList.isEmpty()){
-                foreach(QStringList infoList, receivedApplicationList){
-                    QString senderID = infoList.at(0);
-                    UserInfo *sender = getUserInfo(senderID);
-                    if(!sender){continue;}
-                    UserInfo::FriendshipApplyResult faResult = UserInfo::FriendshipApplyResult(infoList.at(1).toUInt());
-                    QString message = infoList.at(2);
-                    if(faResult == UserInfo::FAR_UNKNOWN ){
-                        sendAddContactRequestFromUserPacket(socketID, senderID, sender->getNickName(), sender->getFace(), message, sessionEncryptionKey, peerAddress, peerPort );
-                    }else if(faResult == UserInfo::FAR_ACCEPTED ){
-                        sendAddContactResultPacket(socketID, senderID, sender->getNickName(), sender->getFace(), userInfo->groupIDThatContactBelongsTo(senderID), IM::ERROR_NoError, message, sender->getOnlineState(), sessionEncryptionKey, peerAddress.toString(), peerPort);
-                    }/*else{
-                        sendAddContactResultPacket(senderID, sender->getNickName(), sender->getFace(), IM::ERROR_RequestDenied, message, sessionEncryptionKey, clientAddress.toString(), clientPort );
-                    }*/
-
-                }
-            }
-
-            QStringList interestgroupChatMessagesCachedOnServer = getCachedInterestGroupChatMessagesForUserFromDB(userInfo);
-            if(!interestgroupChatMessagesCachedOnServer.isEmpty()){
-                sendCachedInterestGroupChatMessagesPacket(socketID, interestgroupChatMessagesCachedOnServer, sessionEncryptionKey, peerAddress, peerPort);
-            }
-
-            m_userSocketsHash.insert(socketID, userInfo);
-
-            qWarning()<<QString("User %1 logged in!").arg(userID);
-        }else{
-            sendClientLoginFailedPacket(socketID, userID, quint8(errorType));
-            qWarning()<<QString("User %1 Login Failed!").arg(userID);
-
-        }
-
-        //        emit signalUserLoginInfoPacketReceived(userID, encryptedPassword, IM::OnlineState(onlineStateCode));
-        //        qWarning()<<"~~CLIENT_LOGIN_INFO--"<<" peerAddress:"<<clientAddress.toString()<<"   peerPort:"<<clientPort;
-
-    }
-        break;
-
-    case quint8(IM::ONLINE_STATE_CHANGED):
-    {
-        qDebug()<<"~~ONLINE_STATE_CHANGED";
-
-        QString userID = peerID;
-        QByteArray encryptedOnlineState;
-        in >> encryptedOnlineState;
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedOnlineState)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint8 onlineStateCode = quint8(IM::ONLINESTATE_ONLINE);
-        stream >> onlineStateCode;
-
-        processUserOnlineStatusChanged(userID, IM::OnlineState(onlineStateCode), peerAddress.toString(), peerPort);
-
-        //        emit signalUserOnlineStateChanged(userID, encryptedOnlineState);
-
-    }
-        break;
-
-    case quint8(IM::CONTACT_GROUPS_INFO):
-    {
-        qDebug()<<"~~CONTACT_GROUPS_INFO";
-
-        QString userID =peerID;
-
-        UserInfo *userInfo = getOnlineUserInfo(userID);
-        if(!userInfo){return;}
-
-        sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
-    }
-        break;
-    case quint8(IM::CONTACTS_INFO_VERSION):
-    {
-        qDebug()<<"~~CONTACTS_INFO_VERSION";
-
-        QString userID =peerID;
-
-        UserInfo *userInfo = getOnlineUserInfo(userID);
-        if(!userInfo){return;}
-
-        QString versionInfo = "";
-        if(!getUserAllContactsInfoVersionFromDatabase(userInfo, &versionInfo)){
-            return;
-        }
-
-        sendPersonalContactsInfoVersionPacket(socketID, versionInfo, userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_USER_INFO):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_USER_INFO";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-        //        qWarning()<<"userID:"<<userID << encryptedUserID.size();
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        
-        //QBuffer buf(&decryptedData);
-        //buf.open(QIODevice::ReadOnly);
-        //in.setDevice(&buf);
-        //in.device()->seek(0);
-        //QString contactID = "";
-        //in >> contactID;
-        
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "";
-        quint8 requestSummaryInfo = 1;
-        stream >> contactID >> requestSummaryInfo;
-        //        qWarning()<<"contactID:"<<contactID;
-
-        QString userInfoString = "";
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-        if(userID == contactID){
-            userInfoString = userInfo->getPersonalInfoString(requestSummaryInfo);
-        }else{
-            UserInfo *contactInfo = getUserInfo(contactID);
-            if(!contactInfo){return;}
-            userInfoString = contactInfo->getPersonalInfoString(requestSummaryInfo);
-        }
-        sendUserInfoPacket(socketID, contactID, userInfoString, userInfo->getSessionEncryptionKey(), requestSummaryInfo);
-
-        //        emit signalUserRequestUserInfo(userID, encryptedUserID);
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_SEARCH_CONTACTS):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_SEARCH_CONTACTS";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-        
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString propertiesString = "";
-        bool matchExactly = true, searchOnlineUsersOnly = true, searchWebcamUsersOnly = false;
-        int startIndex = 0;
-        stream >> propertiesString >> matchExactly >> searchOnlineUsersOnly >> searchWebcamUsersOnly >> startIndex;
-        
-        QString usersListString = searchContact(propertiesString, matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly, startIndex);
-        if(!usersListString.isEmpty()){
-            sendSearchContactResultPacket(socketID, usersListString, userInfo->getSessionEncryptionKey(), peerAddress, peerPort);
-        }
-        
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_SEARCH_INTERESTGROUPS):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_SEARCH_INTERESTGROUPS";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString keyword = "";
-        int startIndex = 0;
-        stream >> keyword >> startIndex;
-
-        QString groupsListString = searchInterestGroup(keyword, startIndex);
-        if(!groupsListString.isEmpty()){
-            sendSearchInterestGroupResultPacket(socketID, groupsListString, userInfo->getSessionEncryptionKey());
-        }
-
-    }
-        break;
-
-
-    case quint8(IM::CLIENT_REQUEST_JOIN_OR_QUIT_INTERESTGROUP):
-    {
-        qDebug()<<"--CLIENT_REQUEST_JOIN_OR_QUIT_INTERESTGROUP";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        quint32 groupID = 0;
-        quint8 join = 0;
-        QString verificationMessage = "";
-        stream >> groupID >> join >> verificationMessage;
-
-        InterestGroup *group = getInterestGroup(groupID);
-        if(!group){return;}
-
-        if(join){
-            if(userInfo->isMemberOfInterestGroup(groupID)){
-                qWarning()<<QString("ERROR! Failed to join group! '%1' is already a member of group '%2' !").arg(userID).arg(groupID);
-                return;
-                //TODO:Send Error Message
-            }
-
-            if(group->getPrivacy() == InterestGroupBase::Allow_Anyone_To_Join){
-                bool ok = memberJoinOrQuitInterestGroup(userInfo, group, true);
-                if(!ok){return;}
-                //TODO:
-                QStringList members = group->members();
-                foreach (QString memberID, members) {
-                    UserInfo *member = getOnlineUserInfo(memberID);
-                    if(!member){continue;}
-                    sendUserJoinOrQuitInterestGroupResultToUserPacket(member->getSocketID(), groupID, memberID, true, member->getSessionEncryptionKey());
-                }
-
-            }else if(group->getPrivacy() == InterestGroupBase::Request_Verfication_To_Join){
-                QStringList admins = group->getAdmins(true);
-                bool requestSent = false;
-                foreach (QString adminID, admins) {
-                    UserInfo *adminInfo = getOnlineUserInfo(userID);
-                    if(!adminInfo){continue;}
-                    sendUserJoinInterestGroupRequestToAdminPacket(adminInfo->getSocketID(), groupID, verificationMessage, userInfo);
-                    requestSent = true;
-                }
-                if(!requestSent){
-                    saveOrDeleteMembershipApplication(userID, groupID, verificationMessage, true);
-                }
-
-
-            }else{
-                //TODO
-
-
-
-            }
-
-
-        }else{
-            //Quit Group
-            if(!userInfo->isMemberOfInterestGroup(groupID)){
-                qWarning()<<QString("ERROR! Failed to quit group! '%1' is not a member of group '%2' !").arg(userID).arg(groupID);
-                return;
-                //TODO:Send Error Message
-            }
-
-            bool ok = memberJoinOrQuitInterestGroup(userInfo, group, false);
-            if(!ok){return;}
-            //TODO:
-            QStringList members = group->members();
-            foreach (QString memberID, members) {
-                UserInfo *member = getOnlineUserInfo(memberID);
-                if(!member){continue;}
-                sendUserJoinOrQuitInterestGroupResultToUserPacket(member->getSocketID(), groupID, memberID, false, member->getSessionEncryptionKey());
-            }
-            sendUserJoinOrQuitInterestGroupResultToUserPacket(userInfo->getSocketID(), groupID, userID, false, userInfo->getSessionEncryptionKey());
-
-
-        }
-
-
-
-
-
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_ADD_CONTACT):
-    {
-        qDebug()<<"--CLIENT_REQUEST_ADD_CONTACT";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "", verificationMessage = "";
-        quint32 groupID = ContactGroupBase::Group_Friends_ID;
-        stream >> contactID >> verificationMessage >> groupID;
-
-        if(userID == contactID){return;}
-
-        UserInfo *contactInfo = getUserInfo(contactID);
-        if(!contactInfo){return;}
-
-        if(userInfo->hasFriendContact(contactID)){
-            //sendAddContactResultPacket(contactID, IM::ERROR_RequestDenied, "Contact already exists!", userInfo->getSessionEncryptionKey(), clientAddress, clientPort);
-            //TODO:Send Error Message
-            qWarning()<<QString("'%1' already has contact '%2' !").arg(userID).arg(contactID);
-            return;
-        }
-
-        if(!userInfo->hasContactGroup(groupID)){
-            groupID = ContactGroupBase::Group_Friends_ID;
-        }
-
-        if(contactInfo->getFriendshipApply() == UserInfo::FA_AUTO_ACCEPT){
-            addContactForUser(userInfo, contactInfo, groupID);
-
-//            if(addNewContactForUserInDB(userID, contactID, groupID)){
-//                sendAddContactResultPacket(socketID, contactID, contactInfo->getNickName(), contactInfo->getFace(), IM::ERROR_NoError, "", userInfo->getSessionEncryptionKey(), userInfo->getLastLoginExternalHostAddress(), userInfo->getLastLoginExternalHostPort());
-//                userInfo->addNewContact(contactID, groupID);
-//            }else{
-//                sendAddContactResultPacket(socketID, contactID, contactInfo->getNickName(), contactInfo->getFace(), IM::ERROR_ServerError, "", userInfo->getSessionEncryptionKey(), userInfo->getLastLoginExternalHostAddress(), userInfo->getLastLoginExternalHostPort());
-//            }
-
-//            contactInfo->addNewContact(userID, contactInfo->defaultFriendContactGroupID());
-//            addNewContactForUserInDB(contactID, userID, groupID);
-//            if(contactInfo->getOnlineState() != IM::ONLINESTATE_OFFLINE){
-//                sendAddContactResultPacket(socketID, userID, userInfo->getNickName(), userInfo->getFace(), IM::ERROR_NoError, "", contactInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
-//            }else{
-//                //TODO:保存消息到数据库
-//                saveFriendshipApplyRequestToDB(userID, contactID, verificationMessage, UserInfo::FAR_ACCEPTED, true);
-//            }
-
-        }else{
-            if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
-                //TODO:保存请求到数据库
-                saveFriendshipApplyRequestToDB(userID, contactID, verificationMessage);
-            }else{
-                sendAddContactRequestFromUserPacket(contactInfo->getSocketID(), userID, userInfo->getNickName(), userInfo->getFace(), verificationMessage, contactInfo->getSessionEncryptionKey(), peerAddress, peerPort);
-            }
-        }
-
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_MOVE_CONTACT):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_MOVE_CONTACT";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-        
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "";
-        quint32 oldGroupID = 0, newGroupID = 0;
-        stream >> contactID >> oldGroupID >> newGroupID;
-        
-        if(userID == contactID){return;}
-        
-        UserInfo *contactInfo = getUserInfo(contactID);
-        if(!contactInfo){return;}
-        if(!userInfo->hasFriendContact(contactID)){return;}
-        
-        bool ok = moveContactForUserInDB(userInfo, contactID, newGroupID);
-        if(ok){
-            userInfo->moveContactToAnotherGroup(contactID, oldGroupID, newGroupID);
-        }
-//        sendMoveContactToGroupResultPacket(socketID, contactID, oldGroupID, newGroupID, ok, userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
-        
-    }
-        break;
-
-    case quint8(IM::CLIENT_RESPONSE_ADD_CONTACT_REQUEST):
-    {
-        qDebug()<<"~~CLIENT_RESPONSE_ADD_CONTACT_REQUEST";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-        
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "", extraMessage = "";
-        bool acceptRequest = true;
-        quint32 groupID = ContactGroupBase::Group_Friends_ID;
-        stream >> contactID >> acceptRequest;
-
-        stream >> groupID >> extraMessage;
-
-        UserInfo *contactInfo = getUserInfo(contactID);
-        if(!contactInfo){return;}
-
-        
-        //TODO:
-        if(acceptRequest){
-            addContactForUser(userInfo, contactInfo, groupID);
-
-//            contactInfo->addNewContact(userID, UserInfo::defaultFriendContactGroupID());
-
-//            if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
-//                //TODO:保存请求到数据库
-//                saveFriendshipApplyRequestToDB(contactID, userID, extraMessage, UserInfo::FAR_ACCEPTED, false, true);
-//                return;
-//            }else{
-//                sendAddContactResultPacket(socketID, userID, userInfo->getNickName(), userInfo->getFace(), IM::ERROR_NoError, "", contactInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
-//            }
-
-        }else{
-            if(!extraMessage.trimmed().isEmpty()){
-                if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
-                    //TODO:保存请求到数据库
-                    saveFriendshipApplyRequestToDB(contactID, userID, extraMessage, UserInfo::FAR_DENIED, false, true);
-                    return;
-                }else{
-                    sendAddContactResultPacket(contactInfo->getSocketID(), userID, userInfo->getNickName(), userInfo->getFace(), -1, IM::ERROR_RequestDenied, extraMessage, userInfo->getOnlineState(), contactInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
-                }
-            }
-            
-        }
-        //TODO:从数据库删除请求
-        deleteFriendshipApplyRequest(contactID, userID);
-        
-    }
-        break;
-
-    case quint8(IM::CLIENT_REQUEST_DELETE_CONTACT):
-    {
-        qDebug()<<"~~CLIENT_REQUEST_DELETE_CONTACT";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "";
-        quint8 deleteMeFromOpposition = 0, addToBlacklist = 0;
-        stream >> contactID >> deleteMeFromOpposition >> addToBlacklist;
-
-        //TODO:数据库
-        //deleteFriendshipApplyRequest(userID, contactID);
-        deleteContactForUserFromDB(userID, contactID, deleteMeFromOpposition, addToBlacklist);
-
-        userInfo->deleteContact(contactID);
-        if(deleteMeFromOpposition){
-            //TODO:
-            UserInfo *contactInfo = getOnlineUserInfo(contactID);
-            if(!contactInfo){
-                contactInfo = getOfflineUserInfo(contactID);;
-            }
-            if(!contactInfo){return;}
-            contactInfo->deleteContact(userID);
-
-            //deleteFriendshipApplyRequest(contactID, userID);
-        }
-        if(addToBlacklist){
-            userInfo->addOrDeleteBlacklistedContact(contactID, true);
-            userInfo->clearUpdatedProperties();
-        }
-
+        RgeistrationPacket p(packet, sessionEncryptionKey);
+        qDebug()<<"~~CMD_Rgeistration";
         //TODO
-        sendDeleteContactResultPacket(socketID, contactID, true, addToBlacklist, userInfo->getSessionEncryptionKey());
-
-
-        //qDebug()<<"------------contactID:"<<contactID<<" groupName:"<<groupName;
-
+        processRgeistrationPacket(p);
     }
         break;
 
-//    case quint8(IM::CLIENT_REQUEST_ADD_OR_DELETE_BLACKLISTED_CONTACT):
-//    {
-//        qDebug()<<"~~CLIENT_REQUEST_ADD_OR_DELETE_BLACKLISTED_CONTACT";
-
-//        QString userID = peerID;
-//        QByteArray encryptedData;
-//        in >> encryptedData;
-
-//        UserInfo *userInfo = getUserInfo(userID);
-//        if(!userInfo){return;}
-
-//        //解密数据
-//        QByteArray decryptedData;
-//        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-//        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-//        stream.setVersion(QDataStream::Qt_4_7);
-//        QString contactID = "";
-//        bool addToBlacklist = true;
-//        stream >> contactID >> addToBlacklist;
-
-//        addOrDeleteBlacklistedContactForUserFromDB(userID, contactID, addToBlacklist);
-
-//        userInfo->addOrDeleteBlacklistedContact(contactID, addToBlacklist);
-//        userInfo->clearUpdatedProperties();
-//    }
-//        break;
-
-    case quint8(IM::CLIENT_REQUEST_INTEREST_GROUPS_LIST):
+    case quint8(IM::CMD_UpdatePassword):
     {
-        qDebug()<<"~~CLIENT_REQUEST_INTEREST_GROUPS_LIST";
+        UpdatePasswordPacket p(packet, sessionEncryptionKey);
+        p.AuthInfo.authMode = UsersManager::passwordUpdateAuthMode();
 
-        QString userID = peerID;
-        //in >> userID ;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-        sendUserInterestGroupsListPacket(socketID, userInfo, peerAddress, peerPort);
-
+        processUpdatePasswordPacket(p);
+        qDebug()<<"~~CMD_UpdatePassword";
     }
         break;
 
-    case quint8(IM::CLIENT_REQUEST_INTEREST_GROUP_INFO):
+    case quint8(IM::CMD_Login):
     {
-        qDebug()<<"~~CLIENT_REQUEST_INTEREST_GROUP_INFO";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint32 groupID = 0;
-        stream >> groupID;
-
-        sendUserInterestGroupInfoPacket(socketID, userInfo, groupID, peerAddress, peerPort);
-
+        LoginPacket p(packet, sessionEncryptionKey);
+        processLoginPacket(p);
+        qDebug()<<"~~CMD_Login";
     }
         break;
 
-    case quint8(IM::CLIENT_REQUEST_INTEREST_GROUP_MEMBERS_INFO):
+    case quint8(IM::CMD_OnlineStateChanged):
     {
-
-        qDebug()<<"~~CLIENT_REQUEST_INTEREST_GROUP_MEMBERS_INFO";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint32 groupID = 0;
-        stream >> groupID;
-
-        sendUserInterestGroupMembersInfoPacket(socketID, userInfo, groupID, peerAddress, peerPort);
-
+        OnlineStateChangedPacket p(packet, sessionEncryptionKey);
+        quint8 stateCode = p.stateCode;
+        processUserOnlineStatusChanged(userID, IM::OnlineState(stateCode), peerAddress.toString(), peerPort);
+        qDebug()<<"~~CMD_OnlineStateChanged";
     }
         break;
 
-    case quint8(IM::CLIENT_REQUEST_CREATE_INTEREST_GROUP):
+    case quint8(IM::CMD_ContactGroupsInfo):
     {
-
-        qDebug()<<"~~CLIENT_REQUEST_CREATE_INTEREST_GROUP";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString groupName = 0;
-        stream >> groupName;
-
-        //TODO
-        quint32 groupID = createNewInterestGroup(userInfo, groupName);
-        sendCreateInterestGroupResultPacket(socketID, userInfo, groupID, groupName);
-
-
+        ContactGroupsInfoPacket p(packet, sessionEncryptionKey);
+        processContactGroupsInfoPacket(p);
+        qDebug()<<"~~CMD_ContactGroupsInfo";
     }
         break;
 
-    case quint8(IM::CLIENT_REQUEST_DISBAND_INTEREST_GROUP):
+    case quint8(IM::CMD_InterestGroupsInfo):
     {
-
-        qDebug()<<"~~CLIENT_REQUEST_DISBAND_INTEREST_GROUP";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        quint32 groupID = 0;
-        stream >> groupID;
-
-        //TODO
-        bool ok = disbandInterestGroup(userInfo, groupID);
-        sendDisbandInterestGroupResultPacket(socketID, userInfo, groupID, ok);
-        if(!ok){return;}
-
-        InterestGroup *group = getInterestGroup(groupID);
-        QStringList members = group->members();
-        members.removeAll(userID);
-        foreach (QString memberID, members) {
-            UserInfo *member = getOnlineUserInfo(memberID);
-            if(!member){continue;}
-            member->joinOrLeaveInterestGroup(groupID, false);
-            sendDisbandInterestGroupResultPacket(member->getSocketID(), member, groupID, ok);
-        }
-
+        InterestGroupsInfoPacket p(packet, sessionEncryptionKey);
+        processInterestGroupsInfoPacket(p);
+        qDebug()<<"~~CMD_InterestGroupsInfo";
     }
         break;
 
-
-
-    case quint8(IM::CLIENT_REQUEST_PERSONAL_MESSAGE_INFO):
+    case quint8(IM::CMD_ContactInfo):
     {
-        qDebug()<<"~~CLIENT_REQUEST_PERSONAL_MESSAGE_INFO";
-
-        QString userID = peerID;
-        in >> userID ;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(userInfo){return;}
-        sendUserPersonalMessagePacket(socketID, userInfo, peerAddress, peerPort);
-
+        ContactInfoPacket p(packet, sessionEncryptionKey);
+        processContactInfoPacket(p);
+        qDebug()<<"~~CMD_ContactInfo";
     }
         break;
 
-    case quint8(IM::CLIENT_REQUEST_MODIFY_CONTACT_REMARK):
+    case quint8(IM::CMD_SearchInfo):
     {
-        qDebug()<<"~~CLIENT_REQUEST_MODIFY_CONTACT_REMARK";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "", remarkName = "", extraRemarkInfo = "";
-        stream >> contactID >> remarkName >> extraRemarkInfo;
-
-        //TODO:Save To DB!
-
+        SearchInfoPacket p(packet, sessionEncryptionKey);
+        processSearchInfoPacket(p);
+        qDebug()<<"~~CMD_SearchInfo";
     }
         break;
 
-    case quint8(IM::CREATE_OR_DELETE_CONTACT_GROUP):
-    {
-        qDebug()<<"--CREATE_OR_DELETE_CONTACT_GROUP";
 
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
 
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint32 groupID = 0;
-        QString groupName = "";
-        quint8 create = 1;
-        stream >> groupID >> groupName >> create;
 
-        bool ok = createOrDeleteContactGroupInDB(userInfo, &groupID, groupName, create);
-        sendCreateOrDeleteContactGroupResultPacket(socketID, groupID, groupName, create, ok, userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
 
-    }
-        break;
 
-    case quint8(IM::RENAME_CONTACT_GROUP):
-    {
-        qDebug()<<"~~RENAME_CONTACT_GROUP";
 
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
 
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint32 groupID = 0;
-        QString newGroupName = "";
-        stream >> groupID >> newGroupName;
 
-        updateContactGroupNameInDB(userInfo, groupID, newGroupName);
 
-    }
-        break;
 
     case quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT):
     {
@@ -1162,191 +304,8 @@ void ServerPacketsParser::parseIncomingPacketData(Packet *packet){
     }
         break;
 
-    case quint8(IM::CHAT_MESSAGES_CACHED_ON_SERVER):
-    {
-        qDebug()<<"--CHAT_MESSAGES_CACHED_ON_SERVER";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "", message = "", imageNames = "";
-        stream >> contactID >> message >> imageNames;
-
-        saveCachedChatMessageFromIMUser(userID, contactID, message);
-
-        QStringList imageNameList = imageNames.split(",");
-        if(imageNameList.isEmpty()){return;}
-        foreach (QString imageName, imageNameList) {
-            if(!QFile::exists(m_chatImageCacheDir + "/" + imageName)){
-                qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
-                sendRequestImagePacket(socketID, userID, imageName, userInfo->getSessionEncryptionKey());
-            }
-        }
 
 
-        //Send To Contact
-        UserInfo *contactInfo = getUserInfo(contactID);
-        if(!contactInfo){return;}
-        if(contactInfo->getOnlineState() != IM::ONLINESTATE_OFFLINE){
-            sendContactChatMessagePacket(contactInfo->getSocketID(), userID, message, contactInfo->getSessionEncryptionKey());
-        }
-
-
-    }
-        break;
-
-    case quint8(IM::GROUP_CHAT_MESSAGE_TO_SERVER):
-    {
-        qDebug()<<"--GROUP_CHAT_MESSAGE_TO_SERVER";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        quint32 interestGroupID = 0;
-        QString  message = "", imageNames = "";
-        stream >> interestGroupID >> message >> imageNames;
-
-        if(userInfo->isMemberOfInterestGroup(interestGroupID)){
-            saveCachedInterestGroupChatMessageFromIMUser(userID, interestGroupID, message);
-        }else{
-            qCritical()<<QString("User '%1' is not a member of group '%2'!").arg(userID).arg(interestGroupID);
-            return;
-        }
-
-        QStringList imageNameList = imageNames.split(",");
-        if(imageNameList.isEmpty()){return;}
-        foreach (QString imageName, imageNameList) {
-            if(!QFile::exists(m_chatImageCacheDir + "/" + imageName)){
-                qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
-                sendRequestImagePacket(socketID, userID, imageName, userInfo->getSessionEncryptionKey());
-            }
-        }
-
-        //TODO:Send message to all contacts
-        sendInterestGroupChatMessageToMembers(interestGroupID, userInfo, message);
-
-
-    }
-        break;
-
-    case quint8(IM::REQUEST_CHAT_IMAGE):
-    {
-        qDebug()<<"--REQUEST_CHAT_IMAGE";
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString imageName = "", contactID = "";
-        stream >> imageName >> contactID;
-
-        //TODO:Check cached file
-        QFile file(m_chatImageCacheDir + "/" + imageName);
-        if(file.exists()){
-            qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
-            QByteArray ba;
-            if (file.open(QFile::ReadOnly)) {
-                ba = file.readAll();
-                file.close();
-
-                sendImagePacket(socketID, contactID, imageName, ba, userInfo->getSessionEncryptionKey());
-                return ;
-            }else{
-                qCritical()<< QString("ERROR! Failed to open image '%1'! %2").arg(imageName).arg(file.errorString());
-            }
-        }
-
-
-        UserInfo *contactInfo = getOnlineUserInfo(contactID);
-        if(!contactInfo){
-            sendImagePacket(socketID, contactID, imageName, QByteArray(), userInfo->getSessionEncryptionKey());
-            return;
-        }
-
-        sendRequestImagePacket(contactInfo->getSocketID(), userID, imageName, contactInfo->getSessionEncryptionKey());
-
-
-    }
-        break;
-
-    case quint8(IM::CHAT_IMAGE):
-    {
-        qDebug()<<"--CHAT_IMAGE";
-
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString  imageName = "";
-        QByteArray image;
-        stream >> imageName >> image;
-
-        if(image.isNull()){
-            qCritical()<<"ERROR! Invalid image!";
-            return;
-        }
-
-        //TODO:Save image
-        Settings settings;
-        QString cacheDir = settings.getChatImageCacheDir();
-        QString fileName = cacheDir + "/" + imageName;
-
-        QFile file(fileName);
-        if(!file.exists()){
-            if(!file.open(QFile::WriteOnly)){
-                qCritical()<< QString("ERROR! Failed to write image '%1'! %2").arg(imageName).arg(file.errorString());
-                return;
-            }
-            file.write(image);
-            file.flush();
-            file.close();
-        }
-        //QString md5String = QCryptographicHash::hash(image, QCryptographicHash::Md5).toHex();
-        QList<UserInfo *> users = imageDownloadingRequestHash.values(imageName);
-        foreach (UserInfo *user, users) {
-            sendImagePacket(user->getSocketID(), userID, imageName, image, user->getSessionEncryptionKey());
-        }
-
-
-    }
-        break;
 
 
         //FILE TX
@@ -1470,6 +429,15 @@ bool ServerPacketsParser::decryptData(UserInfo *info, QByteArray *destination, c
 
 }
 
+QByteArray ServerPacketsParser::getUserSessionEncryptionKey(const QString &userID){
+    UserInfo *info = getUserInfo(userID);
+    if(!info){
+        return QByteArray();
+    }
+
+    return info->getSessionEncryptionKey();
+}
+
 void ServerPacketsParser::peerDisconnected(int socketID){
     //qDebug()<<"--ServerPacketsParser::peerDisconnected(...) "<<" socketID:"<<socketID;
 
@@ -1531,33 +499,858 @@ void ServerPacketsParser::addContactForUser(UserInfo *userInfo, UserInfo *contac
 
 }
 
-//void ServerPacketsParser::startCheckIMUsersOnlineStateTimer(){
-//    qWarning()<<"--startCheckIMUsersOnlineStateTimer()";
+void ServerPacketsParser::processRgeistrationPacket(const RgeistrationPacket &packet){
+    RgeistrationPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case RgeistrationPacket::REGISTRATION_SERVER_INFO:
+    {
+        sendRegistrationServerInfoPacket(packet.getSocketID(), packet);
+    }
+        break;
 
-//    if(!checkIMUsersOnlineStateTimer){
-//        checkIMUsersOnlineStateTimer = new QTimer(this);
-//        checkIMUsersOnlineStateTimer->setInterval(HEARTBEAT_TIMER_INTERVAL); //1 minute
-//        checkIMUsersOnlineStateTimer->setSingleShot(false);
-//        connect(checkIMUsersOnlineStateTimer, SIGNAL(timeout()), this, SLOT(slotCheckIMUsersOnlineStatus()));
-//    }
+    case RgeistrationPacket::REGISTRATION_INFO:
+    {
+        IM::ErrorType errorype = IM::ERROR_UnKnownError;
+        quint32 sysID = 0;
+        QString userID = packet.RgeistrationInfo.userID;
+        QString password = packet.RgeistrationInfo.password;
+        registerNewUser(userID, password, &errorype, &sysID);
+        sendClientRegistrationResultPacket(packet.getSocketID(), sysID, userID, password, quint8(errorype));
+    }
+        break;
 
-//    //    if(!checkIMUsersOnlineStateTimer->isActive()){
-//    //    }
+    case RgeistrationPacket::REGISTRATION_RESULT:
+    {
+    }
+        break;
 
-//    checkIMUsersOnlineStateTimer->start();
+    default:
+        break;
+    }
 
-//}
 
-//void ServerPacketsParser::slotCheckIMUsersOnlineStatus(){
-//    qWarning()<<"--slotCheckIMUsersOnlineStatus()";
-//    QList<UserInfo*>  users = onlineUsers();
-//    foreach(UserInfo *info, users){
-//        if(!info->isOnLine()){
-//            processUserOnlineStatusChanged(info, IM::ONLINESTATE_OFFLINE, "", 0);
-//        }
-//    }
 
-//}
+}
+
+void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket &packet){
+    UpdatePasswordPacket::PacketInfoType infoType = packet.InfoType;
+
+    //TODO
+    switch (infoType) {
+    case UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST:
+    {
+        quint8 authMode = UsersManager::passwordUpdateAuthMode();
+        QByteArray captchaImage = QByteArray();
+        QString userID = packet.AuthInfo.userID;
+        QString securityQuestion = "";
+        QString email = "";
+        quint32 cellphoneNO = "";
+        QString url = "";
+
+
+        UpdatePasswordPacket::AuthMode mode = UpdatePasswordPacket::AuthMode(authMode);
+        switch (mode) {
+        case UpdatePasswordPacket::AUTH_OLD_PWD_ONLY:
+            break;
+        case UpdatePasswordPacket::AUTH_SECURITY_QUESTION:
+        {
+
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_EMAIL:
+        {
+
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_SMS:
+        {
+
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_HTTP:
+        {
+
+        }
+            break;
+        default:
+            break;
+        }
+
+        sendUpdatePasswordAuthInfoPacket(authMode, captchaImage, userID, securityQuestion, email, cellphoneNO, url);
+
+    }
+        break;
+    case UpdatePasswordPacket::INFO_TYPE_CAPTCHA_REQUEST:
+    {
+
+    }
+        break;
+    case UpdatePasswordPacket::INFO_TYPE_CAPTCHA_IMAGE:
+    {
+        //TODO
+    }
+        break;
+
+    case UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_SERVER:
+    {
+    }
+        break;
+
+    case UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT:
+    {
+
+
+        UpdatePasswordPacket::AuthMode mode = UpdatePasswordPacket::AuthMode(AuthInfo.authMode);
+        switch (mode) {
+        case UpdatePasswordPacket::AUTH_OLD_PWD_ONLY:
+        {
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_SECURITY_QUESTION:
+        {
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_EMAIL:
+        {
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_SMS:
+        {
+        }
+            break;
+        case UpdatePasswordPacket::AUTH_HTTP:
+        {
+
+        }
+            break;
+        default:
+            break;
+        }
+    }
+        break;
+
+    case UpdatePasswordPacket::INFO_TYPE_AUTH_RESULT:
+    {
+    }
+        break;
+
+    case UpdatePasswordPacket::INFO_TYPE_UPDATE_RESULT:
+    {
+    }
+        break;
+
+
+    default:
+        break;
+    }
+
+
+}
+
+void ServerPacketsParser::processLoginPacket(const LoginPacket &packet){
+    LoginPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO:
+    {
+        QString userID = packet.getPeerID();
+        IM::ErrorType errorType = IM::ERROR_UnKnownError;
+        if(canUserLogin(userID, clientVersion, &errorType)){
+            QHostAddress loginServerAddress = QHostAddress::Null;
+            quint16 loginServerPort = 0;
+            getUserLoginServer(userID, &loginServerAddress, &loginServerPort);
+            sendClientCanLoginPacket(socketID, userID, loginServerAddress, loginServerPort);
+        }else{
+            sendClientCanNotLoginPacket(socketID, userID, quint8(errorType));
+        }
+    }
+        break;
+    case LoginPacket::INFO_TYPE_CAPTCHA:
+    {
+        //out << CaptchaInfo.type << CaptchaInfo.captchaImage << CaptchaInfo.captcha << CaptchaInfo.authResult;
+    }
+        break;
+    case LoginPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT:
+    {
+
+        QString userID = packet.getPeerID();
+        QByteArray encryptedPassword;
+        quint8 onlineStateCode = quint8(IM::ONLINESTATE_ONLINE);
+        QString deviceInfo = "";
+        in >> encryptedPassword >> onlineStateCode >> deviceInfo;
+        //        qDebug()<<"----onlineStateCode:"<<onlineStateCode;
+
+        IM::ErrorType errorType = IM::ERROR_UnKnownError;
+        UserInfo *userInfo = logUserIn(userID, encryptedPassword, IM::OnlineState(onlineStateCode), &errorType);
+        if(userInfo){
+
+            userInfo->setSocketID(socketID);
+
+            QByteArray sessionEncryptionKey = userInfo->getSessionEncryptionKey();
+            sendClientLoginSucceededPacket(socketID, userID, userInfo->encryptedPassword(), sessionEncryptionKey,
+                                           userInfo->getPersonalSummaryInfoVersion(),
+                                           userInfo->getPersonalDetailInfoVersion(),
+                                           userInfo->getPersonalContactGroupsVersion(),
+                                           userInfo->getInterestGroupInfoVersion(),
+                                           userInfo->getPersonalMessageInfoVersion()
+                                           );
+
+
+            //Send all contact groups info to user
+            sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
+
+            //Send all contacts version info to user
+            QString contactsInfoString = "";
+            if(getUserAllContactsInfoVersionFromDatabase(userInfo, &contactsInfoString)){
+                if(!contactsInfoString.trimmed().isEmpty()){
+                    sendPersonalContactsInfoVersionPacket(socketID, contactsInfoString, userInfo->getPersonalContactGroupsVersion(), sessionEncryptionKey);
+                }
+            }
+
+            //Send last login info
+            sendClientLastLoginInfoPacket(socketID, sessionEncryptionKey,
+                                          userInfo->getLastLoginExternalHostAddress(),
+                                          userInfo->getLastLoginTime().toString("yyyy-MM-dd hh:mm:ss"),
+                                          userInfo->getLastLogoutTime().toString("yyyy-MM-dd hh:mm:ss"),
+                                          userInfo->getLastLoginDeviceInfo());
+
+            //Send all online contacts list to user
+            sendContactsOnlineInfo(socketID, userInfo);
+
+            //Save login or logout info, send info to contacts
+            processUserOnlineStatusChanged(userInfo, onlineStateCode, peerAddress.toString(), peerPort, deviceInfo);
+
+
+            QStringList messagesCachedOnServer = cachedChatMessagesForIMUser(userInfo);
+            if(!messagesCachedOnServer.isEmpty()){
+                sendCachedChatMessagesPacket(socketID, messagesCachedOnServer, sessionEncryptionKey);
+            }
+
+            QList<QStringList> sentApplicationList, receivedApplicationList;
+            getFriendshipApplyRequest(userID, &sentApplicationList, &receivedApplicationList);
+            if(!sentApplicationList.isEmpty()){
+                foreach(QStringList infoList, sentApplicationList){
+                    QString receiverID = infoList.at(0);
+                    UserInfo *receiver = getUserInfo(receiverID);
+                    if(!receiver){continue;}
+                    UserInfo::FriendshipApplyResult faResult = UserInfo::FriendshipApplyResult(infoList.at(1).toUInt());
+                    QString message = infoList.at(2);
+                    if(faResult == UserInfo::FAR_ACCEPTED ){
+                        sendAddContactResultPacket(socketID, receiverID, receiver->getNickName(), receiver->getFace(), userInfo->groupIDThatContactBelongsTo(receiverID), IM::ERROR_NoError, message, receiver->getOnlineState(),  sessionEncryptionKey, peerAddress.toString(), userInfo->getLastLoginExternalHostPort() );
+                    }else{
+                        sendAddContactResultPacket(socketID, receiverID, receiver->getNickName(), receiver->getFace(), -1, IM::ERROR_RequestDenied, message, receiver->getOnlineState(), sessionEncryptionKey, peerAddress.toString(), userInfo->getLastLoginExternalHostPort() );
+                    }
+                }
+            }
+
+            if(!receivedApplicationList.isEmpty()){
+                foreach(QStringList infoList, receivedApplicationList){
+                    QString senderID = infoList.at(0);
+                    UserInfo *sender = getUserInfo(senderID);
+                    if(!sender){continue;}
+                    UserInfo::FriendshipApplyResult faResult = UserInfo::FriendshipApplyResult(infoList.at(1).toUInt());
+                    QString message = infoList.at(2);
+                    if(faResult == UserInfo::FAR_UNKNOWN ){
+                        sendAddContactRequestFromUserPacket(socketID, senderID, sender->getNickName(), sender->getFace(), message, sessionEncryptionKey, peerAddress, peerPort );
+                    }else if(faResult == UserInfo::FAR_ACCEPTED ){
+                        sendAddContactResultPacket(socketID, senderID, sender->getNickName(), sender->getFace(), userInfo->groupIDThatContactBelongsTo(senderID), IM::ERROR_NoError, message, sender->getOnlineState(), sessionEncryptionKey, peerAddress.toString(), peerPort);
+                    }/*else{
+                        sendAddContactResultPacket(senderID, sender->getNickName(), sender->getFace(), IM::ERROR_RequestDenied, message, sessionEncryptionKey, clientAddress.toString(), clientPort );
+                    }*/
+
+                }
+            }
+
+            QStringList interestgroupChatMessagesCachedOnServer = getCachedInterestGroupChatMessagesForUserFromDB(userInfo);
+            if(!interestgroupChatMessagesCachedOnServer.isEmpty()){
+                sendCachedInterestGroupChatMessagesPacket(socketID, interestgroupChatMessagesCachedOnServer, sessionEncryptionKey, peerAddress, peerPort);
+            }
+
+            m_userSocketsHash.insert(socketID, userInfo);
+
+            qWarning()<<QString("User %1 logged in!").arg(userID);
+        }else{
+            sendClientLoginFailedPacket(socketID, userID, quint8(errorType));
+            qWarning()<<QString("User %1 Login Failed!").arg(userID);
+
+        }
+    }
+        break;
+
+    case LoginPacket::INFO_TYPE_LOGIN_RESULT:
+    {
+        //out << AuthResultInfo.authResult << AuthResultInfo.sessionEncryptionKey;
+    }
+        break;
+
+
+    default:
+        break;
+    }
+
+
+
+}
+
+void ServerPacketsParser::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet){
+    UserInfo *userInfo = getUserInfo(packet.getPeerID());
+    if(!userInfo){return;}
+
+    ContactGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ContactGroupsInfoPacket::PIT_GROUPS_LIST:
+    {
+        sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
+
+        slotProcessContactGroupsInfo();
+        out << GroupsList.groupsInfo << GroupsList.version;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_CHANGE_PARENT:
+    {
+        out << GroupParentInfo.groupID << GroupParentInfo.parentID;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_CREATION:
+    {
+        out << GroupCreationInfo.name << GroupCreationInfo.parentID << GroupCreationInfo.id;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_DELETION:
+    {
+        out << GroupDeletionInfo.id << GroupDeletionInfo.deleted;
+    }
+        break;
+    case ContactGroupsInfoPacket::PIT_GROUP_RENAMING:
+    {
+        quint32 groupID = 0;
+        QString newGroupName = "";
+
+        updateContactGroupNameInDB(userInfo, groupID, newGroupName);
+
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+}
+
+
+void ServerPacketsParser::processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+
+    InterestGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case InterestGroupsInfoPacket::PIT_GROUPS_LIST:
+    {
+        sendUserInterestGroupsListPacket(packet.getSocketID(), userInfo);
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_INFO:
+    {
+        sendUserInterestGroupInfoPacket(socketID, userInfo, groupID);
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_UPDATE_ANNOUNCEMENT:
+    {
+        out << GroupAnnouncementInfo.content << GroupAnnouncementInfo.admin;
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_CREATION:
+    {
+        quint32 groupID = createNewInterestGroup(userInfo, packet.GroupCreationInfo.name, packet.GroupCreationInfo.type);
+        sendCreateInterestGroupResultPacket(socketID, userInfo, groupID, groupName);
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_DELETION:
+    {
+        quint32 groupID = packet.GroupDeletionInfo.id;
+
+        //TODO
+        bool ok = disbandInterestGroup(userInfo, groupID);
+        sendDisbandInterestGroupResultPacket(socketID, userInfo, groupID, ok);
+        if(!ok){return;}
+
+        InterestGroup *group = getInterestGroup(groupID);
+        QStringList members = group->members();
+        members.removeAll(userID);
+        foreach (QString memberID, members) {
+            UserInfo *member = getOnlineUserInfo(memberID);
+            if(!member){continue;}
+            member->joinOrLeaveInterestGroup(groupID, false);
+            sendDisbandInterestGroupResultPacket(member->getSocketID(), member, groupID, ok);
+        }
+
+    }
+        break;
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION:
+    {
+        InterestGroup *group = getInterestGroup(groupID);
+        if(!group){return;}
+
+        if(userInfo->isMemberOfInterestGroup(groupID)){
+            qWarning()<<QString("ERROR! Failed to join group! '%1' is already a member of group '%2' !").arg(userID).arg(groupID);
+            return;
+        }
+
+        if(group->getPrivacy() == InterestGroupBase::Allow_Anyone_To_Join){
+            bool ok = memberJoinOrQuitInterestGroup(userInfo, group, true);
+            if(!ok){return;}
+            //TODO:
+            QStringList members = group->members();
+            foreach (QString memberID, members) {
+                UserInfo *member = getOnlineUserInfo(memberID);
+                if(!member){continue;}
+                sendUserJoinOrQuitInterestGroupResultToUserPacket(member->getSocketID(), groupID, memberID, true, member->getSessionEncryptionKey());
+            }
+
+        }else if(group->getPrivacy() == InterestGroupBase::Request_Verfication_To_Join){
+            QStringList admins = group->getAdmins(true);
+            bool requestSent = false;
+            foreach (QString adminID, admins) {
+                UserInfo *adminInfo = getOnlineUserInfo(userID);
+                if(!adminInfo){continue;}
+                sendUserJoinInterestGroupRequestToAdminPacket(adminInfo->getSocketID(), groupID, verificationMessage, userInfo);
+                requestSent = true;
+            }
+            if(!requestSent){
+                saveOrDeleteMembershipApplication(userID, groupID, verificationMessage, true);
+            }
+
+
+        }else{
+            //TODO
+
+        }
+
+        out << MemberApplicationInfo.userID << MemberApplicationInfo.message << MemberApplicationInfo.approved << MemberApplicationInfo.admin;
+    }
+        break;
+
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_DELETION:
+    {
+        if(userID  = packet.MemberDeletionInfo.userID){
+        //Quit Group
+        if(!userInfo->isMemberOfInterestGroup(groupID)){
+            qWarning()<<QString("ERROR! Failed to quit group! '%1' is not a member of group '%2' !").arg(userID).arg(groupID);
+            return;
+            //TODO:Send Error Message
+        }
+
+        bool ok = memberJoinOrQuitInterestGroup(userInfo, group, false);
+        if(!ok){return;}
+        //TODO:
+        QStringList members = group->members();
+        foreach (QString memberID, members) {
+            UserInfo *member = getOnlineUserInfo(memberID);
+            if(!member){continue;}
+            sendUserJoinOrQuitInterestGroupResultToUserPacket(member->getSocketID(), groupID, memberID, false, member->getSessionEncryptionKey());
+        }
+        sendUserJoinOrQuitInterestGroupResultToUserPacket(userInfo->getSocketID(), groupID, userID, false, userInfo->getSessionEncryptionKey());
+
+        }
+        //out << MemberDeletionInfo.userID << MemberDeletionInfo.blockForever << MemberDeletionInfo.admin;
+    }
+        break;
+
+    case InterestGroupsInfoPacket::PIT_GROUP_MEMBER_PROMOTION:
+    {
+        out << MemberPromotionInfo.userID << MemberPromotionInfo.promoted;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+}
+
+void ServerPacketsParser::processContactInfoPacket(const ContactInfoPacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+    UserInfo *contactInfo = 0;
+    QString contactID = packet.ContactID;
+    if(userID == contactID){
+        contactInfo = userInfo;
+    }else{
+        contactInfo = getUserInfo(contactID);
+        if(!contactInfo){return;}
+    }
+
+    ContactInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ContactInfoPacket::PIT_CONTACT_INFO:
+    {
+        quint8 requestSummaryInfo = packet.info.isSummaryInfo;
+        QString infoString = contactInfo->getPersonalInfoString(requestSummaryInfo);
+
+        sendUserInfoPacket(socketID, requestSummaryInfo, contactID, infoString, userInfo->getSessionEncryptionKey());
+    }
+        break;
+    case ContactInfoPacket::PIT_GROUP_CHANGE:
+    {
+        if(userID == contactID){return;}
+        if(!userInfo->hasFriendContact(contactID)){return;}
+
+        quint32 oldGroupID = packet.ContactChangeGroup.oldGroupID;
+        quint32 newGroupID = packet.ContactChangeGroup.newGroupID;
+
+        bool ok = moveContactForUserInDB(userInfo, contactID, newGroupID);
+        if(ok){
+            userInfo->moveContactToAnotherGroup(contactID, oldGroupID, newGroupID);
+        }
+
+    }
+        break;
+
+    case ContactInfoPacket::PIT_FRIENDING_REQUEST:
+    {
+
+        QString verificationMessage = packet.ContactFriendingRequest.message;
+        quint32 groupID = packet.ContactFriendingRequest.groupID;
+        if(userID == contactID){return;}
+
+        if(userInfo->hasFriendContact(contactID)){
+            //sendAddContactResultPacket(contactID, IM::ERROR_RequestDenied, "Contact already exists!", userInfo->getSessionEncryptionKey(), clientAddress, clientPort);
+            //TODO:Send Error Message
+            qWarning()<<QString("'%1' already has contact '%2' !").arg(userID).arg(contactID);
+            return;
+        }
+
+        if(!userInfo->hasContactGroup(groupID)){
+            groupID = ContactGroupBase::Group_Friends_ID;
+        }
+
+        if(contactInfo->getFriendshipApply() == UserInfo::FA_AUTO_ACCEPT){
+            addContactForUser(userInfo, contactInfo, groupID);
+
+
+        }else{
+            if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
+                //TODO:保存请求到数据库
+                saveFriendshipApplyRequestToDB(userID, contactID, verificationMessage);
+            }else{
+                sendAddContactRequestFromUserPacket(contactInfo->getSocketID(), userID, userInfo->getNickName(), userInfo->getFace(), verificationMessage, contactInfo->getSessionEncryptionKey(), peerAddress, peerPort);
+            }
+        }
+
+        in >> ContactFriendingRequest.message;
+    }
+        break;
+
+    case ContactInfoPacket::PIT_FRIENDING_RESULT:
+    {
+        QString contactID = "", extraMessage = "";
+        bool acceptRequest = true;
+        quint32 groupID = ContactGroupBase::Group_Friends_ID;
+        stream >> contactID >> acceptRequest;
+
+        stream >> groupID >> extraMessage;
+
+        UserInfo *contactInfo = getUserInfo(contactID);
+        if(!contactInfo){return;}
+
+
+        //TODO:
+        if(acceptRequest){
+            addContactForUser(userInfo, contactInfo, groupID);
+
+//            contactInfo->addNewContact(userID, UserInfo::defaultFriendContactGroupID());
+
+//            if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
+//                //TODO:保存请求到数据库
+//                saveFriendshipApplyRequestToDB(contactID, userID, extraMessage, UserInfo::FAR_ACCEPTED, false, true);
+//                return;
+//            }else{
+//                sendAddContactResultPacket(socketID, userID, userInfo->getNickName(), userInfo->getFace(), IM::ERROR_NoError, "", contactInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
+//            }
+
+        }else{
+            if(!extraMessage.trimmed().isEmpty()){
+                if(contactInfo->getOnlineState() == IM::ONLINESTATE_OFFLINE){
+                    //TODO:保存请求到数据库
+                    saveFriendshipApplyRequestToDB(contactID, userID, extraMessage, UserInfo::FAR_DENIED, false, true);
+                    return;
+                }else{
+                    sendAddContactResultPacket(contactInfo->getSocketID(), userID, userInfo->getNickName(), userInfo->getFace(), -1, IM::ERROR_RequestDenied, extraMessage, userInfo->getOnlineState(), contactInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
+                }
+            }
+
+        }
+        //TODO:从数据库删除请求
+        deleteFriendshipApplyRequest(contactID, userID);
+
+        in >> ContactFriendingResult.message >> ContactFriendingResult.approved >> ContactFriendingResult.blocked;
+    }
+        break;
+
+    case ContactInfoPacket::PIT_CONTACT_DELETION:
+    {
+        QString contactID = "";
+        quint8 deleteMeFromOpposition = 0, addToBlacklist = 0;
+        stream >> contactID >> deleteMeFromOpposition >> addToBlacklist;
+
+        //TODO:数据库
+        //deleteFriendshipApplyRequest(userID, contactID);
+        deleteContactForUserFromDB(userID, contactID, deleteMeFromOpposition, addToBlacklist);
+
+        userInfo->deleteContact(contactID);
+        if(deleteMeFromOpposition){
+            //TODO:
+            UserInfo *contactInfo = getOnlineUserInfo(contactID);
+            if(!contactInfo){
+                contactInfo = getOfflineUserInfo(contactID);;
+            }
+            if(!contactInfo){return;}
+            contactInfo->deleteContact(userID);
+
+            //deleteFriendshipApplyRequest(contactID, userID);
+        }
+        if(addToBlacklist){
+            userInfo->addOrDeleteBlacklistedContact(contactID, true);
+            userInfo->clearUpdatedProperties();
+        }
+
+        //TODO
+        sendDeleteContactResultPacket(socketID, contactID, true, addToBlacklist, userInfo->getSessionEncryptionKey());
+
+    }
+        break;
+
+    case ContactInfoPacket::PIT_CONTACT_REMARK:
+    {
+        in >> ContactRemarkInfo.newRemarkName;
+    }
+        break;
+
+
+    default:
+        break;
+    }
+
+}
+
+void ServerPacketsParser::processSearchInfoPacket(const SearchInfoPacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+    SearchInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case SearchInfoPacket::PIT_SEARCH_CONTACT_CONDITIONS:
+    {
+        QString usersListString = searchContact(propertiesString, matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly, startIndex);
+        if(!usersListString.isEmpty()){
+            sendSearchContactResultPacket(socketID, usersListString, userInfo->getSessionEncryptionKey(), peerAddress, peerPort);
+        }
+
+
+        out << SearchContactConditions.keyword << SearchContactConditions.isOnline
+                << SearchContactConditions.hasWebcam << SearchContactConditions.location
+                << SearchContactConditions.hometown << SearchContactConditions.gender
+                << SearchContactConditions.age << SearchContactConditions.matchExactly
+                << SearchContactConditions.startIndex
+                ;
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_CONTACT_RESULT:
+    {
+        out << SearchContactResult.result;
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_CONDITIONS:
+    {
+        QString keyword = packet.SearchInterestGroupConditions.keyword;
+        int startIndex = packet.SearchInterestGroupConditions.startIndex;
+
+        QString groupsListString = searchInterestGroup(keyword, startIndex);
+        if(!groupsListString.isEmpty()){
+            sendSearchInterestGroupResultPacket(socketID, groupsListString, userInfo->getSessionEncryptionKey());
+        }
+
+    }
+        break;
+    case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_RESULT:
+    {
+        out << SearchInterestGroupResult.result;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+}
+
+void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+    SearchInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE:
+    {
+
+        QString contactID = packet.ContactChatMessage.contactID;
+        UserInfo *contactInfo = getUserInfo(contactID);
+        if(!contactInfo){return;}
+
+        QString message = packet.ContactChatMessage.message;
+        QString imageNames = packet.ContactChatMessage.imageNames;
+
+        saveCachedChatMessageFromIMUser(userID, contactID, message);
+
+        QStringList imageNameList = imageNames.split(",");
+        if(imageNameList.isEmpty()){return;}
+        foreach (QString imageName, imageNameList) {
+            if(!QFile::exists(m_chatImageCacheDir + "/" + imageName)){
+                qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
+                sendRequestImagePacket(socketID, userID, imageName, userInfo->getSessionEncryptionKey());
+            }
+        }
+
+
+        //Send To Contact
+        if(contactInfo->getOnlineState() != IM::ONLINESTATE_OFFLINE){
+            sendContactChatMessagePacket(contactInfo->getSocketID(), userID, message, contactInfo->getSessionEncryptionKey());
+        }
+
+
+    }
+        break;
+    case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGES_CACHED_ON_SERVER:
+    {
+        out << ContactChatMessageCachedOnServer.messages;
+    }
+        break;
+    case ChatMessagePacket::PIT_CONTACT_CHAT_HISTORY_MESSAGES:
+    {
+        out << ContactChatHistoryMessages.contactID << ContactChatHistoryMessages.messages << ContactChatHistoryMessages.startime;
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGE:
+    {
+        quint32 interestGroupID = 0;
+        QString  message = "", imageNames = "";
+        stream >> interestGroupID >> message >> imageNames;
+
+        if(userInfo->isMemberOfInterestGroup(interestGroupID)){
+            saveCachedInterestGroupChatMessageFromIMUser(userID, interestGroupID, message);
+        }else{
+            qCritical()<<QString("User '%1' is not a member of group '%2'!").arg(userID).arg(interestGroupID);
+            return;
+        }
+
+        QStringList imageNameList = imageNames.split(",");
+        if(imageNameList.isEmpty()){return;}
+        foreach (QString imageName, imageNameList) {
+            if(!QFile::exists(m_chatImageCacheDir + "/" + imageName)){
+                qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
+                sendRequestImagePacket(socketID, userID, imageName, userInfo->getSessionEncryptionKey());
+            }
+        }
+
+        //TODO:Send message to all contacts
+        sendInterestGroupChatMessageToMembers(interestGroupID, userInfo, message);
+
+
+       out << GroupChatMessage.groupID << GroupChatMessage.memberID << GroupChatMessage.time << GroupChatMessage.message;
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGES_CACHED_ON_SERVER:
+    {
+        out << GroupChatMessagesCachedOnServer.messages;
+    }
+        break;
+    case ChatMessagePacket::PIT_GROUP_CHAT_HISTORY_MESSAGES:
+    {
+        out << GroupChatHistoryMessages.groupID << GroupChatHistoryMessages.messages << GroupChatHistoryMessages.startime;
+    }
+        break;
+    case ChatMessagePacket::PIT_CHAT_IMAGE:
+    {
+
+        bool isRequest = packet.ChatImage.isRequest;
+        QString imageName = packet.ChatImage.name;
+        QByteArray image = packet.ChatImage.image;
+        if(isRequest){
+            //TODO:Check cached file
+            QFile file(m_chatImageCacheDir + "/" + imageName);
+            if(file.exists()){
+                qDebug()<<QString("Image '%1' exists on server!").arg(imageName);
+                QByteArray ba;
+                if (file.open(QFile::ReadOnly)) {
+                    ba = file.readAll();
+                    file.close();
+
+                    sendImagePacket(socketID, contactID, imageName, ba, userInfo->getSessionEncryptionKey());
+                    return ;
+                }else{
+                    qCritical()<< QString("ERROR! Failed to open image '%1'! %2").arg(imageName).arg(file.errorString());
+                }
+            }
+
+
+            UserInfo *contactInfo = getOnlineUserInfo(contactID);
+            if(!contactInfo){
+                sendImagePacket(socketID, contactID, imageName, QByteArray(), userInfo->getSessionEncryptionKey());
+                return;
+            }
+
+            sendRequestImagePacket(contactInfo->getSocketID(), userID, imageName, contactInfo->getSessionEncryptionKey());
+
+        }else{
+
+            if(image.isNull()){
+                qCritical()<<"ERROR! Invalid image!";
+                return;
+            }
+
+            //TODO:Save image
+            Settings settings;
+            QString cacheDir = settings.getChatImageCacheDir();
+            QString fileName = cacheDir + "/" + imageName;
+
+            QFile file(fileName);
+            if(!file.exists()){
+                if(!file.open(QFile::WriteOnly)){
+                    qCritical()<< QString("ERROR! Failed to write image '%1'! %2").arg(imageName).arg(file.errorString());
+                    return;
+                }
+                file.write(image);
+                file.flush();
+                file.close();
+            }
+            //QString md5String = QCryptographicHash::hash(image, QCryptographicHash::Md5).toHex();
+            QList<UserInfo *> users = imageDownloadingRequestHash.values(imageName);
+            foreach (UserInfo *user, users) {
+                sendImagePacket(user->getSocketID(), userID, imageName, image, user->getSessionEncryptionKey());
+            }
+        }
+
+
+    }
+        break;
+
+    default:
+        break;
+    }
+
+
+}
 
 
 UserInfo* ServerPacketsParser::logUserIn(const QString &userID, const QByteArray &encryptedPassword, IM::OnlineState loginState, IM::ErrorType *errorType){

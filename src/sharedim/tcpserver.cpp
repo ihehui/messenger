@@ -1,9 +1,7 @@
-
 #include <QDataStream>
 
 #include "tcpserver.h"
 
-#include "HHSharedNetwork/hpackethandlerbase.h"
 
 
 namespace HEHUI {
@@ -15,41 +13,45 @@ TCPServer::TCPServer(QObject *parent) :
 
 }
 
+TCPServer::~TCPServer(){
+    qDebug()<<"--TCPServer::~TCPServer()";
+}
+
 quint16 TCPServer::getTCPServerListeningPort(){
     quint16 port = 0;
     serverAddressInfo(0, &port);
     return port;
 }
 
-void TCPServer::processData(quint32 socketID, QByteArray *data){
+void TCPServer::processData(SOCKETID socketID, QByteArray *data){
 
     QString address;
     quint16 port;
     getAddressInfoFromSocket(socketID, &address, &port, true);
 
 
-    QDataStream in(data, QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_4_7);
-    QVariant v;
-    in >> v;
-    if (v.canConvert<Packet>()){
-        Packet *packet = PacketHandlerBase::getPacket();
-        *packet = v.value<Packet>();
-        packet->setTransmissionProtocol(TP_UDT);
-        packet->setSocketID(socketID);
+//    QDataStream in(data, QIODevice::ReadOnly);
+//    in.setVersion(QDataStream::Qt_4_8);
+//    QVariant v;
+//    in >> v;
+//    if (v.canConvert<PacketBase>()){
+//        PacketBase *packet = PacketHandlerBase::getPacket();
+//        *packet = v.value<PacketBase>();
+//        packet->setTransmissionProtocol(TP_UDT);
+//        packet->setSocketID(socketID);
 
+//        packet->setPeerHostAddress(QHostAddress(address));
+//        packet->setPeerHostPort(port);
 
-        packet->setPeerHostAddress(QHostAddress(address));
-        packet->setPeerHostPort(port);
-//        packet->setLocalHostAddress(m_udpSocket->localAddress());
-//        packet->setLocalHostPort(m_udpSocket->localPort());
+//        emit packetReceived(packet);
+//    }
 
-//        m_packetHandlerBase->appendIncomingPacket(packet);
-
+    PacketBase packet;
+    if(packet.fromByteArray(data)){
+        packet.setSocketID(socketID);
+        packet.setPeerHostAddress(QHostAddress(address));
+        packet.setPeerHostPort(port);
         emit packetReceived(packet);
-
-    }else{
-        qWarning()<<"ERROR! Can not convert TCP data to Packet!";
     }
 
 

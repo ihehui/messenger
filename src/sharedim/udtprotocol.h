@@ -2,7 +2,7 @@
 #define UDTPROTOCOL_H
 
 #include "HHSharedUDT/hudtprotocolbase.h"
-#include "HHSharedNetwork/hpacket.h"
+#include "HHSharedNetwork/PacketBase"
 
 #include "sharedimlib.h"
 
@@ -17,7 +17,7 @@ public:
     explicit UDTProtocol(bool stream = false, const SocketOptions *options = 0, QObject *parent = 0);
 
 signals:
-    void packetReceived(Packet *packet);
+    void packetReceived(const PacketBase &packet);
 
 public slots:
 //    bool sendData(UDTSOCKET socket, const QByteArray *byteArray);
@@ -31,7 +31,6 @@ private slots:
 
 private:
     inline void convertDataToPacket(UDTSOCKET socket, QByteArray *data);
-
 
 
     

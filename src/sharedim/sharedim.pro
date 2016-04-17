@@ -34,7 +34,9 @@ HEADERS += \
     imgroupbase.h \
     filetransmitter/filetransmissionmanager.h \
     filetransmitter/filetransmissionpacketsparser.h \
-    resourcesmanagerinstance.h
+    resourcesmanagerinstance.h \
+    impackets.h \
+    enetprotocol.h
 SOURCES += \
     imuserbase.cpp \
     udtprotocol.cpp \
@@ -47,7 +49,9 @@ SOURCES += \
     imgroupbase.cpp \
     filetransmitter/filetransmissionmanager.cpp \
     filetransmitter/filetransmissionpacketsparser.cpp \
-    resourcesmanagerinstance.cpp
+    resourcesmanagerinstance.cpp \
+    impackes.cpp \
+    enetprotocol.cpp
 FORMS += 
 RESOURCES += resources.qrc
 

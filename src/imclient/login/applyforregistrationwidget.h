@@ -39,7 +39,7 @@
 #include "../imuser.h"
 
 #include "../../sharedim/constants_global_shared.h"
-
+#include "../../sharedim/impackets.h"
 
 namespace HEHUI{
 
@@ -62,7 +62,8 @@ signals:
     void canceled();
         
 public slots:
-    void slotProcessRegistrationServerInfo(quint8 errorTypeCode, bool canRegister, const QString &extraMessage, quint8 regMode, const QString &regServerAddress, bool requireActivation);
+    void slotProcessRegistrationPacket(const RgeistrationPacket &packet);
+    void slotProcessRegistrationServerInfo(quint8 regMode, const QString &extraMessage, const QString &regServerAddress);
     void slotProcessRegistrationResult(quint8 errorTypeCode, quint32 sysID, const QString &message);
 
 private slots:
@@ -83,10 +84,6 @@ private:
     
     bool m_registrationModeInfoResponseReceived;
     bool m_registrationResultReceived;
-
-    IM::RegistrationMode m_registrationMode;
-    bool m_requireActivation;
-
 
 
 };

@@ -64,25 +64,6 @@ IMClientPacketsParser::IMClientPacketsParser(ClientResourcesManager *resourcesMa
     Q_ASSERT(m_tcpServer);
     connect(m_tcpServer, SIGNAL(packetReceived(Packet*)), this, SLOT(parseIncomingPacketData(Packet*)), Qt::QueuedConnection);
 
-
-
-    //    heartbeatTimer = 0;
-    //    processWaitingForReplyPacketsTimer = 0;
-
-    //packetHandlerBase = new PacketHandlerBase(this);
-    //m_packetHandlerBase = packetHandlerBase;
-
-
-    //    m_networkManager = ClientNetworkManager::instance();
-    //    connect(networkManager, SIGNAL(signalNewPacketReceived(Packet *)), this, SLOT(slotNewPacketReceived(Packet *)));
-    //    processingPackets = false;
-
-    //    localIPMCListeningAddress = NetworkManager::instance()->localIPMCListeningAddress();
-    //    localIPMCListeningPort = NetworkManager::instance()->localIPMCListeningPort();
-
-    
-
-
     //serverLastOnlineTime = QDateTime();
 
     myself = IMUser::instance();
@@ -104,777 +85,195 @@ IMClientPacketsParser::~IMClientPacketsParser() {
 
     QMutexLocker locker(&mutex);
 
-    //    if(heartbeatTimer){
-    //        qDebug()<<"----------------------------33333333";
-    //        heartbeatTimer->stop();
-    //        qDebug()<<"----------------------------44444444";
-    //    }
-    //    delete heartbeatTimer;
-    //    heartbeatTimer = 0;
-
-
-    //    if(processWaitingForReplyPacketsTimer){
-    //        processWaitingForReplyPacketsTimer->stop();
-    //    }
-    //    delete processWaitingForReplyPacketsTimer;
-    //    processWaitingForReplyPacketsTimer = 0;
-
-
     if(cryptography){
         delete cryptography;
         cryptography = 0;
     }
-
-
-    //networkManager = 0;
 
 }
 
 
 
 
-void IMClientPacketsParser::parseIncomingPacketData(Packet *packet){
+void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
 
-    //        if((packet->getTransmissionProtocol() == TP_UDP)
-    //            && (networkManager->isLocalAddress(packet->getPeerHostAddress()))
-    //            && (packet->getPeerHostPort() == localIPMCListeningPort)){
-    //            qDebug()<<"~~Packet is been discarded!";
-    //            return;
-    //        }else if((packet->getTransmissionProtocol() == TP_TCP)
-    //            && (packet->getPeerHostAddress() == networkManager->localTCPListeningAddress())
-    //            && (packet->getPeerHostPort() == networkManager->localTCPListeningPort())){
-    //            qDebug()<<"~~Packet is been discarded!";
-    //            return;
-    //        }
+    //QByteArray packetBody = packet.getPacketBody();
+    quint8 packetType = packet.getPacketType();
+    QString peerID = packet.getPeerID();
 
-    //    qDebug()<<"~~networkManager->localAddress():"<<networkManager->localTCPListeningAddress().toString();
-    //    qDebug()<<"~~packet->getPeerHostAddress():"<<packet->getPeerHostAddress();
-
-    QByteArray packetData = packet->getPacketData();
-    QDataStream in(&packetData, QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_4_8);
-
-    QString peerID = "";
-    in >> peerID;
-
-    QHostAddress peerAddress = packet->getPeerHostAddress();
-    quint16 peerPort = packet->getPeerHostPort();
-
-    quint8 packetType = packet->getPacketType();
-    int socketID = packet->getSocketID();
+    QHostAddress peerAddress = packet.getPeerHostAddress();
+    quint16 peerPort = packet.getPeerHostPort();
+    SOCKETID socketID = packet.getSocketID();
 
 
     switch(packetType){
-    //    case quint8(HEHUI::HeartbeatPacket):
-    //    {
-    //        QString contactID;
-    //        in >> contactID;
-    //        emit signalHeartbeatPacketReceived(contactID);
-    //        qDebug()<<"~~HeartbeatPacket--"<<" contactID:"<<contactID;
-    //    }
-    //    break;
-    //    case quint8(HEHUI::ConfirmationOfReceiptPacket):
-    //    {
-    //        quint16 packetSerialNumber1 = 0, packetSerialNumber2 = 0;
-    //        in >> packetSerialNumber1 >> packetSerialNumber2;
-    //        m_packetHandlerBase->removeWaitingForReplyPacket(packetSerialNumber1, packetSerialNumber2);
-    //        emit signalConfirmationOfReceiptPacketReceived(packetSerialNumber1, packetSerialNumber2);
-    //        //qDebug()<<"~~ConfirmationOfReceiptPacket:"<<packetSerialNumber;
-    //    }
-    //    break;
 
-    case quint8(IM::ForwardedDataByServer):
-    {
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray data;
-        stream >> data;
-
-        QDataStream ds(&data, QIODevice::ReadOnly);
-        ds.setVersion(QDataStream::Qt_4_8);
-        QVariant v;
-        ds >> v;
-        if (v.canConvert<Packet>()){
-            *packet = v.value<Packet>();
-            //packet->setTransmissionProtocol(TP_UDT);
-            packet->setSocketID(socketID);
-
-            //packet->setPeerHostAddress(QHostAddress(address));
-            //packet->setPeerHostPort(port);
-
-            parseIncomingPacketData(packet);
-        }
-
-
-        qDebug()<<"~~ForwardedDataByServer";
-    }
-        break;
-
-
-
-    case quint8(IM::ServerDeclare):
+    case quint8(IM::CMD_ServerDiscovery):
     {
 
-        quint16 port = 0;
-        QString version;
-        in >> port >> version;
-
-        //serverLastOnlineTime = QDateTime::currentDateTime();
-
-        emit signalServerDeclarePacketReceived(peerAddress.toString(), port, peerID, version);
+        ServerDiscoveryPacket p(packet, QByteArray());
+        emit signalServerDeclarePacketReceived(p);
 
         qWarning()<<"~~ServerDeclare"<<" serverAddress:"<<peerAddress.toString()<<" servername:"<<peerID <<" serverRTPListeningPort:"<<port;
     }
         break;
-    case quint8(IM::ServerOnline):
+
+    case quint8(IM::CMD_DataForward):
     {
-        quint16 port;
-        in >> port;
+        qDebug()<<"~~ForwardedDataByServer";
 
-        //serverLastOnlineTime = QDateTime::currentDateTime();
+        DataForwardPacket p(packet, sessionEncryptionKey);
 
-        emit signalServerOnlinePacketReceived(peerAddress.toString(), port, peerID);
-        qDebug()<<"~~ServerOnline";
+        PacketBase packet2;
+        if(packet2.fromByteArray(p.data)){
+            packet2.setSocketID(socketID);
+            parseIncomingPacketData(packet2);
+        }else{
+            qWarning()<<"ERROR! Can not convert data to Packet!";
+        }
+
     }
         break;
-    case quint8(IM::ServerOffline):
+
+    case quint8(IM::CMD_Announcement):
     {
-        quint16 port;
-        in >> port;
-
-        //        stopHeartbeat();
-
-        emit signalServerOfflinePacketReceived(peerAddress.toString(), port, peerID);
-        qWarning()<<"~~ServerOffline";
-    }
-        break;
-    case quint8(IM::ServerAnnouncement):
-    {
-
-        QString groupName, computerName, announcement;
-        quint8 mustRead;
-        in >> announcement >> mustRead;
-        emit signalServerAnnouncementPacketReceived(announcement, (mustRead == quint8(0))?false:true);
+        AnnouncementPacket p(packet, QByteArray());
+        emit signalServerAnnouncementPacketReceived(p.AnnouncementInfo.announcementID, (mustRead == quint8(0))?false:true);
         qDebug()<<"~~ServerAnnouncement"<<"groupName:"<<groupName<<"computerName:"<<computerName<<"announcement:"<<announcement<<"mustRead:"<<mustRead;
     }
         break;
 
-    case quint8(IM::SERVER_RESPONSE_CLIENT_REQUEST_REGISTRATION_SERVER_INFO):
+    case quint8(IM::CMD_Rgeistration):
     {
+        RgeistrationPacket p(packet, sessionEncryptionKey);
+        emit signalRegistrationPacketReceived(p);
+        qDebug()<<"~~CMD_Rgeistration";
+    }
+        break;
 
-        qWarning()<<"--SERVER_RESPONSE_CLIENT_REQUEST_REGISTRATION_SERVER_INFO";
+    case quint8(IM::CMD_UpdatePassword):
+    {
+        UpdatePasswordPacket p(packet, sessionEncryptionKey);
+        emit signalUpdatePasswordResultReceived(p);
+        qDebug()<<"--CMD_UpdatePassword";
+    }
+        break;
 
-        quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-        quint8 canRegister = 1;
-        QString extraMessage = "";
-        quint8 regMode = quint8(IM::RM_UserDefineAll);
-        QString regServerAddress = "";
-        quint8 requireActivation = 0;
-        in >> errorTypeCode >> extraMessage >> canRegister  >> regMode >> regServerAddress >> requireActivation;
-        emit signalRegistrationServerInfoReceived(errorTypeCode, canRegister, extraMessage, regMode, regServerAddress, requireActivation);
+    case quint8(IM::CMD_Login):
+    {
+        LoginPacket p(packet, sessionEncryptionKey);
+        processLoginPacket(p);
+        qDebug()<<"--CMD_Login";
+    }
+        break;
+
+    case quint8(IM::CMD_OnlineStateChanged):
+    {
+        OnlineStateChangedPacket p(packet, sessionEncryptionKey);
+        quint8 stateCode = p.stateCode;
+        QString contactID = p.contactID;
+        QString contactIP = p.contactIP;
+        quint16 contactPort = p.contactPort;
+
+        emit signalContactStateChangedPacketReceived(stateCode, contactID, contactIP, contactPort);
+        qDebug()<<"--CMD_OnlineStateChanged";
+    }
+        break;
+
+    case quint8(IM::CMD_OnlineContacts):
+    {
+        OnlineContacts p(packet, sessionEncryptionKey);
+        emit signalContactsOnlineInfoPacketReceived(p.contactsOnlineInfoString);
+        qDebug()<<"--CMD_OnlineContacts";
+    }
+        break;
+
+    case quint8(IM::CMD_ContactGroupsInfo):
+    {
+        ContactGroupsInfoPacket p(packet, sessionEncryptionKey);
+        emit signalContactGroupsInfoPacketReceived(p);
+
+        qDebug()<<"--CMD_ContactGroupsInfo";
+    }
+        break;
+
+    case quint8(IM::CMD_InterestGroupsInfo):
+    {
+        InterestGroupsInfoPacket p(packet, sessionEncryptionKey);
+        emit signalInterestGroupsInfoPacketReceived(p);
+    }
+        break;
+
+    case quint8(IM::CMD_ContactInfo):
+    {
+        ContactInfoPacket p(packet, sessionEncryptionKey);
+        emit signalContactInfoPacketReceived(p);
+        qDebug()<<"~~CMD_ContactInfo";
 
     }
         break;
 
-    case quint8(IM::SERVER_RESPONSE_CLIENT_REGISTRATION):
+    case quint8(IM::CMD_SearchInfo):
     {
-        
-        qWarning()<<"--SERVER_RESPONSE_CLIENT_REQUEST_REGISTRATION";
-        
-        quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-        quint32 sysID = 0;
-        QString message = "";
-        in >> errorTypeCode >> sysID >> message;
-        emit signalRegistrationResultReceived(errorTypeCode, sysID, message);
-        
+        SearchInfoPacket p(packet, sessionEncryptionKey);
+        emit signalSearchContactsResultPacketReceived(p);
+        qDebug()<<"~~CMD_SearchInfo";
     }
         break;
 
-    case quint8(IM::SERVER_RESPONSE_CLIENT_REQUEST_UPDATE_PASSWORD):
-    {
-        
-        qWarning()<<"--SERVER_RESPONSE_CLIENT_REQUEST_UPDATE_PASSWORD";
-        
-
-        quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-        QString message = "";
-        in >> errorTypeCode >> message;
-        emit signalUpdatePasswordResultReceived(errorTypeCode, message);
-        
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_CLIENT_REQUEST_LOGIN):
+    case quint8(IM::CMD_ChatMessage):
     {
 
-        quint8 requestLoginResultCode = 0;
-        in >> requestLoginResultCode;
-        if(requestLoginResultCode){
-            QString serverAddress = "";
-            quint16 serverPort = 0;
-            in >> serverAddress >> serverPort;
-            if( serverPort == 0 || ((serverAddress == peerAddress.toString()) && (serverPort == peerPort)) ){
-                if(!login(socketID)){
-                   emit signalLoginResultReceived(quint8(IM::ERROR_UnKnownError));
-                }
-            }else{
-                emit signalLoginServerRedirected(serverAddress, serverPort, peerID);
-            }
-        }else{
-            quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-            in >> errorTypeCode;
-            emit signalLoginResultReceived(errorTypeCode);
-
-        }
-
-        qDebug()<<"--SERVER_RESPONSE_CLIENT_REQUEST_LOGIN";
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_CLIENT_LOGIN_REDIRECTION):
-    {
-
-        QString serverAddress = "";
-        quint16 serverPort = 0;
-        in >> serverAddress >> serverPort;
-
-        emit signalLoginServerRedirected(serverAddress, serverPort, peerID);
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_CLIENT_LOGIN_RESULT):
-    {
-
-        quint8 loginResultCode = 10;
-        in >> loginResultCode;
-        quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-        QString errorMessage = "";
-
-        if(loginResultCode){
-
-            m_serverName = peerID;
-            m_socketConnectedToServer = socketID;
-
-            QByteArray encryptedData;
-            in >> encryptedData ;
-
-            QByteArray decryptedData;
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-            //TODO
-            QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-            stream.setVersion(QDataStream::Qt_4_8);
-
-            quint32 personalSummaryInfoVersionOnServer = 1, personalDetailInfoVersionOnServer = 1, personalContactGroupsInfoVersionOnServer = 1, interestGroupsInfoVersionOnServer = 1, personalMessageInfoVersionOnServer = 1;
-            uint serverTime = 0;
-            stream >> sessionEncryptionKey >> personalSummaryInfoVersionOnServer >> personalDetailInfoVersionOnServer >> personalContactGroupsInfoVersionOnServer >> interestGroupsInfoVersionOnServer >> personalMessageInfoVersionOnServer >> serverTime;
-
-            Q_ASSERT(serverTime);
-            ServerTime::instance()->startSync(serverTime);
-
-            myself->setSessionEncryptionKey(sessionEncryptionKey);
-
-            errorTypeCode = quint8(IM::ERROR_NoError);
-            errorMessage = "";
-
-            //TODO:
-            myself->loadMyInfoFromLocalDatabase();
-
-            if(personalSummaryInfoVersionOnServer != myself->getPersonalSummaryInfoVersion()){requestContactInfo(socketID, m_myUserID, true);}
-            if(personalDetailInfoVersionOnServer != myself->getPersonalDetailInfoVersion()){requestContactInfo(socketID, m_myUserID, false);}
-//            if(personalContactGroupsInfoVersionOnServer != user->getPersonalContactGroupsVersion()){requestPersonalContactGroupsInfo(socketID);}
-            if(interestGroupsInfoVersionOnServer != myself->getInterestGroupInfoVersion()){requestInterestGroupsList(socketID);}
-            if(personalMessageInfoVersionOnServer != myself->getPersonalMessageInfoVersion()){requestPersonalMessage(socketID, m_myUserID);}
-
-        }else{
-            in >> errorTypeCode >> errorMessage;
-        }
-
-        emit signalLoginResultReceived(errorTypeCode, errorMessage);
-
-
-        qDebug()<<"--SERVER_RESPONSE_CLIENT_LOGIN_RESULT";
-
-    }
-        break;
-
-    case quint8(IM::CLIENT_LAST_LOGIN_INFO):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString extIPAddress = "", loginTime = "", LogoutTime = "", deviceInfo = "";
-        stream >> extIPAddress >> loginTime >> LogoutTime >> deviceInfo;
-        myself->setLastLoginExternalHostAddress(extIPAddress);
-        myself->setLastLoginTime(QDateTime::fromString(loginTime));
-        myself->setLastLogoutTime(QDateTime::fromString(LogoutTime));
-        myself->setLastLoginDeviceInfo(deviceInfo);
-        //TODO
-
-        emit signalClientLastLoginInfoPacketReceived(extIPAddress, loginTime, LogoutTime, deviceInfo);
-
-        qDebug()<<"--CLIENT_LAST_LOGIN_INFO";
-    }
-        break;
-
-    case quint8(IM::ONLINE_STATE_CHANGED):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString contactID = "", contactHostAddress = "";
-        quint16 contactHostPort = 0;
-        quint8 stateCode = quint8(IM::ONLINESTATE_OFFLINE);
-        stream >> contactID >> stateCode >> contactHostAddress >> contactHostPort;
-
-        //emit signalContactStateChangedPacketReceived(contactID, IM::OnlineState(stateCode), contactHostAddress, contactHostPort);
-        emit signalContactStateChangedPacketReceived(contactID, stateCode, contactHostAddress, contactHostPort);
-
-        qWarning()<<"--ONLINE_STATE_CHANGED";
-    }
-        break;
-
-    case quint8(IM::CONTACTS_ONLINE_INFO):
-    {
-        qWarning()<<"--CONTACTS_ONLINE_INFO";
-
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString contactsOnlineInfoString = "";
-        stream >> contactsOnlineInfoString;
-
-
-
-        emit signalContactsOnlineInfoPacketReceived(contactsOnlineInfoString);
-
-    }
-        break;
-
-
-    case quint8(IM::SERVER_RESPONSE_USER_INFO):
-    {
-        qDebug()<<"--SERVER_RESPONSE_USER_SUMMARY_INFO";
-        
-
-        //TODO:
-        QString userID = "";
-        QByteArray encryptedData;
-        in >> userID >> encryptedData;
-
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString userInfo = "";
-        quint8 isSummaryInfo = 1;
-        stream >> userInfo >> isSummaryInfo;
-        
-        if(userID == myself->getUserID()){
-            myself->setPersonalInfoString(userInfo, isSummaryInfo);
-            myself->saveMyInfoToLocalDatabase();
-        }else{
-            myself->setContactInfoString(userID, userInfo, isSummaryInfo);
-            myself->saveContactInfoToLocalDatabase(userID);
-        }
-
-        emit signalUserInfoPacketReceived(userID);
-
-    }
-        break;
-
-    case quint8(IM::CONTACT_GROUPS_INFO):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString groupsInfo = "";
-        quint32 personalContactGroupsInfoVersionOnServer = 1;
-        stream >> groupsInfo >> personalContactGroupsInfoVersionOnServer;
-        
-        //TODO: Save the data
-
-        emit signalContactGroupsInfoPacketReceived(groupsInfo, personalContactGroupsInfoVersionOnServer);
-        
-        qDebug()<<"--CONTACT_GROUPS_INFO";
-
-    }
-        break;
-
-    case quint8(IM::CONTACTS_INFO_VERSION):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString contactsInfoVersionString = "";
-        quint32 contactGroupsInfoVersionOnServer = 1;
-        stream >> contactsInfoVersionString >> contactGroupsInfoVersionOnServer;
-
-        emit signalContactsInfoVersionPacketReceived(contactsInfoVersionString, contactGroupsInfoVersionOnServer);
-
-        qDebug()<<"--CONTACTS_INFO_VERSION";
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_CREATE_OR_DELETE_CONTACT_GROUP):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        quint32 groupID = 0;
-        QString groupName = "";
-        quint8 createGroup = 1, result = 0;
-        quint32 contactGroupsVersionOnServer = 1;
-        stream >> groupID >> groupName >> createGroup >> result >> contactGroupsVersionOnServer;
-
-        emit signalCreateOrDeleteContactGroupResultPacketReceived(groupID, groupName, createGroup, result);
-
-//        if(contactGroupsVersionOnServer != (user->getPersonalContactGroupsVersion() + 1) ){
-//            requestPersonalContactGroupsInfo(socketID);
+//        bool fromContact = myself->hasContact(peerID);
+//        if(fromContact){
+//            //From contact
+//        }else{
+//            //From server
 //        }
 
-        qWarning()<<"--SERVER_RESPONSE_CREATE_OR_DELETE_CONTACT_GROUP";
 
+        if(peerID == m_serverName){
+            //FROM SERVER
+            ChatMessagePacket p(packet, sessionEncryptionKey);
+            emit signalChatMessageReceivedFromContact(p);
+
+            qDebug()<<"Chat message from server!";
+        }else{
+            //FROM CONTACT
+            ChatMessagePacket p(packet, sessionEncryptionKeyWithContactHash.value(peerID));
+            emit signalChatMessageReceivedFromContact(p);
+
+            qDebug()<<"Chat message from contact!";
+        }
+
+        //emit signalChatMessageReceivedFromContact(p);
     }
         break;
 
 
-    case quint8(IM::SERVER_RESPONSE_SEARCH_CONTACTS):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString result = "";
-        stream >> result;
-
-        emit signalSearchContactsResultPacketReceived(result);
-
-        qWarning()<<"--SERVER_RESPONSE_SEARCH_CONTACTS";
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_SEARCH_INTERESTGROUPS):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString result = "";
-        stream >> result;
-
-        emit signalSearchInterestGroupsResultPacketReceived(result);
-
-        qWarning()<<"--SERVER_RESPONSE_SEARCH_INTERESTGROUPS";
-    }
-        break;
-
-    case quint8(IM::USER_REQUEST_JOIN_INTERESTGROUP):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        quint32 groupID = 0;
-        QString verificationMessage = "", userID = "", nickName = "", face = "";
-        stream >> groupID >> verificationMessage >> userID >> nickName >> face;
 
-        emit signalUserRequestJoinInterestGroupsPacketReceived(groupID, verificationMessage, userID, nickName, face);
 
-        qWarning()<<"--User_REQUEST_JOIN_INTERESTGROUP";
-    }
-        break;
 
-    case quint8(IM::SERVER_RESPONSE_JOIN_OR_QUIT_INTERESTGROUP):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
 
-        quint32 groupID = 0;
-        QString memberID = "";
-        quint8 join = 0;
-        stream >> groupID >> memberID >> join;
 
-        emit signalUserJoinOrQuitInterestGroupPacketReceived(groupID, memberID, join);
 
-        qWarning()<<"--SERVER_RESPONSE_JOIN_OR_QUIT_INTERESTGROUP";
-    }
-        break;
 
-    case quint8(IM::CLIENT_REQUEST_ADD_CONTACT):
-    {
 
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString userID = "", userNickName = "", userFace = "", verificationMessage = "";
-        stream >> userID >> userNickName >> userFace >> verificationMessage;
 
-        emit signalAddContactRequestFromUserPacketReceived(userID, userNickName, userFace, verificationMessage);
-        
-    }
-        break;
 
-    case quint8(IM::CLIENT_RESPONSE_ADD_CONTACT_REQUEST):
-    {
 
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString userID = "", userNickName = "", userFace = "", reasonMessage = "";
-        quint8 errorTypeCode = quint8(IM::ERROR_UnKnownError);
-        int contactGroupID = ContactGroupBase::Group_Strangers_ID;
-        quint8 onlineStateCode = quint8(IM::ONLINESTATE_OFFLINE);
 
-        stream >> userID >> userNickName >> userFace >> contactGroupID >> errorTypeCode >> reasonMessage >> onlineStateCode;
 
-        emit signalAddContactResultPacketReceived(userID, userNickName, userFace, contactGroupID, errorTypeCode, reasonMessage, onlineStateCode);
-        
-    }
-        break;
 
-    case quint8(IM::SERVER_RESPONSE_DELETE_CONTACT):
-    {
 
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString contactID = "";
-        quint8 contactDeleted = 0, addToBlacklist = 0;
 
-        stream >> contactID >> contactDeleted >> addToBlacklist;
 
-        emit signalDeleteContactResultPacketReceived(contactID, contactDeleted, addToBlacklist);
 
-    }
-        break;
-
-
-    case quint8(IM::SERVER_RESPONSE_INTEREST_GROUPS_LIST):
-    {
-        qDebug()<<"--SERVER_RESPONSE_INTEREST_GROUPS_LIST";
-
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString interestGroupsListOnServerForUser = "";
-        quint32 interestGroupsInfoVersionOnServer = 1;
-
-        stream >> interestGroupsListOnServerForUser >> interestGroupsInfoVersionOnServer;
-
-        emit signalInterestGroupsListPacketReceived(interestGroupsListOnServerForUser, interestGroupsInfoVersionOnServer);
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_INTEREST_GROUP_INFO):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        quint32 groupID = 0;
-        QString interestGroupInfoStringFromServer = "";
-
-        stream >> interestGroupInfoStringFromServer >> groupID;
-
-        emit signalInterestGroupInfoPacketReceived(interestGroupInfoStringFromServer, groupID);
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_INTEREST_GROUP_MEMBERS_INFO):
-    {
-        qWarning()<<"----SERVER_RESPONSE_INTEREST_GROUP_MEMBERS_INFO";
-
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString interestGroupMembersInfoStringFromServer = "";
-        quint32 interestGroupMembersInfoVersionOnServer = 0, groupID = 0;
-
-        stream >> interestGroupMembersInfoStringFromServer >> interestGroupMembersInfoVersionOnServer >> groupID;
-
-        emit signalInterestGroupMembersInfoPacketReceived(interestGroupMembersInfoStringFromServer, interestGroupMembersInfoVersionOnServer, groupID);
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_CREATE_INTEREST_GROUP):
-    {
-        qWarning()<<"----SERVER_RESPONSE_CREATE_INTEREST_GROUP";
-
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        quint32 groupID = 0;
-        QString groupName = "";
-        stream >> groupID >> groupName ;
-
-        emit signalCreateInterestGroupResultPacketReceived(groupID, groupName);
-
-    }
-        break;
-
-    case quint8(IM::SERVER_RESPONSE_DISBAND_INTEREST_GROUP):
-    {
-        qWarning()<<"----SERVER_RESPONSE_DISBAND_INTEREST_GROUP";
-
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        quint32 groupID = 0;
-        quint8 result = 0;
-        stream >> groupID >> result ;
-
-        emit signalDisbandInterestGroupResultPacketReceived(groupID, result);
-
-    }
-        break;
-
-
-    case quint8(IM::SERVER_RESPONSE_PERSONAL_MESSAGE_INFO):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString userID = "", personalMessage = "";
-
-        stream >> userID >> personalMessage;
-
-        emit signalPersonalMessagePacketReceived(userID, personalMessage);
-
-    }
-        break;
 
 
     case quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT):
@@ -897,161 +296,11 @@ void IMClientPacketsParser::parseIncomingPacketData(Packet *packet){
     }
         break;
 
-    case quint8(IM::CHAT_MESSAGE_FROM_CONTACT):
-    {
-
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        if(peerID == m_serverName){
-            //FROM SERVER
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-            qDebug()<<"Chat message from server!";
-        }else{
-            //FROM CONTACT
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(peerID), false);
-            qDebug()<<"Chat message from contact!";
-        }
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString contactID = "", message = "";
-        stream  >> contactID >> message;
-
-        emit signalChatMessageReceivedFromContact(contactID, message, ServerTime::instance()->timeString());
-
-    }
-        break;
-
-    case quint8(IM::CHAT_MESSAGES_CACHED_ON_SERVER):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString messagesString = "";
-        stream >> messagesString;
-
-        emit signalChatMessageCachedOnServerReceived(messagesString.split(QString(UNIT_SEPARTOR)));
-
-    }
-        break;
-
-    case quint8(IM::REQUEST_CHAT_IMAGE):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        bool fromContact = myself->hasContact(peerID);
-        if(fromContact){
-            //From contact
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(peerID), false);
-        }else{
-            //From server
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        }
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
 
 
-        QString imageName = "", contactID = "";
-        stream >> imageName >> contactID;
-
-        emit signalImageDownloadRequestReceived(contactID, imageName);
-    }
-        break;
-
-    case quint8(IM::CHAT_IMAGE):
-    {
-        //TODO:
 
 
-        QByteArray encryptedData;
-        in >> encryptedData;
 
-        QByteArray decryptedData;
-        bool fromContact = myself->hasContact(peerID);
-        if(fromContact){
-            //From contact
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(peerID), false);
-        }else{
-            //From server
-            cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        }
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-
-        QString imageName = "";
-        QByteArray image;
-
-        stream >> imageName >> image;
-
-        QString contactID = "";
-        if(fromContact){
-            contactID = peerID;
-        }else{
-            stream >> contactID;
-        }
-
-
-        emit signalImageDownloadResultReceived(contactID, imageName, image);
-    }
-        break;
-
-
-    case quint8(IM::GROUP_CHAT_MESSAGES_CACHED_ON_SERVER):
-    {
-        //TODO:
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString messagesString = "";
-        stream >> messagesString;
-
-        emit signalInterestGroupChatMessagesCachedOnServerReceived(messagesString.split(QString(UNIT_SEPARTOR)));
-
-    }
-        break;
-
-    case quint8(IM::GROUP_CHAT_MESSAGE_FROM_SERVER):
-    {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        quint32 interestGroupID = 0;
-        QString senderID = "", message = "";
-        stream  >> interestGroupID >> senderID >> message;
-
-        emit signalInterestGroupChatMessageReceivedFromContact(interestGroupID, senderID, message, ServerTime::instance()->timeString());
-
-    }
-        break;
 
 
         //File TX
@@ -1383,8 +632,92 @@ QStringList IMClientPacketsParser::runningNICAddresses(){
 
 }
 
+void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet){
+
+    LoginPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO:
+    {
+        QString serverAddress = packet.LoginServerInfo.serverAddress;
+        quint16 serverPort = packet.LoginServerInfo.serverPort;
+        if( serverPort == 0 || ((serverAddress == peerAddress.toString()) && (serverPort == peerPort)) ){
+            if(!login(socketID)){
+                emit signalLoginResultReceived(quint8(IM::ERROR_UnKnownError));
+            }
+        }else{
+            emit signalLoginServerRedirected(serverAddress, serverPort, peerID);
+        }
+    }
+        break;
+    case LoginPacket::INFO_TYPE_CAPTCHA:
+    {
+        //out << CaptchaInfo.type << CaptchaInfo.captchaImage << CaptchaInfo.captcha << CaptchaInfo.authResult;
+    }
+        break;
+    case LoginPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT:
+    {
+    }
+        break;
+
+    case LoginPacket::INFO_TYPE_LOGIN_RESULT:
+    {
+        quint8 loginResultCode = packet.AuthResultInfo.loggedin;
+        quint8 errorTypeCode = packet.AuthResultInfo.errorType;
+        QString errorMessage = "";
+
+        if(loginResultCode){
+
+            m_serverName = peerID;
+            m_socketConnectedToServer = socketID;
+
+            uint serverTime = packet.AuthResultInfo.serverTime;
+            Q_ASSERT(serverTime);
+            ServerTime::instance()->startSync(serverTime);
+
+            myself->setSessionEncryptionKey(packet.AuthResultInfo.sessionEncryptionKey);
+            //TODO:
+            myself->loadMyInfoFromLocalDatabase();
 
 
+            quint32 personalSummaryInfoVersionOnServer = packet.AuthResultInfo.personalSummaryInfoVersionOnServer;
+            quint32 personalDetailInfoVersionOnServer = packet.AuthResultInfo.personalDetailInfoVersionOnServer;
+            quint32 personalContactGroupsInfoVersionOnServer = packet.AuthResultInfo.personalContactGroupsInfoVersionOnServer;
+            quint32 interestGroupsInfoVersionOnServer = packet.AuthResultInfo.interestGroupsInfoVersionOnServer;
+            quint32 personalMessageInfoVersionOnServer = packet.AuthResultInfo.personalMessageInfoVersionOnServer;
+            if(personalSummaryInfoVersionOnServer != myself->getPersonalSummaryInfoVersion()){requestContactInfo(socketID, m_myUserID, true);}
+            if(personalDetailInfoVersionOnServer != myself->getPersonalDetailInfoVersion()){requestContactInfo(socketID, m_myUserID, false);}
+//            if(personalContactGroupsInfoVersionOnServer != user->getPersonalContactGroupsVersion()){requestPersonalContactGroupsInfo(socketID);}
+            if(interestGroupsInfoVersionOnServer != myself->getInterestGroupInfoVersion()){requestInterestGroupsList(socketID);}
+            if(personalMessageInfoVersionOnServer != myself->getPersonalMessageInfoVersion()){requestPersonalMessage(socketID, m_myUserID);}
+
+        }
+
+        emit signalLoginResultReceived(errorTypeCode, errorMessage);
+
+    }
+        break;
+
+    case LoginPacket::INFO_TYPE_PREVIOUS_LOGIN_INFO:
+    {
+        QString extIPAddress = packet.PreviousLoginInfo.loginIP;
+        QDateTime loginTime = QDateTime::fromTime_t(packet.PreviousLoginInfo.loginTime);
+        QDateTime LogoutTime = QDateTime::fromTime_t(packet.PreviousLoginInfo.logoutTime);
+        QString deviceInfo = packet.PreviousLoginInfo.deviceInfo;
+
+        myself->setLastLoginExternalHostAddress(extIPAddress);
+        myself->setLastLoginTime(loginTime);
+        myself->setLastLogoutTime(LogoutTime);
+        myself->setLastLoginDeviceInfo(deviceInfo);
+        //TODO
+        emit signalClientLastLoginInfoPacketReceived(extIPAddress, loginTime.toString(), LogoutTime.toString(), deviceInfo);
+    }
+        break;
+
+    default:
+        break;
+    }
+
+}
 
 
 

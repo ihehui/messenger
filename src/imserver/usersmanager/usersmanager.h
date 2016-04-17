@@ -55,6 +55,12 @@ public:
     UsersManager(QObject *parent = 0);
     virtual ~UsersManager();
 
+    static quint8 activationMode();
+    static void setActivationMode(quint8 mode);
+
+    static quint8 passwordUpdateAuthMode();
+    static quint8 setPasswordUpdateAuthMode(quint8 mode);
+
 
     UserInfo* getUserInfo(const QString &imUserID);
     UserInfo* getCachedUserInfo(const QString &imUserID);
@@ -69,7 +75,7 @@ public:
     void getUserLoginServer(const QString &userID, QHostAddress *serverAddress, quint16 *serverPort);
 //    UserInfo* logUserIn(const QString &userID, const QByteArray &encryptedPassword, IM::OnlineState loginState, IM::ErrorType *errorType);
     
-    bool registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID, QString *message = 0);
+    bool registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID);
     void updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
 
     QString searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
@@ -105,7 +111,7 @@ public:
     
 /////////////////////////// Group Manager ////////////////////////////////////////    
     InterestGroup* getInterestGroup(quint32 groupID);
-    quint32 createNewInterestGroup(UserInfo* creatorInfo, const QString &groupName);
+    quint32 createNewInterestGroup(UserInfo* creatorInfo, const QString &groupName, quint8 type);
     bool disbandInterestGroup(UserInfo* creatorInfo, quint32 groupID);
     bool memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGroup *group, bool join);
 
@@ -183,6 +189,9 @@ private slots:
 
 private:
 
+    static quint8 m_activationMode;
+    static quint8 m_passwordUpdateAuthMode;
+
 
     static QMutex *onlineUserMutex;
     static QHash<QString/*User ID*/, UserInfo*> *onlineUserInfoHash;
@@ -198,6 +207,7 @@ private:
     
     static QMutex *groupMutex;
     static QHash<quint32/*Group ID*/, InterestGroup*> *m_interestGroupHash;
+
 
 
 };

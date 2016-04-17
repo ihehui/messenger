@@ -7,8 +7,8 @@ QT += core \
     sql \
     network \
     xml \
-    webkit \
-    webkitwidgets
+    webengine
+
 qtHaveModule(printsupport): QT += printsupport
 
 

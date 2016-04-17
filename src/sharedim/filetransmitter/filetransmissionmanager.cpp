@@ -168,7 +168,7 @@ void FileTransmissionManagerBase::requestUploadFilesToPeer(int socketID, const Q
             continue ;
         }
 
-        bool ok = m_fileTransmissionPacketsParser->requestUploadFile(socketID, peerID, info->md5sum, fi.fileName(), info->size, remoteDir);
+        bool ok = m_fileTransmissionPacketsParser->requestUploadFile(socketID, info->md5sum, fi.fileName(), info->size, remoteDir);
         if(!ok){
             tryToCloseFile(peerID, info->md5sum);
             qCritical()<<tr("ERROR! Can not send file! %1").arg(m_fileTransmissionPacketsParser->lastErrorMessage());
@@ -190,7 +190,7 @@ void FileTransmissionManagerBase::cancelUploadFileRequest(int socketID, const QS
     }
 
 
-    m_fileTransmissionPacketsParser->cancelUploadFileRequest(socketID, peerID, fileMD5Sum);
+    m_fileTransmissionPacketsParser->stopFileTX(socketID, fileMD5Sum);
     tryToCloseFile(peerID, fileMD5Sum);
 
 }
@@ -203,12 +203,10 @@ void FileTransmissionManagerBase::requestDownloadFilesFromPeer(int socketID, con
         return;
     }
 
-
-
     startFileManager();
 
     foreach (QString remoteFileName, remoteFiles) {
-        bool ok = m_fileTransmissionPacketsParser->requestDownloadFile(socketID, peerID, remoteBaseDir + QDir::separator() + remoteFileName);
+        bool ok = m_fileTransmissionPacketsParser->requestDownloadFile(socketID, peerID, remoteBaseDir + QDir::separator() + remoteFileName, localDir);
         if(!ok){
             qCritical()<<tr("ERROR! Can not send file download request!");
             continue ;
@@ -226,9 +224,7 @@ void FileTransmissionManagerBase::cancelDownloadFileRequest(int socketID, const 
         return;
     }
 
-
-    m_fileTransmissionPacketsParser->cancelDownloadFileRequest(socketID, peerID, remoteFileName);
-
+    m_fileTransmissionPacketsParser->stopFileTX(socketID, remoteFileName, QByteArray());
 }
 
 void FileTransmissionManagerBase::acceptFileUploadRequest(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, quint64 size, const QString &localSavePath){

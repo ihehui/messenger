@@ -4,7 +4,7 @@
 #include "sharedimlib.h"
 
 #include "HHSharedNetwork/htcpbase.h"
-#include "HHSharedNetwork/hpacket.h"
+#include "HHSharedNetwork/PacketBase"
 
 namespace HEHUI {
 
@@ -13,16 +13,17 @@ class SHAREDIMLIB_API TCPServer : public TCPBase
     Q_OBJECT
 public:
     explicit TCPServer(QObject *parent = 0);
+    ~TCPServer();
 
     quint16 getTCPServerListeningPort();
 
 signals:
-    void packetReceived(Packet *packet);
+    void packetReceived(const PacketBase &packet);
 
 
 
 private:
-    void processData(quint32 socketID, QByteArray *data);
+    void processData(SOCKETID socketID, QByteArray *data);
 
 
 

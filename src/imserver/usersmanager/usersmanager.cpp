@@ -57,6 +57,10 @@ namespace HEHUI {
 //QHash<QString, IMUserBase*> UsersManager::imUsersHash = QHash<QString, IMUserBase*>();
 //QTimer * UsersManager::timer = new QTimer();
 
+quint8 UsersManager::m_activationMode = 0;
+quint8 UsersManager::m_passwordUpdateAuthMode = 0;
+
+
 QMutex * UsersManager::onlineUserMutex = new QMutex();
 QHash<QString/*User ID*/, UserInfo*> * UsersManager::onlineUserInfoHash = new QHash<QString, UserInfo*> ();
 QMutex * UsersManager::offlineUserMutex = new QMutex();
@@ -79,7 +83,21 @@ UsersManager::~UsersManager() {
     
 }
 
+quint8 UsersManager::activationMode(){
+    return m_activationMode;
+}
 
+void UsersManager::setActivationMode(quint8 mode){
+    m_activationMode = mode;
+}
+
+quint8 UsersManager::passwordUpdateAuthMode(){
+    return m_passwordUpdateAuthMode;
+}
+
+quint8 UsersManager::setPasswordUpdateAuthMode(quint8 mode){
+    m_passwordUpdateAuthMode = mode;
+}
 
 UserInfo* UsersManager::getUserInfo(const QString &imUserID){
     
@@ -259,8 +277,9 @@ void UsersManager::getUserLoginServer(const QString &userID, QHostAddress *serve
 //    return userInfo;
 //}
 
-bool UsersManager::registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID, QString *message){
+bool UsersManager::registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID){
     
+    //TODO
     
     UserInfo *userInfo = getUserInfo(userID);
     if(userInfo){
@@ -308,8 +327,6 @@ bool UsersManager::registerNewUser(const QString &userID, const QString &passwor
             return false;
         }
     }
-
-
     
     userInfo = getUserInfo(userID);
     if(!userInfo){
@@ -1858,7 +1875,7 @@ InterestGroup* UsersManager::getInterestGroup(quint32 groupID){
 
 }
 
-quint32 UsersManager::createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName){
+quint32 UsersManager::createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName, quint8 type){
     qDebug()<<"UsersManager::createNewInterestGroup(...) "<<" creatorID:"<<creatorInfo->getUserID()<<" groupName:"<<groupName;
 
     if(!creatorInfo){return 0;}

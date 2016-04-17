@@ -148,10 +148,13 @@ bool ServerManagerWindow::isIPAddressValid(){
 
 }
 
-void ServerManagerWindow::serverFound(const QString &serverAddress, quint16 serverRTPListeningPort, const QString &serverName, const QString &version){
+void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet){
+
+    QString serverAddress = packet.getPeerHostAddress().toString();
+    quint16 serverRTPListeningPort = packet.rtpPort;
 
     qWarning();
-    qWarning()<<"Server Found!"<<" Address:"<<serverAddress<<" RTP Port:"<<serverRTPListeningPort<<" Name:"<<serverName<<" Version:"<<version;
+    qWarning()<<"Server Found!"<<" Address:"<<serverAddress<<" RTP Port:"<<serverRTPListeningPort<<" Name:"<<packet.getPeerID()<<" Version:"<<packet.version;
     qWarning();
 
     ServerInfo *info;
@@ -164,31 +167,18 @@ void ServerManagerWindow::serverFound(const QString &serverAddress, quint16 serv
     info->setCurState(ServerInfo::TestOK);
     serversHash[serverAddress] = info;
 
-
     updateModel();
-
 
 }
 
 void ServerManagerWindow::slotRequestForLANServer(const QString &ip, quint16 port){
     ui.toolButtonSearchServer->setEnabled(false);
     ui.toolButtonTestServers->setEnabled(false);
-    //	serversHash.clear();
-    //	updateModel();
 
-    //        if(!clientPacketsParser){
-    //            clientPacketsParser = new ClientPacketsParser(this);
-    //        }
-    //        clientPacketsParser->sendClientLookForServerPacket(QHostAddress(ip), port);
     emit signalLookForServer(QHostAddress(ip), port);
 }
 
 void ServerManagerWindow::slotTestServers(){
-
-    //    if(!clientPacketsParser){
-    //        clientPacketsParser = new ClientPacketsParser(this);
-    //        connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const QString&, quint16, quint16, const QString&, const QString&)), this, SLOT(serverFound(const QString& , quint16, quint16, const QString&, const QString&)), Qt::QueuedConnection);
-    //    }
 
     ui.toolButtonTestServers->setEnabled(false);
     foreach(ServerInfo *info, serversHash.values()){

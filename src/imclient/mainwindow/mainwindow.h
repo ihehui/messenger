@@ -57,6 +57,9 @@ signals:
     void signalContactOnlineStateChanged(const QString &contactID, quint8 onlineStateCode);
     void signalServerOnlineStateChanged(bool online);
 
+    void signalDeleteContactResultPacketReceived(const QString &contactID, bool contactDeleted, bool addToBlacklist = false);
+    void signalSearchContactsResultPacketReceived(const QString &result);
+
 
 public slots:
     void slotIconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -114,7 +117,6 @@ private slots:
     //void slotProcessSearchContactsResult(const QString &users);
     void slotProcessAddContactResult(const QString &contactID, const QString &userNickName, const QString &userFace, int contactGroupID, quint8 errorTypeCode, const QString &reasonMessage, quint8 onlineStateCode);
     void getNewContactSettings(const QString &contactID);
-    void slotProcessPersonalMessage(const QString &userID, const QString &message);
 
     void slotSearch();
     void searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
@@ -138,6 +140,22 @@ private slots:
 
     void slotSendChatMessageToContact(Contact *contact, const QString &message, const QStringList &imageNameList);
     void slotSendChatMessageToInterestGroup(InterestGroup *interestGroup, const QString &message, const QStringList &imageList);
+
+
+
+
+
+
+    void processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet);
+    void processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet);
+    void processContactInfoPacket(const ContactInfoPacket &packet);
+    void processSearchInfoPacket(const SearchInfoPacket &packet);
+    void processChatMessagePacket(const ChatMessagePacket &packet);
+
+
+
+
+
 
 
     void slotProcessInterestGroupsList(const QString &interestGroupsListFromServer, quint32 interestGroupsInfoVersionOnServer);
@@ -202,18 +220,6 @@ private slots:
     void slotAcceptPeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5, const QString &localSavePath);
     void slotDeclinePeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5);
 
-
-    //File TX
-
-
-//    void processFileDataRequestPacket(int socketID, const QString &contactID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex);
-//    void processFileDataReceivedPacket(int socketID, const QString &contactID, const QByteArray &fileMD5, int pieceIndex, const QByteArray &data, const QByteArray &sha1);
-//    void processFileTXStatusChangedPacket(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 status);
-//    void processFileTXErrorFromPeer(int socketID, const QString &contactID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString);
-
-//    void fileDataRead(int requestID, const QByteArray &fileMD5, int pieceIndex, const QByteArray &data, const QByteArray &dataSHA1SUM);
-//    void fileTXError(int requestID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString);
-//    void pieceVerified(const QByteArray &fileMD5, int pieceIndex, bool verified, int verificationProgress);
 
 
 private:

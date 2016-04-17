@@ -333,8 +333,8 @@ void LoginWidget::on_toolButtonApplyForRegistration_clicked(){
     QVBoxLayout vbl(&dlg);
     
     ApplyForRegistrationWidget rw(&dlg);
-    connect(this, SIGNAL(signalRegistrationServerInfoReceived(quint8, bool, const QString &, quint8, const QString &, bool)), &rw, SLOT(slotProcessRegistrationServerInfo(quint8, bool, const QString &, quint8, const QString &, bool))/*, Qt::QueuedConnection*/);
-    connect(this, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString&)), &rw, SLOT(slotProcessRegistrationResult(quint8, quint32, const QString&))/*, Qt::QueuedConnection*/);
+    connect(this, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), &rw, SLOT(slotProcessRegistrationPacket(const RgeistrationPacket &))/*, Qt::QueuedConnection*/);
+    //connect(this, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString&)), &rw, SLOT(slotProcessRegistrationResult(quint8, quint32, const QString&))/*, Qt::QueuedConnection*/);
     //connect(&rw, SIGNAL(requestRegistrationServerInfo()), this, SIGNAL(requestRegistrationServerInfo())/*, Qt::QueuedConnection*/);
     connect(&rw, SIGNAL(registration()), this, SIGNAL(registration()));
     connect(&rw, SIGNAL(canceled()), &dlg, SLOT(accept()));
@@ -515,7 +515,7 @@ void LoginWidget::on_toolButtonServersManager_clicked(){
     QVBoxLayout vbl(&dlg);
 
     ServerManagerWindow smw(&dlg);
-    connect(this, SIGNAL(signalServerFound(const QString&, quint16, const QString&, const QString&)), &smw, SLOT(serverFound(const QString& ,quint16, const QString&, const QString&))/*, Qt::QueuedConnection*/);
+    connect(this, SIGNAL(signalServerFound(const ServerDiscoveryPacket &)), &smw, SLOT(serverFound(const ServerDiscoveryPacket &))/*, Qt::QueuedConnection*/);
     connect(&smw, SIGNAL(signalLookForServer(const QHostAddress &, quint16 )), this, SIGNAL(signalLookForServer(const QHostAddress &, quint16)));
     //        connect(&smw, SIGNAL(signalServersUpdated()), this, SLOT(slotServersUpdated()));
     connect(&smw, SIGNAL(signalServerSelected(const QString &)), this, SLOT(slotServerSelected(const QString &)));
