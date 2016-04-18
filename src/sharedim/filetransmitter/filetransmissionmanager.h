@@ -56,7 +56,7 @@ public slots:
     void declineFileUploadRequest(int socketID, const QString &peerID, const QByteArray &fileMD5Sum);
 
     void acceptFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size);
-    void declineFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName, const QString &message);
+    void declineFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName);
 
     void abortFileTransmission(int socketID, const QString &peerID, const QByteArray &fileMD5Sum);
 

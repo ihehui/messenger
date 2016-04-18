@@ -434,6 +434,17 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
+    bool sendContactChatMessagePacket(int peerSocketID, const QString &senderID, const QString &message, const QString &imageNames, const QByteArray &sessionEncryptionKey){
+        qDebug()<<"--sendContactChatMessagePacket(...)";
+        ChatMessagePacket packet(sessionEncryptionKey);
+        packet.InfoType = ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE;
+        packet.ContactChatMessage.contactID = senderID;
+        packet.ContactChatMessage.message = message;
+        packet.ContactChatMessage.imageNames = imageNames;
+
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
+
     bool sendCachedChatMessagesPacket(int peerSocketID, const QStringList &messages, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendCachedChatMessagesPacket(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
@@ -485,9 +496,24 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
+    bool sendSessionEncryptionKeyWithContact(int peerSocketID, const QString &contactID, const QByteArray &sessionEncryptionKeyWithContact){
+        qDebug()<<"--sendSessionEncryptionKeyWithContact(...)";
+        ChatMessagePacket packet(sessionEncryptionKey);
+        packet.InfoType = ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT;
+        packet.SessionEncryptionKeyWithContact.contactID = contactID;
+        packet.SessionEncryptionKeyWithContact.key = sessionEncryptionKeyWithContact;
 
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
 
+    bool responseFileServerInfo(SOCKETID socketID, const QString &serverAddress, quint16 serverPort){
+        FileTransferPacket packet(getSessionEncryptionKey(socketID));
+        packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
+        packet.FileServerInfo.address = serverAddress;
+        packet.FileServerInfo.port = serverPort;
 
+        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+    }
 
 
 
@@ -550,117 +576,12 @@ public slots:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    bool sendSessionEncryptionKeyWithContact(int peerSocketID, const QString &contactID, const QByteArray &encryptedPassword, const QByteArray &sessionEncryptionKeyWithContact, const QString &targetHostAddress, quint16 targetHostPort){
-        qDebug()<<"--sendSessionEncryptionKeyWithContact(...)";
-        
-        PacketBase *packet = PacketHandlerBase::getPacket();
-        packet->setPacketType(quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT));
-        packet->setTransmissionProtocol(TP_RUDP);
-        QByteArray ba;
-
-
-
-        out << contactID << sessionEncryptionKeyWithContact;
-        QByteArray encryptedData;
-        crypto(&encryptedData, ba, encryptedPassword, true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_serverName << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-        return m_rtp->sendReliableData(peerSocketID, &ba);
-
-    }
-
-
-
-
-
-    bool sendContactChatMessagePacket(int peerSocketID, const QString &senderID, const QString &message, const QString &imageNames, const QByteArray &sessionEncryptionKey){
-        qDebug()<<"--sendContactChatMessagePacket(...)";
-        ChatMessagePacket packet(sessionEncryptionKey);
-        packet.InfoType = ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE;
-        packet.ContactChatMessage.contactID = senderID;
-        packet.ContactChatMessage.message = message;
-        packet.ContactChatMessage.imageNames = imageNames;
-
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
-    }
-
-
-
-
-
-
-
-
-
-    bool sendFileServerInfoToUser(int peerSocketID, const QByteArray &sessionEncryptionKey){
-        qDebug()<<"--sendFileServerInfoToUser(...)";
-
-        qCritical()<<"-------!!!!-------TODO:Get File Server Info!-------!!!!-------";
-        quint32 ipv4Address = 0;
-        quint16 port = m_localRTPListeningPort;
-
-
-        //TODO:缓存消息的格式
-        PacketBase *packet = PacketHandlerBase::getPacket();
-        packet->setPacketType(quint8(IM::SERVER_RESPONSE_FILE_SERVER_INFO));
-        packet->setTransmissionProtocol(TP_RUDP);
-        QByteArray ba;
-
-
-
-        out << ipv4Address << port;
-
-        QByteArray encryptedData;
-        crypto(&encryptedData, ba, sessionEncryptionKey, true);
-        ba.clear();
-        out.device()->seek(0);
-        out << m_serverName << encryptedData;
-        packet->setPacketData(ba);
-
-        ba.clear();
-        out.device()->seek(0);
-        QVariant v;
-        v.setValue(*packet);
-        out << v;
-        return m_rtp->sendReliableData(peerSocketID, &ba);
-
-    }
-
-
-
-
     void userExceptionalOffline(const QString &peerAddress, quint16 peerPort);
 
 
 
 
 private slots:
-    //HeartbeatPacket: PacketType+ComputerName
-    //    void startHeartbeat(int interval = HEARTBEAT_TIMER_INTERVAL);
-    //    void stopHeartbeat();
 
 
     //TODO:Replace
@@ -690,13 +611,15 @@ private slots:
     void processContactInfoPacket(const ContactInfoPacket &packet);
     void processSearchInfoPacket(const SearchInfoPacket &packet);
     void processChatMessagePacket(const ChatMessagePacket &packet);
+    void processCaptchaInfoPacket(const CaptchaInfoPacket &packet);
+    void processFileTransferPacket(const FileTransferPacket &packet);
 
 
 
 
 signals:
-    void  signalHeartbeatPacketReceived(const QString &clientAddress, const QString &userID);
-    void  signalConfirmationOfReceiptPacketReceived(quint16 packetSerialNumber1, quint16 packetSerialNumber2);
+    //void  signalHeartbeatPacketReceived(const QString &clientAddress, const QString &userID);
+    //void  signalConfirmationOfReceiptPacketReceived(quint16 packetSerialNumber1, quint16 packetSerialNumber2);
 
     void signalClientLookForServerPacketReceived(const QHostAddress &clientAddress, quint16 clientTCPListeningPort, const QString &clientName);
 
@@ -733,7 +656,7 @@ private:
     QMultiHash<QString/*Image Name*/, UserInfo* /*UserInfo*/> imageDownloadingRequestHash;
 
 
-    UsersManager usersManager;
+    //UsersManager usersManager;
     Cryptography *cryptography;
 
     QMutex mutex;

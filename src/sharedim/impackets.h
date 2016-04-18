@@ -41,8 +41,8 @@ private:
 class SHAREDIMLIB_API ServerDiscoveryPacket : public IMPacket
 {
 public:
-    ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey);
-    ServerDiscoveryPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey = QByteArray());
+    ServerDiscoveryPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey = QByteArray());
     ~ServerDiscoveryPacket();
 
 private:
@@ -77,6 +77,7 @@ private:
 public:
     QByteArray data;
     QString receiver;
+    quint8 isRequest;
 
 };
 ////////////////////////////////////////////////////////////////////////
@@ -303,18 +304,11 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum CaptchaInfoType{
-        CAPTCHA_REQUEST = 0,
-        CAPTCHA_IMAGE,
-        CAPTCHA_CODE,
-        CAPTCHA_AUTH_RESULT,
-    };
 
     enum PacketInfoType{
         INFO_TYPE_UNKNOWN = 0,
 
         INFO_TYPE_LOGIN_SERVER_INFO,
-        INFO_TYPE_CAPTCHA,
 
         INFO_TYPE_AUTH_INFO_FROM_CLIENT,
         INFO_TYPE_LOGIN_RESULT,
@@ -329,13 +323,6 @@ public:
         QString serverAddress;
         quint16 serverPort;
     } LoginServerInfo;
-
-    struct CaptchaInfoStruct{
-        quint8 type;
-        QByteArray captchaImage;
-        QString captcha;
-        quint8 authResult;
-    } CaptchaInfo;
 
     struct AuthInfoStruct{
         QString password;
@@ -617,13 +604,13 @@ public:
 
 
     struct ContactFriendingRequestStruct{
-        quint32 message;
+        QString message;
         quint32 groupID;
     } ContactFriendingRequest;
 
     struct ContactFriendingResultStruct{
         quint8 errorCode;
-        quint32 message;
+        QString message;
     } ContactFriendingResult;
 
     struct ContactDeletionInfoStruct{
@@ -728,7 +715,10 @@ public:
         PIT_GROUP_CHAT_MESSAGES_CACHED_ON_SERVER,
         PIT_GROUP_CHAT_HISTORY_MESSAGES,
 
-        PIT_CHAT_IMAGE
+        PIT_CHAT_IMAGE,
+
+        PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT
+
     };
     PacketInfoType InfoType;
     quint32 JobID;
@@ -773,13 +763,187 @@ public:
         QByteArray image;
     } ChatImage;
 
+    struct SessionEncryptionKeyWithContactStruct{
+        QString contactID;
+        QByteArray key;
+    } SessionEncryptionKeyWithContact;
+
+
 
 };
 ////////////////////////////////////////////////////////////////////////
 
 
+////////////////////////////////////////////////////////////////////////
+class SHAREDIMLIB_API CaptchaInfoPacket : public IMPacket
+{
+public:
+    CaptchaInfoPacket(const QByteArray &sessionEncryptionKey);
+    CaptchaInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~CaptchaInfoPacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
+
+    enum PacketInfoType{
+        PIT_UNKNOWN = 0,
+
+        CAPTCHA_REQUEST,
+        CAPTCHA_IMAGE,
+        CAPTCHA_CODE,
+
+        CAPTCHA_AUTH_RESULT,
+
+    };
+    PacketInfoType InfoType;
+    quint32 JobID;
+
+    quint8 captchaID;
+    QByteArray captchaImage;
+    QString captchaCode;
+    quint8 approved;
 
 
+
+};
+////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////
+class SHAREDIMLIB_API FileTransferPacket : public IMPacket
+{
+public:
+    FileTransferPacket(const QByteArray &sessionEncryptionKey);
+    FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
+    enum PacketInfoType{
+        FT_UNKNOWN = 0,
+
+        FT_FILE_SERVER_INFO,
+
+        FT_FileSystemInfoRequest,
+        FT_FileSystemInfoResponse,
+
+        FT_FileDeletingRequest,
+        FT_FileDeletingResponse,
+
+        FT_FileRenamingRequest,
+        FT_FileRenamingResponse,
+
+        FT_FileDownloadingRequest,
+        FT_FileDownloadingResponse,
+
+        FT_FileUploadingRequest,
+        FT_FileUploadingResponse,
+
+        FT_FileDataRequest,
+        FT_FileData,
+
+        FT_FileTXStatus,
+        FT_FileTXError,
+
+        FT_FileTXStop
+    };
+    PacketInfoType InfoType;
+    QString ContactID;
+
+    struct FileServerInfoStruct{
+        QString address;
+        quint16 port;
+    } FileServerInfo;
+
+    struct FileSystemInfoRequestStruct{
+        QString parentDirPath;
+    } FileSystemInfoRequest;
+    struct FileSystemInfoResponseStruct{
+        QString baseDirPath;
+        QByteArray fileSystemInfoData;
+    } FileSystemInfoResponse;
+
+    struct FileDeletingRequestStruct{
+        QString baseDirPath;
+        QStringList files;
+    } FileDeletingRequest;
+    struct FileDeletingResponseStruct{
+        QString baseDirPath;
+        QStringList failedFiles;
+    } FileDeletingResponse;
+
+    struct FileRenamingRequestStruct{
+        QString baseDirPath;
+        QString oldFileName;
+        QString newFileName;
+    } FileRenamingRequest;
+    struct FileRenamingResponseStruct{
+        QString baseDirPath;
+        QString oldFileName;
+        quint8 renamed;
+        QString message;
+    } FileRenamingResponse;
+
+    struct FileDownloadingRequestStruct{
+        QString baseDir;
+        QString fileName;
+        QString dirToSaveFile;
+    } FileDownloadingRequest;
+    struct FileDownloadingResponseStruct{
+        quint8 accepted;
+        QString baseDir;
+        QString fileName;
+        QByteArray fileMD5Sum;
+        quint64 size;
+        quint8 errorCode;
+    } FileDownloadingResponse;
+
+    struct FileUploadingRequestStruct{
+        QString fileName;
+        QByteArray fileMD5Sum;
+        quint64 size;
+        QString fileSaveDir;
+    } FileUploadingRequest;
+    struct FileUploadingResponseStruct{
+        QByteArray fileMD5Sum;
+        quint8 accepted;
+        QString message;
+    } FileUploadingResponse;
+
+    struct FileDataRequestStruct{
+        QByteArray fileMD5;
+        int startPieceIndex;
+        int endPieceIndex;
+    } FileDataRequest;
+    struct FileDataResponseStruct{
+        QByteArray fileMD5;
+        int pieceIndex;
+        QByteArray data;
+        QByteArray pieceMD5;
+    } FileDataResponse;
+
+    struct FileTXStatusStruct{
+        QByteArray fileMD5;
+        quint8 status;
+    } FileTXStatus;
+
+    struct FileTXErrorStruct{
+        QString fileName;
+        QByteArray fileMD5;
+        quint8 errorCode;
+        QString message;
+    } FileTXError;
+
+
+};
+////////////////////////////////////////////////////////////////////////
 
 
 
@@ -859,608 +1023,8 @@ public:
 ////////////////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ClientInfoPacket : public IMPacket
-{
-public:
-    ClientInfoPacket(const QByteArray &sessionEncryptionKey);
-    ClientInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~ClientInfoPacket();
 
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
 
-public:
-    quint8 IsRequest;
-    QString assetNO;
-    quint8 infoType;
-    QByteArray data;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API SystemInfoFromServerPacket : public IMPacket
-{
-public:
-    SystemInfoFromServerPacket(const QByteArray &sessionEncryptionKey);
-    SystemInfoFromServerPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~SystemInfoFromServerPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    quint8 infoType;
-    QByteArray data;
-    QString extraInfo;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API SysAdminInfoPacket : public IMPacket
-{
-public:
-    SysAdminInfoPacket(const QByteArray &sessionEncryptionKey);
-    SysAdminInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~SysAdminInfoPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString adminID;
-    QByteArray data;
-    quint8 deleteAdmin;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API SystemAlarmsPacket : public IMPacket
-{
-public:
-    SystemAlarmsPacket(const QByteArray &sessionEncryptionKey);
-    SystemAlarmsPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~SystemAlarmsPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    enum PacketInfoType{SYSTEMALARMS_UNKNOWN = 0, SYSTEMALARMS_QUERY, SYSTEMALARMS_ACK};
-
-    PacketInfoType InfoType;
-
-    struct QueryInfoStruct{
-        QString assetNO;
-        QString type;
-        QString acknowledged;
-        QString startTime;
-        QString endTime;
-    } QueryInfo;
-
-    struct ACKInfoStruct{
-        QString alarms;
-        quint8 deleteAlarms;
-    } ACKInfo;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API RemoteConsolePacket : public IMPacket
-{
-public:
-    RemoteConsolePacket(const QByteArray &sessionEncryptionKey);
-    RemoteConsolePacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    enum PacketInfoType{REMOTECONSOLE_UNKNOWN = 0, REMOTECONSOLE_OPEN, REMOTECONSOLE_STATE, REMOTECONSOLE_COMMAND, REMOTECONSOLE_OUTPUT};
-
-    PacketInfoType InfoType;
-
-    struct OpenConsoleStruct{
-        QString applicationPath;
-        quint8 startProcess;
-    } OpenConsole;
-
-    struct ConsoleStateStruct{
-        quint8 isRunning;
-        QString message;
-        quint8 messageType;
-    } ConsoleState;
-
-    struct CommandStruct{
-        QString command;
-    } Command;
-
-    struct OutputStruct{
-        QString output;
-    } Output;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ClientLogPacket : public IMPacket
-{
-public:
-    ClientLogPacket(const QByteArray &sessionEncryptionKey);
-    ClientLogPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    quint8 logType;
-    QString log;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API USBDevPacket : public IMPacket
-{
-public:
-    USBDevPacket(const QByteArray &sessionEncryptionKey);
-    USBDevPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    quint8 usbSTORStatus;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API AdminConnectionToClientPacket : public IMPacket
-{
-public:
-    AdminConnectionToClientPacket(const QByteArray &sessionEncryptionKey);
-    AdminConnectionToClientPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString computerName;
-    QString adminID;
-    quint8 verified;
-    quint8 errorCode;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API AdminSearchClientPacket : public IMPacket
-{
-public:
-    AdminSearchClientPacket(const QByteArray &sessionEncryptionKey);
-    AdminSearchClientPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString computerName;
-    QString userName;
-    QString workgroup;
-    QString macAddress;
-    QString ipAddress;
-    QString osVersion;
-    QString adminID;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API LocalUserOnlineStatusChangedPacket : public IMPacket
-{
-public:
-    LocalUserOnlineStatusChangedPacket(const QByteArray &sessionEncryptionKey);
-    LocalUserOnlineStatusChangedPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString userName;
-    quint8 online;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API FileTransferPacket : public IMPacket
-{
-public:
-    FileTransferPacket(const QByteArray &sessionEncryptionKey);
-    FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    enum PacketInfoType{
-        FT_UNKNOWN = 0,
-        FT_FileSystemInfoRequest,
-        FT_FileSystemInfoResponse,
-
-        FT_FileDeletingRequest,
-        FT_FileDeletingResponse,
-
-        FT_FileRenamingRequest,
-        FT_FileRenamingResponse,
-
-        FT_FileDownloadingRequest,
-        FT_FileDownloadingResponse,
-
-        FT_FileUploadingRequest,
-        FT_FileUploadingResponse,
-
-        FT_FileDataRequest,
-        FT_FileData,
-
-        FT_FileTXStatus,
-        FT_FileTXError,
-
-        FT_FileTXStop
-    };
-    PacketInfoType InfoType;
-
-    struct FileSystemInfoRequestStruct{
-        QString parentDirPath;
-    } FileSystemInfoRequest;
-    struct FileSystemInfoResponseStruct{
-        QString baseDirPath;
-        QByteArray fileSystemInfoData;
-    } FileSystemInfoResponse;
-
-    struct FileDeletingRequestStruct{
-        QString baseDirPath;
-        QStringList files;
-    } FileDeletingRequest;
-    struct FileDeletingResponseStruct{
-        QString baseDirPath;
-        QStringList failedFiles;
-    } FileDeletingResponse;
-
-    struct FileRenamingRequestStruct{
-        QString baseDirPath;
-        QString oldFileName;
-        QString newFileName;
-    } FileRenamingRequest;
-    struct FileRenamingResponseStruct{
-        QString baseDirPath;
-        QString oldFileName;
-        quint8 renamed;
-        QString message;
-    } FileRenamingResponse;
-
-    struct FileDownloadingRequestStruct{
-        QString baseDir;
-        QString fileName;
-        QString dirToSaveFile;
-    } FileDownloadingRequest;
-    struct FileDownloadingResponseStruct{
-        quint8 accepted;
-        QString baseDir;
-        QString fileName;
-        QByteArray fileMD5Sum;
-        quint64 size;
-        QString pathToSaveFile;
-    } FileDownloadingResponse;
-
-    struct FileUploadingRequestStruct{
-        QString fileName;
-        QByteArray fileMD5Sum;
-        quint64 size;
-        QString fileSaveDir;
-    } FileUploadingRequest;
-    struct FileUploadingResponseStruct{
-        QByteArray fileMD5Sum;
-        quint8 accepted;
-        QString message;
-    } FileUploadingResponse;
-
-    struct FileDataRequestStruct{
-        QByteArray fileMD5;
-        int startPieceIndex;
-        int endPieceIndex;
-    } FileDataRequest;
-    struct FileDataResponseStruct{
-        QByteArray fileMD5;
-        int pieceIndex;
-        QByteArray data;
-        QByteArray pieceMD5;
-    } FileDataResponse;
-
-    struct FileTXStatusStruct{
-        QByteArray fileMD5;
-        quint8 status;
-    } FileTXStatus;
-
-    struct FileTXErrorStruct{
-        QString fileName;
-        QByteArray fileMD5;
-        quint8 errorCode;
-        QString message;
-    } FileTXError;
-
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ModifyAssetNOPacket : public IMPacket
-{
-public:
-    ModifyAssetNOPacket(const QByteArray &sessionEncryptionKey);
-    ModifyAssetNOPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    quint8 isRequest;
-    QString oldAssetNO;
-    QString newAssetNO;
-    QString adminID;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API RenameComputerPacket : public IMPacket
-{
-public:
-    RenameComputerPacket(const QByteArray &sessionEncryptionKey);
-    RenameComputerPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString assetNO;
-    QString newComputerName;
-    QString domainAdminName;
-    QString domainAdminPassword;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API JoinOrUnjoinDomainPacket : public IMPacket
-{
-public:
-    JoinOrUnjoinDomainPacket(const QByteArray &sessionEncryptionKey);
-    JoinOrUnjoinDomainPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString assetNO;
-    QString domainOrWorkgroupName;
-    QString domainAdminName;
-    QString domainAdminPassword;
-    quint8 joinWorkgroup;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API TemperaturesPacket : public IMPacket
-{
-public:
-    TemperaturesPacket(const QByteArray &sessionEncryptionKey);
-    TemperaturesPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    enum PacketInfoType{TEMPERATURES_UNKNOWN = 0, TEMPERATURES_REQUEST, TEMPERATURES_RESPONSE};
-
-    PacketInfoType InfoType;
-
-    struct TemperaturesRequestStruct{
-        quint8 requestCPU;
-        quint8 requestHD;
-    } TemperaturesRequest;
-
-    struct TemperaturesResponseStruct{
-        QString cpuTemperature;
-        QString harddiskTemperature;
-    } TemperaturesResponse;
-
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ScreenshotPacket : public IMPacket
-{
-public:
-    ScreenshotPacket(const QByteArray &sessionEncryptionKey);
-    ScreenshotPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    enum PacketInfoType{SCREENSHOT_UNKNOWN = 0, SCREENSHOT_REQUEST, SCREENSHOT_DESKTOP_INFO, SCREENSHOT_DATA};
-    PacketInfoType InfoType;
-
-    struct ScreenshotRequestStruct{
-        QString adminID;
-        QString userName;
-        quint16 adminListeningPort;
-    } ScreenshotRequest;
-
-    struct DesktopInfoStruct{
-        int desktopWidth;
-        int desktopHeight;
-        int blockWidth;
-        int blockHeight;
-    } DesktopInfo;
-
-    struct ScreenshotDataStruct{
-        QList<QPoint> locations;
-        QList<QByteArray> images;
-    } ScreenshotData;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ShutdownPacket : public IMPacket
-{
-public:
-    ShutdownPacket(const QByteArray &sessionEncryptionKey);
-    ShutdownPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString message;
-    quint32 waitTime;
-    quint8 force;
-    quint8 reboot;
-
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API LockWindowsPacket : public IMPacket
-{
-public:
-    LockWindowsPacket(const QByteArray &sessionEncryptionKey);
-    LockWindowsPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString userName;
-    quint8 logoff;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API WinUserPacket : public IMPacket
-{
-public:
-    WinUserPacket(const QByteArray &sessionEncryptionKey);
-    WinUserPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QByteArray userData;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ServiceConfigPacket : public IMPacket
-{
-public:
-    ServiceConfigPacket(const QByteArray &sessionEncryptionKey);
-    ServiceConfigPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QString serviceName;
-    quint64 startupType;
-    quint8  startService;
-    quint64 processID;
-};
-////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////
-class SHAREDIMLIB_API ProcessMonitorInfoPacket : public IMPacket
-{
-public:
-    ProcessMonitorInfoPacket(const QByteArray &sessionEncryptionKey);
-    ProcessMonitorInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-    QByteArray localRules,  globalRules;
-    quint8 enableProcMon;
-    quint8 enablePassthrough;
-    quint8 enableLogAllowedProcess;
-    quint8 enableLogBlockedProcess;
-    quint8 useGlobalRules;
-    QString assetNO;
-};
-////////////////////////////////////////////////////////////////////////
 
 
 

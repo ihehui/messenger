@@ -145,14 +145,14 @@ private slots:
 
 
 
-
+    void processAnnouncementPacket(const AnnouncementPacket &packet);
     void processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet);
     void processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet);
     void processContactInfoPacket(const ContactInfoPacket &packet);
     void processSearchInfoPacket(const SearchInfoPacket &packet);
     void processChatMessagePacket(const ChatMessagePacket &packet);
-
-
+    void processCaptchaInfoPacket(const CaptchaInfoPacket &packet);
+    void processFileTransferPacket(const FileTransferPacket &packet);
 
 
 

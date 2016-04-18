@@ -80,12 +80,12 @@ public slots:
             port = IM_SERVER_IPMC_LISTENING_PORT;
         }
 
-        ServerDiscoveryPacket p;
-        p.responseFromServer = 0;
-        p.version = QString(APP_VERSION);
+        ServerDiscoveryPacket packet;
+        packet.responseFromServer = 0;
+        packet.version = QString(APP_VERSION);
         //packet.udpPort = m_udpServer->localPort();
 
-        QByteArray ba = p.toByteArray();
+        QByteArray ba = packet.toByteArray();
         if(ba.isEmpty()){return false;}
 
         return m_udpServer->sendDatagram(ba, address, port );
@@ -97,6 +97,7 @@ public slots:
         DataForwardPacket p(sessionEncryptionKey);
         p.data = data;
         p.receiver = receiverID;
+        p.isRequest = 1;
 
         QByteArray ba = p.toByteArray();
         if(ba.isEmpty()){return false;}
@@ -107,25 +108,18 @@ public slots:
 
     bool sendClientLookForServerPacket(const QHostAddress &targetAddress, quint16 targetPort){
         //qDebug()<<"----sendClientLookForServerPacket(...)";
+        ServerDiscoveryPacket packet;
+        packet.responseFromServer = 0;
+        packet.version = QString(APP_VERSION);
 
-        packet->setPacketType(quint8(IM::CMD_ServerDiscovery));
-        packet->setTransmissionProtocol(TP_UDP);
-        //packet->setRemainingRetransmissionTimes(int(PACKET_RETRANSMISSION_TIMES*3));
-        QByteArray ba;
-
-
-        out << m_myUserID << QString(APP_VERSION);
-
-
-        return m_udpServer->sendDatagram(ba, targetAddress, targetPort);
-
+        return m_udpServer->sendDatagram(packet.toByteArray(), targetAddress, targetPort);
     }
 
 
     bool requestRegistrationServerInfo(int serverSocketID, const QString &clientVersion = APP_VERSION){
         qWarning()<<"--requestRegistrationServerInfo(...)";
 
-        RgeistrationPacket packet;
+        RgeistrationPacket packet(sessionEncryptionKey);
         packet.InfoType = RgeistrationPacket::REGISTRATION_SERVER_INFO;
         packet.ServerInfo.requestServerInfo = 1;
         packet.ServerInfo.version = clientVersion;
@@ -136,7 +130,7 @@ public slots:
     bool registration(int serverSocketID, const QString &userID, const QString &password){
         qWarning()<<"--registration(...)";
 
-        RgeistrationPacket packet;
+        RgeistrationPacket packet(sessionEncryptionKey);
         packet.InfoType = RgeistrationPacket::REGISTRATION_INFO;
         packet.RgeistrationInfo.userID = userID;
         packet.RgeistrationInfo.password = password;
@@ -147,17 +141,8 @@ public slots:
     bool requestUpdatePassword(int serverSocketID){
         qDebug()<<"--requestUpdatePassword(...)";
 
-        UpdatePasswordPacket packet;
+        UpdatePasswordPacket packet(sessionEncryptionKey);
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST;
-
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
-    }
-
-    bool requestCaptcha(int serverSocketID){
-        qDebug()<<"--requestCaptcha(...)";
-
-        UpdatePasswordPacket packet;
-        packet.InfoType = UpdatePasswordPacket::INFO_TYPE_CAPTCHA_REQUEST;
 
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
@@ -165,7 +150,7 @@ public slots:
     bool updatePassword(int serverSocketID, const QString &captcha, const QString &userID, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &email, const QString &smsCaptcha){
         qDebug()<<"--updatePassword(...)";
         
-        UpdatePasswordPacket packet;
+        UpdatePasswordPacket packet(sessionEncryptionKey);
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT;
         packet.AuthInfo.captcha = captcha;
         packet.AuthInfo.userID = userID;
@@ -191,7 +176,7 @@ public slots:
         qWarning()<<"My User ID:"<<m_myUserID;
 
 
-        LoginPacket packet;
+        LoginPacket packet(sessionEncryptionKey);
         packet.InfoType = LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO;
         packet.LoginServerInfo.version = APP_VERSION;
 
@@ -282,6 +267,11 @@ public slots:
         packet.info.isSummaryInfo = quint8(summaryInfo?1:0);
 
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+    }
+
+    bool requestPersonalInfo(int serverSocketID){
+        qDebug()<<"--requestPersonalInfo(...)";
+        return requestContactInfo(serverSocketID, m_myUserID);
     }
 
     bool addContact(int serverSocketID, const QString &contactID, const QString &verificationMessage = "", quint32 groupID = ContactGroupBase::Group_Friends_ID){
@@ -441,43 +431,33 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-
-
-
-
-
-
-
-
-    bool requestPersonalInfo(int serverSocketID){
-        qDebug()<<"--requestPersonalInfo(...)";
-
-        return requestContactInfo(serverSocketID, m_myUserID);
-
-    }
-
-
-
-
     bool requestSessionEncryptionKeyWithContact(int serverSocketID, quint32 contactID){
         qDebug()<<"--requestSessionEncryptionKeyWithContact(...)";
-        
+        ChatMessagePacket packet(sessionEncryptionKey);
+        packet.InfoType = ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT;
+        packet.SessionEncryptionKeyWithContact.contactID = contactID;
 
-        packet->setPacketType(quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT));
-        packet->setTransmissionProtocol(TP_RUDP);
-        QByteArray ba;
-
-
-        out << contactID;
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKey, true);
-
-
-        out << m_myUserID << encryptedData;
-
-        return m_rtp->sendReliableData(serverSocketID, &ba);
-
+        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
+
+    bool requestCaptcha(int serverSocketID){
+        qDebug()<<"--requestCaptcha(...)";
+
+        CaptchaInfoPacket packet(sessionEncryptionKey);
+        packet.InfoType = CaptchaInfoPacket::CAPTCHA_REQUEST;
+
+        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -504,229 +484,13 @@ public slots:
 
     
     //FILE TX
-    ///////////////////////////////////////////////
-    bool requestFileServerInfo(int serverSocketID){
-        qDebug()<<"--requestFileServerInfo(...)";
-
-
-
-        packet->setPacketType(quint8(IM::CLIENT_REQUEST_FILE_SERVER_INFO));
-
-        QByteArray ba;
-
-
-        out << m_myUserID;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKey, true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-
-
-
-
-
-
-        return m_rtp->sendReliableData(serverSocketID, &ba);
-    }
-
-    bool requestUploadFile(IMUserBase *contact, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size){
-        qDebug()<<"--requestUploadFile(...) Contact ID"<<contact->getUserID()<<" fileName:"<<fileName;
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::REQUEST_UPLOAD_FILE));
-
-        QByteArray ba;
-
-
-        out << fileMD5Sum << fileName << size;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-
-
-
-
-
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-
-    bool cancelUploadFileRequest(IMUserBase *contact, const QByteArray &fileMD5Sum){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::CANCEL_FILE_UPLOAD_REQUEST));
-
-        QByteArray ba;
-
-
-        out << fileMD5Sum;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-
-
-
-
-
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-
-    bool requestDownloadFile(IMUserBase *contact, const QString &remoteBaseDir, const QString &remoteFileName){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::REQUEST_DOWNLOAD_FILE));
-
-        QByteArray ba;
-
-
-        out << remoteBaseDir << remoteFileName;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-    bool cancelDownloadFileRequest(IMUserBase *contact, const QString &remoteFileName){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::CANCEL_FILE_DOWNLOAD_REQUEST));
-
-        QByteArray ba;
-
-
-        out << remoteFileName;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-
-    bool acceptFileDownloadRequest(IMUserBase *contact, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::RESPONSE_FILE_DOWNLOAD_REQUEST));
-
-        QByteArray ba;
-
-
-        out << fileName << true << fileMD5Sum << size;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-    bool denyFileDownloadRequest(IMUserBase *contact, const QString &fileName, const QString &message){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::RESPONSE_FILE_DOWNLOAD_REQUEST));
-
-        QByteArray ba;
-
-
-        out << fileName << false << message;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
-    }
-
-    bool responseFileUploadRequest(IMUserBase *contact, const QByteArray &fileMD5Sum, bool accepted, const QString &message){
-        QString contactID = contact->getUserID();
-
-
-
-        packet->setPacketType(quint8(IM::RESPONSE_FILE_UPLOAD_REQUEST));
-
-        QByteArray ba;
-
-
-        out << fileMD5Sum << accepted << message;
-
-
-        cryptography->teaCrypto(&encryptedData, ba, sessionEncryptionKeyWithContactHash.value(contactID), true);
-
-
-        out << m_myUserID << encryptedData;
-
-
-        if(!contact->isConnected()){
-            return requestDataForward(m_socketConnectedToServer, contactID, ba, sessionEncryptionKey);
-        }
-
-        return m_rtp->sendReliableData(contact->getSocketID(), &ba);
+    bool requestFileServerInfo(SOCKETID serverSocketID){
+        FileTransferPacket packet(sessionEncryptionKey);
+        packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
+        //packet.FileServerInfo.address = "";
+        //packet.FileServerInfo.port = 0;
+
+        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
 
 
@@ -756,7 +520,7 @@ private slots:
         packet.AuthInfo.stateAfterLoggedin = quint8(myself->getStateAfterLoggedin());
         packet.AuthInfo.deviceInfo = deviceInfo;
 
-        return m_rtp->sendReliableData(serverSocketID, &ba);
+        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
 
 
@@ -764,8 +528,11 @@ private slots:
 
 
 signals:
-    void  signalHeartbeatPacketReceived(const QString &contactID);
-    void  signalConfirmationOfReceiptPacketReceived(quint16 packetSerialNumber1, quint16 packetSerialNumber2);
+    //void  signalHeartbeatPacketReceived(const QString &contactID);
+    //void  signalConfirmationOfReceiptPacketReceived(quint16 packetSerialNumber1, quint16 packetSerialNumber2);
+
+    void signalServerDeclarePacketReceived(const ServerDiscoveryPacket &packet);
+    void signalServerAnnouncementPacketReceived(const AnnouncementPacket &packet);
 
     void signalRegistrationPacketReceived(const RgeistrationPacket &packet);
     void signalUpdatePasswordResultReceived(const UpdatePasswordPacket &packet);
@@ -774,15 +541,20 @@ signals:
     void signalContactInfoPacketReceived(const ContactInfoPacket &packet);
     void signalSearchContactsResultPacketReceived(const SearchInfoPacket &packet);
     void signalChatMessageReceivedFromContact(const ChatMessagePacket &packet);
+    void signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &packet);
+    void signalFileTransferPacketReceived(const FileTransferPacket &packet);
 
-
-
-
-
-
-
-    void signalLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName);
     void signalLoginResultReceived(quint8 errorType, const QString &errorMessage = "");
+    void signalLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName);
+
+
+
+
+
+
+
+
+
     void signalClientLastLoginInfoPacketReceived(const QString &extIPAddress, const QString &loginTime, const QString &LogoutTime, const QString &deviceInfo);
     //void signalContactStateChangedPacketReceived(const QString &contactID, IM::OnlineState onlineState, const QString &contactHostAddress, quint16 contactHostPort);
     void signalContactStateChangedPacketReceived(quint8 onlineState, const QString &contactID, const QString &contactHostAddress, quint16 contactHostPort);
@@ -817,8 +589,6 @@ signals:
 
     void signalClientSoftwareUpdatePacketReceived();
 
-    void signalServerDeclarePacketReceived(const ServerDiscoveryPacket &packet);
-    void signalServerAnnouncementPacketReceived(const QString &announcement, bool mustRead = true);
 
 
     ///////////////////////////
@@ -834,6 +604,8 @@ signals:
 
 public:
     QStringList runningNICAddresses();
+    void setSessionEncryptionKeyWithContact(const QString &contactID, const QByteArray &key);
+
 
 private slots:
 

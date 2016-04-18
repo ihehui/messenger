@@ -16,7 +16,8 @@ include(../config.pri)
 
 HHSharedLibs += HHSharedCore \
     HHSharedNetwork \
-    HHSharedUDT
+    HHSharedUDT \
+    HHSharedENET
 include(../../HHSharedLibs.pri)
 
 # Input

@@ -41,8 +41,6 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
 {
 
     cryptography = new Cryptography();
-    sessionEncryptionKey = QByteArray();
-
 
     m_resourcesManager = new ResourcesManager(this);
 
@@ -124,79 +122,46 @@ FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase() {
 void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *packet){
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
 
-    quint8 packetType = packet.getPacketType();
-    QString peerID = packet.getPeerID();
+    quint8 packetType = packet->getPacketType();
+    QString peerID = packet->getPeerID();
 
-    QHostAddress peerAddress = packet.getPeerHostAddress();
-    quint16 peerPort = packet.getPeerHostPort();
-    SOCKETID socketID = packet.getSocketID();
+    QHostAddress peerAddress = packet->getPeerHostAddress();
+    quint16 peerPort = packet->getPeerHostPort();
+    SOCKETID socketID = packet->getSocketID();
+
+
 
     switch(packetType){
-
     case quint8(IM::CMD_DataForward):
     {
-        QByteArray encryptedData;
-        QString senderID = peerID;
-        in >> encryptedData;
+        DataForwardPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
+        QByteArray data = p.data;
 
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(senderID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-
-        QString receiverID = "";
-        QByteArray data;
-        stream >> receiverID >> data;
-
-        forwardData(peerSocketHash.value(receiverID), data, sessionEncryptionKeyWithPeerHash.value(receiverID));
-
-        qDebug()<<"~~DataForwardRequestByClient";
-    }
-        break;
-
-    case quint8(ForwardedDataByServer):
-    {
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithPeerHash.value(peerID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray data;
-        stream >> data;
-
-        QDataStream ds(&data, QIODevice::ReadOnly);
-        ds.setVersion(QDataStream::Qt_4_8);
-        QVariant v;
-        ds >> v;
-        if (v.canConvert<PacketBase>()){
-            *packet = v.value<PacketBase>();
-            //packet->setTransmissionProtocol(TP_UDT);
-            packet->setSocketID(socketID);
-
-            //packet->setPeerHostAddress(QHostAddress(address));
-            //packet->setPeerHostPort(port);
-
-            parseIncomingPacketData(packet);
+        if(p.isRequest){
+            QString receiverID = p.receiver;
+            forwardData(peerSocketHash.value(receiverID), data);
+        }else{
+            PacketBase packet2;
+            if(packet2.fromByteArray(&data)){
+                packet2.setSocketID(socketID);
+                parseIncomingPacketData(&packet2);
+            }else{
+                qWarning()<<"ERROR! Can not convert data to Packet!";
+            }
         }
 
-
-        qDebug()<<"~~ForwardedDataByServer";
+        //qDebug()<<"~~CMD_DataForward";
     }
         break;
 
         ////////////////////////////////////////////
-            case quint8(IM::CMD_FileTransfer):
-            {
-                //qDebug()<<"~~CMD_FileTransfer";
-
-                FileTransferPacket p(packet);
-                emit signalFileTransferPacketReceived(p);
-            }
-            break;
+    case quint8(IM::CMD_FileTransfer):
+    {
+        FileTransferPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
+        emit signalFileTransferPacketReceived(p);
+        //qDebug()<<"~~CMD_FileTransfer";
+    }
+        break;
 
 
 
@@ -250,6 +215,11 @@ void FileTransmissionPacketsParserBase::peerDisconnected(int socketID){
     peerSocketHash.remove(peerID);
 
     emit signalPeerDisconnected(peerID);
+}
+
+QByteArray FileTransmissionPacketsParserBase::getSessionEncryptionKey(SOCKETID socketID){
+    QString peerID = peerSocketHash.key(socketID);
+    return sessionEncryptionKeyWithPeerHash.value(peerID);
 }
 
 

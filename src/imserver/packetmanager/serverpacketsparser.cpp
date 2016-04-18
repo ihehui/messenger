@@ -257,90 +257,25 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet){
     }
         break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-    case quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT):
+    case quint8(IM::CMD_Captcha):
     {
-        qDebug()<<"--SESSION_ENCRYPTION_KEY_WITH_CONTACT";
+        CaptchaInfoPacket p(packet, sessionEncryptionKey);
+        processCaptchaInfoPacket(p);
+        qDebug()<<"~~CMD_Captcha";
+    }
+        break;
 
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-        QString contactID = "";
-        stream >> contactID;
-
-        UserInfo *contactInfo = getUserInfo(contactID);
-        if(!contactInfo){return;}
-        if(contactInfo->isOnLine()){
-            QByteArray key = ServerUtilities::generateSessionEncryptionKey();
-            sendSessionEncryptionKeyWithContact(socketID, userID, contactInfo->getSessionEncryptionKey(), key, contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
-            sendSessionEncryptionKeyWithContact(socketID, contactID, userInfo->getSessionEncryptionKey(), key, peerAddress.toString(), peerPort);
-        }else{
-            sendContactOnlineStatusChangedPacket(socketID, contactID, quint8(IM::ONLINESTATE_OFFLINE), userInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort(), peerAddress.toString(), peerPort);
-
-        }
-
-
+        //File TX
+    case quint8(IM::CMD_FileTransfer):
+    {
+        FileTransferPacket p(packet, sessionEncryptionKey);
+        emit signalFileTransferPacketReceived(p);
+        qDebug()<<"~~CMD_FileTransfer";
     }
         break;
 
 
 
-
-
-        //FILE TX
-    case quint8(IM::CLIENT_REQUEST_FILE_SERVER_INFO):
-    {
-        qDebug()<<"--CLIENT_REQUEST_FILE_SERVER_INFO";
-
-
-        QString userID = peerID;
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        UserInfo *userInfo = getUserInfo(userID);
-        if(!userInfo){return;}
-
-        //解密数据
-        QByteArray decryptedData;
-        if(!decryptData(userID, &decryptedData, encryptedData)){return;}
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_7);
-
-        QString  id = "";
-        stream >> id;
-
-        if(id != userID){
-            qCritical()<<"ERROR! Invalid Request!";
-            return;
-        }
-
-        //TODO
-        sendFileServerInfoToUser(socketID, userInfo->getSessionEncryptionKey());
-
-
-    }
-        break;
 
 
 
@@ -1344,6 +1279,20 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
 
     }
         break;
+    case ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT:
+    {
+        UserInfo *contactInfo = getUserInfo(contactID);
+        if(!contactInfo){return;}
+        if(contactInfo->isOnLine()){
+            QByteArray key = ServerUtilities::generateSessionEncryptionKey();
+            sendSessionEncryptionKeyWithContact(socketID, userID, contactInfo->getSessionEncryptionKey(), key, contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
+            sendSessionEncryptionKeyWithContact(socketID, contactID, userInfo->getSessionEncryptionKey(), key, peerAddress.toString(), peerPort);
+        }else{
+            sendContactOnlineStatusChangedPacket(socketID, contactID, quint8(IM::ONLINESTATE_OFFLINE), userInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort(), peerAddress.toString(), peerPort);
+
+        }
+    }
+        break;
 
     default:
         break;
@@ -1351,6 +1300,154 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
 
 
 }
+
+void ServerPacketsParser::processCaptchaInfoPacket(const CaptchaInfoPacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+    CaptchaInfoPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case CaptchaInfoPacket::CAPTCHA_REQUEST:
+    {
+    }
+        break;
+    case CaptchaInfoPacket::CAPTCHA_IMAGE:
+    {
+        out << captchaImage;
+    }
+        break;
+    case CaptchaInfoPacket::CAPTCHA_CODE:
+    {
+        out << captchaCode;
+    }
+        break;
+    case CaptchaInfoPacket::CAPTCHA_AUTH_RESULT:
+    {
+        out << approved;
+    }
+        break;
+
+
+
+    default:
+        break;
+    }
+
+
+}
+
+void ServerPacketsParser::processFileTransferPacket(const FileTransferPacket &packet){
+    QString userID = packet.getPeerID();
+    UserInfo *userInfo = getUserInfo(userID);
+    if(!userInfo){return;}
+
+    FileTransferPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case FileTransferPacket::FT_FILE_SERVER_INFO:
+    {
+        //TODO
+        QString address = "";
+        quint16 port = 0;
+        responseFileServerInfo(packet.getSocketID(), address, port);
+    }
+        break;
+
+    case FileTransferPacket::FT_FileSystemInfoRequest:
+    {
+        //in >> FileSystemInfoRequest.parentDirPath;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileSystemInfoResponse:
+    {
+        //in >> FileSystemInfoResponse.baseDirPath >> FileSystemInfoResponse.fileSystemInfoData;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileDeletingRequest:
+    {
+        //in >> FileDeletingRequest.baseDirPath >> FileDeletingRequest.files;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileDeletingResponse:
+    {
+        //in >> FileDeletingResponse.baseDirPath >> FileDeletingResponse.failedFiles;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileRenamingRequest:
+    {
+        //in >> FileRenamingRequest.baseDirPath >> FileRenamingRequest.oldFileName >> FileRenamingRequest.newFileName;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileRenamingResponse:
+    {
+        //in >> FileRenamingResponse.baseDirPath >> FileRenamingResponse.oldFileName >> FileRenamingResponse.renamed >> FileRenamingResponse.message;
+    }
+        break;
+
+    case FileTransferPacket::FileTransferPacket::FT_FileDownloadingRequest:
+    {
+        //in >> FileDownloadingRequest.baseDir >> FileDownloadingRequest.fileName >> FileDownloadingRequest.dirToSaveFile;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileDownloadingResponse:
+    {
+        //in >> FileDownloadingResponse.accepted >> FileDownloadingResponse.baseDir >> FileDownloadingResponse.fileName >> FileDownloadingResponse.fileMD5Sum >> FileDownloadingResponse.size >> FileDownloadingResponse.errorCode;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileUploadingRequest:
+    {
+        //in >> FileUploadingRequest.fileName >> FileUploadingRequest.fileMD5Sum >> FileUploadingRequest.size >> FileUploadingRequest.fileSaveDir;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileUploadingResponse:
+    {
+        //in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileDataRequest:
+    {
+        //in >> FileDataRequest.fileMD5 >> FileDataRequest.startPieceIndex >> FileDataRequest.endPieceIndex;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileData:
+    {
+        //in >> FileDataResponse.fileMD5 >> FileDataResponse.pieceIndex >> FileDataResponse.data >> FileDataResponse.pieceMD5;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileTXStatus:
+    {
+        //in >> FileTXStatus.fileMD5 >> FileTXStatus.status;
+    }
+        break;
+
+    case FileTransferPacket::FT_FileTXError:
+    {
+        //in >> FileTXError.fileName >> FileTXError.fileMD5 >> FileTXError.errorCode >> FileTXError.message;
+    }
+        break;
+
+    default:
+        break;
+    }
+
+
+}
+
+
+
+
+
 
 
 UserInfo* ServerPacketsParser::logUserIn(const QString &userID, const QByteArray &encryptedPassword, IM::OnlineState loginState, IM::ErrorType *errorType){

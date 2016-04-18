@@ -25,7 +25,7 @@
 #include <qfile.h>
 #include <qtextstream.h>
 #include <qtextcodec.h>
-
+#include <QDir>
 
 
 
@@ -726,7 +726,7 @@ FaceList CustomFaceConfig::groupMembers(const int groupIndex)
 
 bool CustomFaceConfig::loadXML()
 {
-	QFile xmlFile(m_Dir+"/"XML_FACE_FILE);
+    QFile xmlFile(m_Dir+QDir::separator()+XML_FACE_FILE);
 	if(! xmlFile.open( QIODevice::ReadOnly ) ) {
 		// if config file not existed we create an default config file
 		createConfig();
@@ -764,7 +764,7 @@ bool CustomFaceConfig::saveXML()
 	xmlstr.replace(TAG_FILE_ORG, __FILE_ORG);
 	xmlstr.replace(TAG_FILE_FIXED, __FILE_FIXED);
 
-	QFile xmlFile(m_Dir+"/"XML_FACE_FILE);
+    QFile xmlFile(m_Dir+QDir::separator()+XML_FACE_FILE);
 	if(! xmlFile.open( QIODevice::ReadOnly ) ) return false;
 
 	QTextStream xmlStream(&xmlFile);

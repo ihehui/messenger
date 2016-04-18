@@ -189,10 +189,8 @@ void FileTransmissionManagerBase::cancelUploadFileRequest(int socketID, const QS
         return;
     }
 
-
-    m_fileTransmissionPacketsParser->stopFileTX(socketID, fileMD5Sum);
+    m_fileTransmissionPacketsParser->stopFileTX(socketID, "", fileMD5Sum);
     tryToCloseFile(peerID, fileMD5Sum);
-
 }
 
 void FileTransmissionManagerBase::requestDownloadFilesFromPeer(int socketID, const QString &peerID, const QString &remoteBaseDir, const QStringList &remoteFiles, const QString &localDir){
@@ -242,12 +240,12 @@ void FileTransmissionManagerBase::acceptFileUploadRequest(int socketID, const QS
     const FileManager::FileMetaInfo *info = m_fileManager->tryToReceiveFile(fileMD5Sum, localSavePath, size, &errorString);
     if(!info){
         //TODO
-        m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, peerID, fileMD5Sum, false, errorString);
+        m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum, errorString);
         qCritical()<<QString("ERROR! Can not upload file '%1'! %2").arg(localSavePath).arg(errorString);
         return;
     }
 
-    if(!m_fileTransmissionPacketsParser->requestFileData(socketID, peerID, fileMD5Sum, 0, 0)){
+    if(!m_fileTransmissionPacketsParser->requestFileData(socketID, fileMD5Sum, 0, 0)){
         tryToCloseFile(peerID, fileMD5Sum);
         return;
     }
@@ -264,17 +262,15 @@ void FileTransmissionManagerBase::declineFileUploadRequest(int socketID, const Q
     }
 
 
-    m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, peerID, fileMD5Sum, false, "");
+    m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum,  "");
 }
 
 void FileTransmissionManagerBase::acceptFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size){
 
     if(socketID == INVALID_SOCK_ID){
-        //TODO:
         qCritical()<<"ERROR! Invalid socket!";
         return;
     }
-
 
     startFileManager();
 
@@ -282,11 +278,11 @@ void FileTransmissionManagerBase::acceptFileDownloadRequest(int socketID, const 
     const FileManager::FileMetaInfo *info = m_fileManager->tryToSendFile(fileName, &errorString);
     if(!info){
         qCritical()<<tr("ERROR! Can not send file! %1").arg(errorString);
-        m_fileTransmissionPacketsParser->denyFileDownloadRequest(socketID, peerID, fileName, errorString);
+        m_fileTransmissionPacketsParser->responseFileDownloadRequest(socketID, false, fileName);
         return ;
     }
 
-    bool ok = m_fileTransmissionPacketsParser->acceptFileDownloadRequest(socketID, peerID, fileName, info->md5sum, info->size);
+    bool ok = m_fileTransmissionPacketsParser->responseFileDownloadRequest(socketID, true, fileName, info->md5sum, info->size);
     if(!ok){
         tryToCloseFile(peerID, info->md5sum);
         qCritical()<<tr("ERROR! Can not send file! %1").arg(m_fileTransmissionPacketsParser->lastErrorMessage());
@@ -298,32 +294,23 @@ void FileTransmissionManagerBase::acceptFileDownloadRequest(int socketID, const 
 
 }
 
-void FileTransmissionManagerBase::declineFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName, const QString &message){
+void FileTransmissionManagerBase::declineFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName){
 
     if(socketID == INVALID_SOCK_ID){
         //TODO:
         qCritical()<<"ERROR! Invalid socket!";
         return;
     }
-
-
-    m_fileTransmissionPacketsParser->denyFileDownloadRequest(socketID, peerID, fileName, message);
-
+    bool ok = m_fileTransmissionPacketsParser->responseFileDownloadRequest(socketID, true, fileName);
 }
 
 void FileTransmissionManagerBase::abortFileTransmission(int socketID, const QString &peerID, const QByteArray &fileMD5Sum){
 
 
 
-    m_fileTransmissionPacketsParser->fileTXStatusChanged(socketID, peerID, fileMD5Sum, quint8(File_TX_Aborted));
+    m_fileTransmissionPacketsParser->fileTXStatusChanged(socketID, fileMD5Sum, quint8(File_TX_Aborted));
 
     tryToCloseFile(peerID, fileMD5Sum);
-
-//    //TODO
-//    QList<int> requests = fileTXRequestHash.keys(socketID);
-//    foreach (int request, requests) {
-//        fileTXRequestHash.remove(request);
-//    }
 
 }
 
@@ -389,7 +376,7 @@ void FileTransmissionManagerBase::fileDownloadRequestAccepted(int socketID, cons
         return;
     }
 
-    if(!m_fileTransmissionPacketsParser->requestFileData(socketID, peerID, fileMD5Sum, 0, 0)){
+    if(!m_fileTransmissionPacketsParser->requestFileData(socketID, fileMD5Sum, 0, 0)){
         tryToCloseFile(peerID, fileMD5Sum);
         qCritical()<<tr("ERROR! Failed to download file '%1'! %2 ").arg(remoteFileName).arg(m_fileTransmissionPacketsParser->lastErrorMessage());
         return;
@@ -612,7 +599,7 @@ void FileTransmissionManagerBase::fileDataRead(int requestID, const QByteArray &
     int socketID = info->socketID;
     if(socketID == INVALID_SOCK_ID){return;}
 
-    m_fileTransmissionPacketsParser->sendFileData(socketID, info->peerID, fileMD5, pieceIndex, &data, &dataHashSUM);
+    m_fileTransmissionPacketsParser->sendFileData(socketID, fileMD5, pieceIndex, &data, &dataHashSUM);
 
 //    updateFileTransmissionInfo(socketID, fileMD5, pieceIndex, data.size());
     updateFileTransmissionInfo(info, pieceIndex, data.size());
@@ -627,7 +614,7 @@ void FileTransmissionManagerBase::fileTXError(int requestID, const QByteArray &f
     int socketID = info->socketID;
     if(socketID == INVALID_SOCK_ID){return;}
 
-    m_fileTransmissionPacketsParser->fileTXError(socketID, info->peerID, fileMD5, errorCode, errorString);
+    m_fileTransmissionPacketsParser->fileTXError(socketID, fileMD5, errorCode, errorString);
 
 }
 
@@ -644,7 +631,7 @@ void FileTransmissionManagerBase::pieceVerified(const QByteArray &fileMD5, int p
 
         if(verificationProgress == 100){
             qWarning()<<"Done!";
-            m_fileTransmissionPacketsParser->fileTXStatusChanged(info->socketID, info->peerID, fileMD5, quint8(IM::File_TX_Done));
+            m_fileTransmissionPacketsParser->fileTXStatusChanged(info->socketID, fileMD5, quint8(IM::File_TX_Done));
         }else{
             //TODO:
             //            int uncompletedPieceIndex = m_fileManager->getOneUncompletedPiece(fileMD5);
@@ -662,9 +649,9 @@ void FileTransmissionManagerBase::pieceVerified(const QByteArray &fileMD5, int p
 
             if((pieceIndex % FILE_PIECES_IN_ONE_REQUEST) == 0){
                 if(pieceIndex == 0 ){
-                    m_fileTransmissionPacketsParser->requestFileData(info->socketID, info->peerID, fileMD5, 1, 2 * FILE_PIECES_IN_ONE_REQUEST);
+                    m_fileTransmissionPacketsParser->requestFileData(info->socketID, fileMD5, 1, 2 * FILE_PIECES_IN_ONE_REQUEST);
                 }else{
-                    m_fileTransmissionPacketsParser->requestFileData(info->socketID, info->peerID, fileMD5, pieceIndex + FILE_PIECES_IN_ONE_REQUEST + 1, pieceIndex + 2 * FILE_PIECES_IN_ONE_REQUEST);
+                    m_fileTransmissionPacketsParser->requestFileData(info->socketID, fileMD5, pieceIndex + FILE_PIECES_IN_ONE_REQUEST + 1, pieceIndex + 2 * FILE_PIECES_IN_ONE_REQUEST);
                 }
             }
 
@@ -672,7 +659,7 @@ void FileTransmissionManagerBase::pieceVerified(const QByteArray &fileMD5, int p
 
     }else{
         qCritical()<<"ERROR! Verification Failed! Piece:"<<pieceIndex;
-        m_fileTransmissionPacketsParser->requestFileData(info->socketID, info->peerID, fileMD5, pieceIndex, pieceIndex);
+        m_fileTransmissionPacketsParser->requestFileData(info->socketID, fileMD5, pieceIndex, pieceIndex);
     }
 
 

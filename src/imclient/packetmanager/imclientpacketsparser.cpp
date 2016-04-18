@@ -99,36 +99,37 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
 
     //QByteArray packetBody = packet.getPacketBody();
-    quint8 packetType = packet.getPacketType();
-    QString peerID = packet.getPeerID();
+    quint8 packetType = packet->getPacketType();
+    QString peerID = packet->getPeerID();
 
-    QHostAddress peerAddress = packet.getPeerHostAddress();
-    quint16 peerPort = packet.getPeerHostPort();
-    SOCKETID socketID = packet.getSocketID();
+    QHostAddress peerAddress = packet->getPeerHostAddress();
+    quint16 peerPort = packet->getPeerHostPort();
+    SOCKETID socketID = packet->getSocketID();
 
 
     switch(packetType){
 
     case quint8(IM::CMD_ServerDiscovery):
     {
+        qDebug()<<"~~CMD_ServerDiscovery";
 
-        ServerDiscoveryPacket p(packet, QByteArray());
+        ServerDiscoveryPacket p(*packet, QByteArray());
         emit signalServerDeclarePacketReceived(p);
 
-        qWarning()<<"~~ServerDeclare"<<" serverAddress:"<<peerAddress.toString()<<" servername:"<<peerID <<" serverRTPListeningPort:"<<port;
+        qWarning()<<"***Server Found***:"<<" serverAddress:"<<peerAddress.toString()<<" servername:"<<peerID <<" serverRTPListeningPort:"<<peerPort;
     }
         break;
 
     case quint8(IM::CMD_DataForward):
     {
-        qDebug()<<"~~ForwardedDataByServer";
+        qDebug()<<"~~CMD_DataForward";
 
-        DataForwardPacket p(packet, sessionEncryptionKey);
+        DataForwardPacket p(*packet, sessionEncryptionKey);
 
         PacketBase packet2;
-        if(packet2.fromByteArray(p.data)){
+        if(packet2.fromByteArray(&p.data)){
             packet2.setSocketID(socketID);
-            parseIncomingPacketData(packet2);
+            parseIncomingPacketData(&packet2);
         }else{
             qWarning()<<"ERROR! Can not convert data to Packet!";
         }
@@ -138,15 +139,15 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_Announcement):
     {
-        AnnouncementPacket p(packet, QByteArray());
-        emit signalServerAnnouncementPacketReceived(p.AnnouncementInfo.announcementID, (mustRead == quint8(0))?false:true);
-        qDebug()<<"~~ServerAnnouncement"<<"groupName:"<<groupName<<"computerName:"<<computerName<<"announcement:"<<announcement<<"mustRead:"<<mustRead;
+        AnnouncementPacket p(*packet, QByteArray());
+        emit signalServerAnnouncementPacketReceived(p);
+        qDebug()<<"~~CMD_Announcement";
     }
         break;
 
     case quint8(IM::CMD_Rgeistration):
     {
-        RgeistrationPacket p(packet, sessionEncryptionKey);
+        RgeistrationPacket p(*packet, sessionEncryptionKey);
         emit signalRegistrationPacketReceived(p);
         qDebug()<<"~~CMD_Rgeistration";
     }
@@ -154,7 +155,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_UpdatePassword):
     {
-        UpdatePasswordPacket p(packet, sessionEncryptionKey);
+        UpdatePasswordPacket p(*packet, sessionEncryptionKey);
         emit signalUpdatePasswordResultReceived(p);
         qDebug()<<"--CMD_UpdatePassword";
     }
@@ -162,7 +163,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_Login):
     {
-        LoginPacket p(packet, sessionEncryptionKey);
+        LoginPacket p(*packet, sessionEncryptionKey);
         processLoginPacket(p);
         qDebug()<<"--CMD_Login";
     }
@@ -170,7 +171,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_OnlineStateChanged):
     {
-        OnlineStateChangedPacket p(packet, sessionEncryptionKey);
+        OnlineStateChangedPacket p(*packet, sessionEncryptionKey);
         quint8 stateCode = p.stateCode;
         QString contactID = p.contactID;
         QString contactIP = p.contactIP;
@@ -183,7 +184,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_OnlineContacts):
     {
-        OnlineContacts p(packet, sessionEncryptionKey);
+        OnlineContacts p(*packet, sessionEncryptionKey);
         emit signalContactsOnlineInfoPacketReceived(p.contactsOnlineInfoString);
         qDebug()<<"--CMD_OnlineContacts";
     }
@@ -191,7 +192,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_ContactGroupsInfo):
     {
-        ContactGroupsInfoPacket p(packet, sessionEncryptionKey);
+        ContactGroupsInfoPacket p(*packet, sessionEncryptionKey);
         emit signalContactGroupsInfoPacketReceived(p);
 
         qDebug()<<"--CMD_ContactGroupsInfo";
@@ -200,14 +201,14 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_InterestGroupsInfo):
     {
-        InterestGroupsInfoPacket p(packet, sessionEncryptionKey);
+        InterestGroupsInfoPacket p(*packet, sessionEncryptionKey);
         emit signalInterestGroupsInfoPacketReceived(p);
     }
         break;
 
     case quint8(IM::CMD_ContactInfo):
     {
-        ContactInfoPacket p(packet, sessionEncryptionKey);
+        ContactInfoPacket p(*packet, sessionEncryptionKey);
         emit signalContactInfoPacketReceived(p);
         qDebug()<<"~~CMD_ContactInfo";
 
@@ -216,7 +217,7 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_SearchInfo):
     {
-        SearchInfoPacket p(packet, sessionEncryptionKey);
+        SearchInfoPacket p(*packet, sessionEncryptionKey);
         emit signalSearchContactsResultPacketReceived(p);
         qDebug()<<"~~CMD_SearchInfo";
     }
@@ -224,7 +225,6 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     case quint8(IM::CMD_ChatMessage):
     {
-
 //        bool fromContact = myself->hasContact(peerID);
 //        if(fromContact){
 //            //From contact
@@ -232,293 +232,36 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 //            //From server
 //        }
 
-
         if(peerID == m_serverName){
             //FROM SERVER
-            ChatMessagePacket p(packet, sessionEncryptionKey);
+            ChatMessagePacket p(*packet, sessionEncryptionKey);
             emit signalChatMessageReceivedFromContact(p);
-
             qDebug()<<"Chat message from server!";
         }else{
             //FROM CONTACT
-            ChatMessagePacket p(packet, sessionEncryptionKeyWithContactHash.value(peerID));
+            ChatMessagePacket p(*packet, sessionEncryptionKeyWithContactHash.value(peerID));
             emit signalChatMessageReceivedFromContact(p);
-
             qDebug()<<"Chat message from contact!";
         }
-
-        //emit signalChatMessageReceivedFromContact(p);
     }
         break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    case quint8(IM::SESSION_ENCRYPTION_KEY_WITH_CONTACT):
+    case quint8(IM::CMD_Captcha):
     {
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString contactID = "";
-        QByteArray key;
-        stream >> contactID >> key;
-
-        sessionEncryptionKeyWithContactHash[contactID] = key;
-
+        CaptchaInfoPacket p(*packet, sessionEncryptionKey);
+        emit signalCaptchaInfoPacketReceived(p);
+        qDebug()<<"~~CMD_Captcha";
     }
         break;
-
-
-
-
-
-
-
 
         //File TX
-    case quint8(IM::SERVER_RESPONSE_FILE_SERVER_INFO):
+    case quint8(IM::CMD_FileTransfer):
     {
-        qDebug()<<"~~SERVER_RESPONSE_FILE_SERVER_INFO";
-
-        QByteArray encryptedData;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        quint32 ipv4Address = 0;
-        quint16 port = 0;
-        stream >> ipv4Address >> port ;
-
-        Q_ASSERT(port != 0);
-        if(port == 0){
-            qCritical()<<"ERROR! Invalid File Server Address Info!";
-            return;
-        }
-
-        if(ipv4Address == 0){
-            myself->setFileServerAddress(myself->getLoginServerAddress());
-        }else{
-            myself->setFileServerAddress(QHostAddress(ipv4Address).toString());
-        }
-
-        myself->setFileServerPort(port);
-
+        FileTransferPacket p(*packet, sessionEncryptionKey);
+        emit signalFileTransferPacketReceived(p);
+        qDebug()<<"~~CMD_FileTransfer";
     }
         break;
-
-    case quint8(IM::REQUEST_UPLOAD_FILE):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5Sum;
-        QString fileName = "";
-        quint64 size = 0;
-        stream >> fileMD5Sum >> fileName >> size ;
-
-        emit signalContactRequestUploadFile(contactID, fileMD5Sum, fileName, size);
-
-        qDebug()<<"~~REQUEST_UPLOAD_FILE";
-    }
-        break;
-
-    case quint8(IM::REQUEST_DOWNLOAD_FILE):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString localBaseDir, fileName;
-        stream >> localBaseDir >> fileName;
-
-        emit signalContactRequestDownloadFile(contactID, localBaseDir, fileName);
-
-        qDebug()<<"~~RequestDownloadFile";
-    }
-        break;
-
-    case quint8(IM::RESPONSE_FILE_DOWNLOAD_REQUEST):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QString fileName = "";
-        bool accepted = false;
-        stream >> fileName >> accepted;
-
-        if(accepted){
-            QByteArray fileMD5Sum;
-            quint64 size;
-            stream >> fileMD5Sum >> size;
-            emit signalFileDownloadRequestAccepted(contactID, fileName, fileMD5Sum, size);
-        }else{
-            QString message = "";
-            stream >> message;
-            signalFileDownloadRequestDenied(contactID, fileName, message);
-        }
-        qDebug()<<"~~RESPONSE_FILE_DOWNLOAD_REQUEST";
-    }
-        break;
-    case quint8(IM::RESPONSE_FILE_UPLOAD_REQUEST):
-    {
-        QByteArray encryptedData;
-        QString contactID = peerID;
-        in >> encryptedData;
-
-        QByteArray decryptedData;
-        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-        //TODO
-        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-        stream.setVersion(QDataStream::Qt_4_8);
-        QByteArray fileMD5;
-        bool accepted = false;
-        QString message = "";
-
-        in >> fileMD5 >> accepted >> message;
-
-        emit signalFileUploadRequestResponsed(contactID, fileMD5, accepted, message);
-
-        qDebug()<<"~~RESPONSE_FILE_UPLOAD_REQUEST";
-    }
-        break;
-
-
-
-//    case quint8(IM::RequestFileData):
-//    {
-//        QByteArray encryptedData;
-//        QString contactID = peerID;
-//        in >> encryptedData;
-
-//        QByteArray decryptedData;
-//        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-//        //TODO
-//        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-//        stream.setVersion(QDataStream::Qt_4_8);
-//        QByteArray fileMD5;
-//        int startPieceIndex = 0, endPieceIndex = 0;
-//        in >> fileMD5 >> startPieceIndex >> endPieceIndex;
-
-//        emit signalFileDataRequested(socketID, contactID, fileMD5, startPieceIndex, endPieceIndex);
-
-//        qDebug()<<"~~RequestFileData";
-//    }
-//        break;
-//    case quint8(IM::FileData):
-//    {
-//        QByteArray encryptedData;
-//        QString contactID = peerID;
-//        in >> encryptedData;
-
-//        QByteArray decryptedData;
-//        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-//        //TODO
-//        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-//        stream.setVersion(QDataStream::Qt_4_8);
-//        QByteArray fileMD5, data, sha1;;
-//        int pieceIndex = 0;
-//        stream >> fileMD5 >> pieceIndex >> data >>sha1;
-
-//        //        if(data.size() != size || sha1 != QCryptographicHash::hash(data, QCryptographicHash::Sha1)){
-//        //            qCritical()<<"ERROR! Data Verification Failed!";
-//        //            requestFileData(socketID, offset, size);
-//        //            return;
-//        //        }
-
-//        emit signalFileDataReceived(socketID, contactID, fileMD5, pieceIndex, data, sha1);
-
-//        //qDebug()<<"~~FileData";
-//    }
-//        break;
-//    case quint8(IM::FileTXStatusChanged):
-//    {
-//        QByteArray encryptedData;
-//        QString contactID = peerID;
-//        in >> encryptedData;
-
-//        QByteArray decryptedData;
-//        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-//        //TODO
-//        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-//        stream.setVersion(QDataStream::Qt_4_8);
-//        QByteArray fileMD5;
-//        quint8 status;
-//        stream >> fileMD5 >> status;
-
-//        emit signalFileTXStatusChanged(socketID, contactID, fileMD5, status);
-
-//        qDebug()<<"~~FileTXStatusChanged";
-//    }
-//        break;
-//    case quint8(IM::FileTXError):
-//    {
-//        QByteArray encryptedData;
-//        QString contactID = peerID;
-//        in >> encryptedData;
-
-//        QByteArray decryptedData;
-//        cryptography->teaCrypto(&decryptedData, encryptedData, sessionEncryptionKeyWithContactHash.value(contactID), false);
-//        //TODO
-//        QDataStream stream(&decryptedData, QIODevice::ReadOnly);
-//        stream.setVersion(QDataStream::Qt_4_8);
-//        QByteArray fileMD5;
-//        quint8 errorCode;
-//        QString message;
-//        stream >> fileMD5 >> errorCode >> message;
-
-//        emit signalFileTXError(socketID, contactID, fileMD5, errorCode, message);
-
-//        qDebug()<<"~~FileTXStatusChanged";
-//    }
-//        break;
 
 
 
@@ -531,83 +274,9 @@ void IMClientPacketsParser::parseIncomingPacketData(PacketBase *packet){
 
     }
 
-    PacketHandlerBase::recylePacket(packet);
-
 
 }
 
-
-//void IMClientPacketsParser::startHeartbeat(int interval){
-//    if(NULL == heartbeatTimer){
-//        heartbeatTimer = new QTimer();
-//        heartbeatTimer->setSingleShot(false);
-//        heartbeatTimer->setInterval(interval);
-//        connect(heartbeatTimer, SIGNAL(timeout()), this, SLOT(sendHeartbeatPacket()));
-
-//    }else{
-//        heartbeatTimer->stop();
-//        heartbeatTimer->setInterval(interval);
-//    }
-
-//    heartbeatTimer->start();
-
-
-//}
-
-//void IMClientPacketsParser::stopHeartbeat(){
-//    if(heartbeatTimer){
-//        heartbeatTimer->stop();
-//    }
-
-//}
-
-//int IMClientPacketsParser::crypto(QByteArray *destination, const QByteArray &source, bool encrypt){
-
-//    return cryptography->teaCrypto(destination, source, sessionEncryptionKey, encrypt);
-
-//}
-
-
-//quint16 IMClientPacketsParser::getLastReceivedPacketSN(const QString &peerID){
-//    quint16 lastpacketSN = 0;
-
-//    QList< QPair<quint16 /*Packet Serial Number*/, QDateTime/*Received Time*/> > list = m_receivedPacketsHash.values(peerID);
-//    if(list.isEmpty()){
-//        return lastpacketSN;
-//    }
-
-//    QDateTime lastpacketTime(QDate(1970, 1, 1));
-//    for(int i=0; i<list.size(); i++){
-//        QPair<quint16, QDateTime> pair = list.at(i);
-//        QDateTime time = pair.second;
-//        if(time.addSecs(UDP_PACKET_WAITING_FOR_REPLY_TIMEOUT) < QDateTime::currentDateTime()){
-//            m_receivedPacketsHash.remove(peerID, pair);
-//        }else{
-//            if(time > lastpacketTime){
-//                lastpacketTime = time;
-//                lastpacketSN = pair.first;
-//            }
-//        }
-//    }
-//    //    foreach ( QPair<quint16, QDateTime> pair, list) {
-//    //        QDateTime time = pair.second;
-//    //        if(time.addSecs(UDP_PACKET_WAITING_FOR_REPLY_TIMEOUT) < QDateTime::currentDateTime()){
-//    //            m_receivedPacketsHash.remove(peerID, pair);
-//    //            list.removeOne(pair);
-//    //        }else{
-//    //            if(time > lastpacketTime){
-//    //                lastpacketTime = time;
-//    //                lastpacketSN = pair.first;
-//    //            }
-//    //        }
-//    //    }
-
-//    //TODO:TX Rate
-
-//    return lastpacketSN;
-
-
-//}
 
 
 
@@ -632,6 +301,11 @@ QStringList IMClientPacketsParser::runningNICAddresses(){
 
 }
 
+void IMClientPacketsParser::setSessionEncryptionKeyWithContact(const QString &contactID, const QByteArray &key){
+    sessionEncryptionKeyWithContactHash[contactID] = key;
+}
+
+
 void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet){
 
     LoginPacket::PacketInfoType infoType = packet.InfoType;
@@ -640,20 +314,16 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet){
     {
         QString serverAddress = packet.LoginServerInfo.serverAddress;
         quint16 serverPort = packet.LoginServerInfo.serverPort;
-        if( serverPort == 0 || ((serverAddress == peerAddress.toString()) && (serverPort == peerPort)) ){
-            if(!login(socketID)){
+        if( serverPort == 0 || ((serverAddress == packet.getPeerHostAddress().toString()) && (serverPort == packet.getPeerHostPort())) ){
+            if(!login(packet.getSocketID())){
                 emit signalLoginResultReceived(quint8(IM::ERROR_UnKnownError));
             }
         }else{
-            emit signalLoginServerRedirected(serverAddress, serverPort, peerID);
+            emit signalLoginServerRedirected(serverAddress, serverPort, packet.getPeerID());
         }
     }
         break;
-    case LoginPacket::INFO_TYPE_CAPTCHA:
-    {
-        //out << CaptchaInfo.type << CaptchaInfo.captchaImage << CaptchaInfo.captcha << CaptchaInfo.authResult;
-    }
-        break;
+
     case LoginPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT:
     {
     }
@@ -661,14 +331,13 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet){
 
     case LoginPacket::INFO_TYPE_LOGIN_RESULT:
     {
-        quint8 loginResultCode = packet.AuthResultInfo.loggedin;
+        quint8 loggedin = packet.AuthResultInfo.loggedin;
         quint8 errorTypeCode = packet.AuthResultInfo.errorType;
         QString errorMessage = "";
 
-        if(loginResultCode){
-
-            m_serverName = peerID;
-            m_socketConnectedToServer = socketID;
+        if(loggedin){
+            m_serverName = packet.getPeerID();
+            m_socketConnectedToServer = packet.getSocketID();
 
             uint serverTime = packet.AuthResultInfo.serverTime;
             Q_ASSERT(serverTime);
@@ -684,11 +353,12 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet){
             quint32 personalContactGroupsInfoVersionOnServer = packet.AuthResultInfo.personalContactGroupsInfoVersionOnServer;
             quint32 interestGroupsInfoVersionOnServer = packet.AuthResultInfo.interestGroupsInfoVersionOnServer;
             quint32 personalMessageInfoVersionOnServer = packet.AuthResultInfo.personalMessageInfoVersionOnServer;
-            if(personalSummaryInfoVersionOnServer != myself->getPersonalSummaryInfoVersion()){requestContactInfo(socketID, m_myUserID, true);}
-            if(personalDetailInfoVersionOnServer != myself->getPersonalDetailInfoVersion()){requestContactInfo(socketID, m_myUserID, false);}
+
+            if(personalSummaryInfoVersionOnServer != myself->getPersonalSummaryInfoVersion()){requestContactInfo(m_socketConnectedToServer, m_myUserID, true);}
+            if(personalDetailInfoVersionOnServer != myself->getPersonalDetailInfoVersion()){requestContactInfo(m_socketConnectedToServer, m_myUserID, false);}
 //            if(personalContactGroupsInfoVersionOnServer != user->getPersonalContactGroupsVersion()){requestPersonalContactGroupsInfo(socketID);}
-            if(interestGroupsInfoVersionOnServer != myself->getInterestGroupInfoVersion()){requestInterestGroupsList(socketID);}
-            if(personalMessageInfoVersionOnServer != myself->getPersonalMessageInfoVersion()){requestPersonalMessage(socketID, m_myUserID);}
+            if(interestGroupsInfoVersionOnServer != myself->getInterestGroupInfoVersion()){requestInterestGroupsList(m_socketConnectedToServer);}
+//            if(personalMessageInfoVersionOnServer != myself->getPersonalMessageInfoVersion()){requestPersonalMessage(m_socketConnectedToServer, m_myUserID);}
 
         }
 

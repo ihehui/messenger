@@ -201,18 +201,15 @@ enum Command {
     CMD_ContactInfo,
     CMD_SearchInfo,
     CMD_ChatMessage,
+    CMD_Captcha,
+
+    CMD_FileTransfer,
 
 
 
-
-
-
-
-    SESSION_ENCRYPTION_KEY_WITH_CONTACT, //s
 
 
     //File TX
-    CLIENT_REQUEST_FILE_SERVER_INFO,
     SERVER_RESPONSE_FILE_SERVER_INFO,
 
     REQUEST_DOWNLOAD_FILE,
