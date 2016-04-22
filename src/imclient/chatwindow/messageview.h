@@ -34,8 +34,8 @@
 #ifndef MESSAGEVIEW_H
 #define MESSAGEVIEW_H
 
-#include <QWebView>
-#include <QWebFrame>
+#include <QQmlError>
+#include <QQuickView>
 
 
 #include "../imuser.h"
@@ -45,14 +45,14 @@
 
 namespace HEHUI {
 
-class MessageView : public QWebView
+class MessageView : public QWidget
 {
     Q_OBJECT
 
 public:
     enum ImageDownloadStatus{ImageDownloading, ImageDownloaded, ImageDownloadingFailed};
 
-    explicit MessageView(QWidget *parent = 0);
+    explicit MessageView(bool isGroupChat, QWidget *parent = 0);
 
 //    QSize sizeHint();
 
@@ -69,7 +69,11 @@ public slots:
 
 private slots:
     void scrollWebFrame(const QSize &contentsSize);
-    void linkClicked(const QUrl & url);
+    void linkClicked(const QString &urlString);
+
+
+    void quickViewStatusChanged(QQuickView::Status);
+    void sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
 
 
 private:
@@ -88,7 +92,9 @@ private:
     int m_properScrollBarValue;
     QString lastUnACKedMessageFromContact;
 
-    QWebFrame *m_mainWebFrame;
+
+    QQuickView *m_quickView;
+
 
 
 };

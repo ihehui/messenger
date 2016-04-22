@@ -52,9 +52,38 @@ const QString ImagePath_Downloading = "qrc:/chatmessagewindow/imagedownloading.g
 const QString ImagePath_DownloadingFailed = "qrc:/chatmessagewindow/imagedownloadingfailed.png";
 
 
-MessageView::MessageView(QWidget *parent) :
-    QWebView(parent)
+MessageView::MessageView(bool isGroupChat, QWidget *parent)
+    :QWidget(parent), m_quickView(new QQuickView)
 {
+
+
+    m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
+    connect(m_quickView, &QQuickView::statusChanged,
+            this, &MainWindow::quickViewStatusChanged);
+    connect(m_quickView, &QQuickWindow::sceneGraphError,
+            this, &MainWindow::sceneGraphError);
+    QString qmlFileName = "qrc:/resources/qml/chat.qml";
+    if(isGroupChat){
+        qmlFileName = "qrc:/resources/qml/groupchat.qml";
+    }
+    m_quickView->setSource(QUrl(QStringLiteral(qmlFileName)));
+
+    QQuickItem *rootItem = m_quickView->rootObject();
+    QObject *listViewer = rootItem->findChild<QObject *>("chatMessagesList");
+    if(listViewer){
+        connect(listViewer, SIGNAL(linkActivated(const QString &)), this, SLOT(linkClicked(const QString &)));
+    }
+
+
+
+    QWidget *container = QWidget::createWindowContainer(m_quickView);
+    container->setMinimumSize(m_quickView->size());
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(container);
+
+
+
 
     m_myself = IMUser::instance();
     myUserID = m_myself->getUserID();
@@ -66,12 +95,10 @@ MessageView::MessageView(QWidget *parent) :
     lastUnACKedMessageFromContact = "";
 
 
-    QWebPage *m_page = page();
     m_page->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     connect(m_page, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
 
-    m_mainWebFrame = m_page->mainFrame();
-    connect(m_mainWebFrame, SIGNAL(contentsSizeChanged(const QSize &)), this, SLOT(scrollWebFrame(const QSize &)));
+    //connect(m_mainWebFrame, SIGNAL(contentsSizeChanged(const QSize &)), this, SLOT(scrollWebFrame(const QSize &)));
 
 
 }
@@ -230,7 +257,9 @@ void MessageView::scrollWebFrame(const QSize & contentsSize){
 
 }
 
-void MessageView::linkClicked(const QUrl & url){
+void MessageView::linkClicked(const QString &urlString){
+
+    QUrl url(urlString);
     QString scheme = url.scheme();
 
     if(scheme == URLScheme_Image){
@@ -259,6 +288,21 @@ void MessageView::linkClicked(const QUrl & url){
 
     qDebug()<<"URL scheme:"<<scheme<<" host:"<<url.host()<<" userInfo:"<<url.userInfo();
 
+}
+
+void MessageView::quickViewStatusChanged(QQuickView::Status status)
+{
+//    if (status == QQuickView::Error) {
+//        QStringList errors;
+//        foreach (const QQmlError &error, m_quickView->errors())
+//            errors.append(error.toString());
+//        statusBar()->showMessage(errors.join(QStringLiteral(", ")));
+//    }
+}
+
+void MessageView::sceneGraphError(QQuickWindow::SceneGraphError, const QString &message)
+{
+    //statusBar()->showMessage(message);
 }
 
 

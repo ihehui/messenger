@@ -5,8 +5,8 @@
 #include <QColor>
 #include <QDebug>
 
-#include <QtWebKit>
-#include <QtWebKitWidgets>
+#include <QQuickView>
+#include <QQmlError>
 
 #include "./chatmessagewindow.h"
 #include "../contactsmanager/contact.h"

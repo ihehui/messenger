@@ -7,7 +7,7 @@ QT += core \
     sql \
     network \
     xml \
-    webengine
+    webenginewidgets
 
 qtHaveModule(printsupport): QT += printsupport
 
