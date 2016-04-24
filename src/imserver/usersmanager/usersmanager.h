@@ -59,7 +59,7 @@ public:
     static void setActivationMode(quint8 mode);
 
     static quint8 passwordUpdateAuthMode();
-    static quint8 setPasswordUpdateAuthMode(quint8 mode);
+    static void setPasswordUpdateAuthMode(quint8 mode);
 
 
     UserInfo* getUserInfo(const QString &imUserID);

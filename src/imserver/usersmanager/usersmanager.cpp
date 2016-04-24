@@ -95,7 +95,7 @@ quint8 UsersManager::passwordUpdateAuthMode(){
     return m_passwordUpdateAuthMode;
 }
 
-quint8 UsersManager::setPasswordUpdateAuthMode(quint8 mode){
+void UsersManager::setPasswordUpdateAuthMode(quint8 mode){
     m_passwordUpdateAuthMode = mode;
 }
 
@@ -503,7 +503,7 @@ QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineU
 
     quint32 pageSize = SEARCH_RESULT_PAGE_SIZE;
 
-    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly?1:0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(businessAddress).arg(startIndex).arg(pageSize);
+    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly?1:0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(location).arg(startIndex).arg(pageSize);
     qDebug()<<"----queryString:"<<queryString;
 
     if(!db.isValid()){

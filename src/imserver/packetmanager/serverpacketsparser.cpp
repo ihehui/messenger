@@ -1114,7 +1114,6 @@ void ServerPacketsParser::processSearchInfoPacket(const SearchInfoPacket &packet
         break;
     case SearchInfoPacket::PIT_SEARCH_CONTACT_RESULT:
     {
-        out << SearchContactResult.result;
     }
         break;
     case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_CONDITIONS:
@@ -1130,8 +1129,7 @@ void ServerPacketsParser::processSearchInfoPacket(const SearchInfoPacket &packet
     }
         break;
     case SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_RESULT:
-    {
-        out << SearchInterestGroupResult.result;
+    {        
     }
         break;
 
@@ -1148,7 +1146,9 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo){return;}
 
-    SearchInfoPacket::PacketInfoType infoType = packet.InfoType;
+    int socketID = packet.getSocketID();
+
+    ChatMessagePacket::PacketInfoType infoType = packet.InfoType;
     switch (infoType) {
     case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE:
     {
@@ -1174,7 +1174,7 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
 
         //Send To Contact
         if(contactInfo->getOnlineState() != IM::ONLINESTATE_OFFLINE){
-            sendContactChatMessagePacket(contactInfo->getSocketID(), userID, message, contactInfo->getSessionEncryptionKey());
+            sendContactChatMessagePacket(contactInfo->getSocketID(), userID, message, imageNames, contactInfo->getSessionEncryptionKey());
         }
 
 
@@ -1182,19 +1182,19 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
         break;
     case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGES_CACHED_ON_SERVER:
     {
-        out << ContactChatMessageCachedOnServer.messages;
     }
         break;
     case ChatMessagePacket::PIT_CONTACT_CHAT_HISTORY_MESSAGES:
     {
-        out << ContactChatHistoryMessages.contactID << ContactChatHistoryMessages.messages << ContactChatHistoryMessages.startime;
     }
         break;
     case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGE:
-    {
-        quint32 interestGroupID = 0;
-        QString  message = "", imageNames = "";
-        stream >> interestGroupID >> message >> imageNames;
+    {     
+        quint32 interestGroupID = packet.GroupChatMessage.groupID;
+        QString memberID = packet.GroupChatMessage.memberID;
+        uint time = packet.GroupChatMessage.time;
+        QString  message = packet.GroupChatMessage.message;
+        QString imageNames = packet.GroupChatMessage.imageNames;
 
         if(userInfo->isMemberOfInterestGroup(interestGroupID)){
             saveCachedInterestGroupChatMessageFromIMUser(userID, interestGroupID, message);
@@ -1213,20 +1213,18 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
         }
 
         //TODO:Send message to all contacts
-        sendInterestGroupChatMessageToMembers(interestGroupID, userInfo, message);
+        sendInterestGroupChatMessageToMembers(interestGroupID, userInfo, message, imageNames);
 
-
-       out << GroupChatMessage.groupID << GroupChatMessage.memberID << GroupChatMessage.time << GroupChatMessage.message;
     }
         break;
     case ChatMessagePacket::PIT_GROUP_CHAT_MESSAGES_CACHED_ON_SERVER:
     {
-        out << GroupChatMessagesCachedOnServer.messages;
+        //out << GroupChatMessagesCachedOnServer.messages;
     }
         break;
     case ChatMessagePacket::PIT_GROUP_CHAT_HISTORY_MESSAGES:
     {
-        out << GroupChatHistoryMessages.groupID << GroupChatHistoryMessages.messages << GroupChatHistoryMessages.startime;
+        //out << GroupChatHistoryMessages.groupID << GroupChatHistoryMessages.messages << GroupChatHistoryMessages.startime;
     }
         break;
     case ChatMessagePacket::PIT_CHAT_IMAGE:
@@ -1296,15 +1294,15 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
         break;
     case ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT:
     {
+        QString contactID = packet.SessionEncryptionKeyWithContact.contactID;
         UserInfo *contactInfo = getUserInfo(contactID);
         if(!contactInfo){return;}
         if(contactInfo->isOnLine()){
             QByteArray key = ServerUtilities::generateSessionEncryptionKey();
-            sendSessionEncryptionKeyWithContact(socketID, userID, contactInfo->getSessionEncryptionKey(), key, contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
-            sendSessionEncryptionKeyWithContact(socketID, contactID, userInfo->getSessionEncryptionKey(), key, peerAddress.toString(), peerPort);
+            sendSessionEncryptionKeyWithContact(socketID, userID, key, contactInfo->getSessionEncryptionKey());
+            sendSessionEncryptionKeyWithContact(socketID, contactID, key, userInfo->getSessionEncryptionKey());
         }else{
-            sendContactOnlineStatusChangedPacket(socketID, contactID, quint8(IM::ONLINESTATE_OFFLINE), userInfo->getSessionEncryptionKey(), contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort(), peerAddress.toString(), peerPort);
-
+            sendContactOnlineStatusChangedPacket(socketID, userInfo->getSessionEncryptionKey(), quint8(IM::ONLINESTATE_OFFLINE), contactID,  contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
         }
     }
         break;
@@ -1329,17 +1327,17 @@ void ServerPacketsParser::processCaptchaInfoPacket(const CaptchaInfoPacket &pack
         break;
     case CaptchaInfoPacket::CAPTCHA_IMAGE:
     {
-        out << captchaImage;
+        //out << captchaImage;
     }
         break;
     case CaptchaInfoPacket::CAPTCHA_CODE:
     {
-        out << captchaCode;
+        //out << captchaCode;
     }
         break;
     case CaptchaInfoPacket::CAPTCHA_AUTH_RESULT:
     {
-        out << approved;
+        //out << approved;
     }
         break;
 
@@ -1364,7 +1362,7 @@ void ServerPacketsParser::processFileTransferPacket(const FileTransferPacket &pa
         //TODO
         QString address = "";
         quint16 port = 0;
-        responseFileServerInfo(packet.getSocketID(), address, port);
+        responseFileServerInfo(packet.getSocketID(), address, port, userInfo->getSessionEncryptionKey());
     }
         break;
 
