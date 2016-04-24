@@ -34,6 +34,8 @@
 #ifndef MESSAGEVIEW_H
 #define MESSAGEVIEW_H
 
+
+#include <QWidget>
 #include <QQmlError>
 #include <QQuickView>
 
@@ -58,12 +60,15 @@ public:
 
 
 signals:
+    void appendMessage(const QString &userID, const QString &displayName, const QString &headIcon, const QString &message, uint timestamp);
+
     void signalRequestDownloadImage(const QString &contactID, const QString &imageName);
     void signalTipLastUnACKedMessageFromContact(const QString &tip);
 
 public slots:
-    void appendChatMessage(const QString &userID, const QString &displayName, const QString &message, const QString &datetime, bool richTextMessage);
+    void appendChatMessage(const QString &userID, const QString &displayName, const QString &headICON, const QString &message, uint timestamp);
     void appendHTML(const QString &htmlTag);
+    void setHtml(const QString &html);
 
     void updateImage(const QString &imageName, ImageDownloadStatus downloadStatus);
 
@@ -94,6 +99,7 @@ private:
 
 
     QQuickView *m_quickView;
+    QObject *messagesListViewer;
 
 
 

@@ -31,10 +31,11 @@
 #include "messageview.h"
 
 
-#include <QWebElement>
+#include <QMetaObject>
+
+#include <QVBoxLayout>
+#include <QQuickItem>
 #include <QFile>
-
-
 
 #include "../servertime/servertime.h"
 #include "../settings.h"
@@ -58,35 +59,37 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 
 
     m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
-    connect(m_quickView, &QQuickView::statusChanged,
-            this, &MainWindow::quickViewStatusChanged);
-    connect(m_quickView, &QQuickWindow::sceneGraphError,
-            this, &MainWindow::sceneGraphError);
+    connect(m_quickView, &QQuickView::statusChanged, this, &MessageView::quickViewStatusChanged);
+    connect(m_quickView, &QQuickWindow::sceneGraphError, this, &MessageView::sceneGraphError);
     QString qmlFileName = "qrc:/resources/qml/chat.qml";
     if(isGroupChat){
         qmlFileName = "qrc:/resources/qml/groupchat.qml";
     }
-    m_quickView->setSource(QUrl(QStringLiteral(qmlFileName)));
-
-    QQuickItem *rootItem = m_quickView->rootObject();
-    QObject *listViewer = rootItem->findChild<QObject *>("chatMessagesList");
-    if(listViewer){
-        connect(listViewer, SIGNAL(linkActivated(const QString &)), this, SLOT(linkClicked(const QString &)));
-    }
-
-
+    m_quickView->setSource(QUrl(qmlFileName));
 
     QWidget *container = QWidget::createWindowContainer(m_quickView);
     container->setMinimumSize(m_quickView->size());
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(container);
-
-
+    setLayout(layout);
 
 
     m_myself = IMUser::instance();
     myUserID = m_myself->getUserID();
+
+    messagesListViewer = 0;
+    QQuickItem *rootItem = m_quickView->rootObject();
+    messagesListViewer = rootItem->findChild<QObject *>("chatMessagesList");
+    if(messagesListViewer){
+        //connect(this, SIGNAL(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)), messagesListViewer, SLOT(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)));
+
+        connect(messagesListViewer, SIGNAL(linkActivated(const QString &)), this, SLOT(linkClicked(const QString &)));
+
+        messagesListViewer->setProperty("myID", myUserID);
+    }
+
+
 
     imageCachePath = Settings::instance()->getImageCacheDir();
 
@@ -94,9 +97,6 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 
     lastUnACKedMessageFromContact = "";
 
-
-    m_page->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(m_page, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
 
     //connect(m_mainWebFrame, SIGNAL(contentsSizeChanged(const QSize &)), this, SLOT(scrollWebFrame(const QSize &)));
 
@@ -107,129 +107,78 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 //    return QSize(540, 300);
 //}
 
-void MessageView::appendChatMessage(const QString &userID, const QString &displayName, const QString &message, const QString &datetime, bool richTextMessage){
-    qDebug()<<"----MessageView::appendChatMessage(...) contactID:"<<userID<<" Time:"<<datetime<<" Msg:"<<message;;
+void MessageView::appendChatMessage(const QString &userID, const QString &displayName, const QString &headICON, const QString &message, uint timestamp){
+    qDebug()<<"----MessageView::appendChatMessage(...) contactID:"<<userID<<" Time:"<<timestamp<<" Msg:"<<message;;
 
-    QString timeString = datetime;
-    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
-    if(dt.date() == ServerTime::instance()->time().date() ){
-        timeString = dt.toString("hh:mm:ss");
-    }
+//    QString timeString = datetime;
+//    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
+//    if(dt.date() == ServerTime::instance()->time().date() ){
+//        timeString = dt.toString("hh:mm:ss");
+//    }
 
     //URL: contact://contactid
-    QString msg = QString("<span>%1(<a title=\"%2\" href=\"%3://%2\">%2</a>) %4</span>").arg(displayName).arg(userID).arg(URLScheme_Contact).arg(timeString);
+    //QString msg = QString("<span>%1(<a title=\"%2\" href=\"%3://%2\">%2</a>) %4</span>").arg(displayName).arg(userID).arg(URLScheme_Contact).arg(timeString);
 
 
-    if(!richTextMessage){
-        QString richMessage = simpleTextToRichTextMessage(message);
-        msg += richMessage;
-
-        if(m_properScrollBarValue != m_mainWebFrame->scrollBarValue(Qt::Vertical)){
-            lastUnACKedMessageFromContact = contactsSimpleTextToPlainTipTextMessage(message);
-            lastUnACKedMessageFromContact = displayName + ":" + lastUnACKedMessageFromContact;
-        }
-
-    }else{
-        msg += message;
+//    emit appendMessage(userID, displayName, headICON, message, timestamp);
+    if(messagesListViewer){
+        QMetaObject::invokeMethod(messagesListViewer, "appendMessage",
+                                 Q_ARG(QString, userID),
+                                 Q_ARG(QString, displayName),
+                                 Q_ARG(QString, headICON),
+                                 Q_ARG(QString, message),
+                                 Q_ARG(uint, timestamp)
+                                 );
     }
-
-
-
-    QWebElement doc = m_mainWebFrame->documentElement();
-    QWebElement div = doc.findFirst("div");
-    div.appendInside(msg);
-
-
-    //Modify images path
-    QWebElement messageElement = div.lastChild();
-    QWebElementCollection elements = messageElement.findAll("img");
-    foreach (QWebElement element, elements){
-        QString imageSRC = element.attribute("src");
-        if(!imageSRC.trimmed().startsWith("qrc:/", Qt::CaseInsensitive)){
-            QString localCacheImage = imageCachePath + "/" + imageSRC;
-            if(QFile::exists(localCacheImage)){
-                //element.setAttribute("src", "file://" + localCacheImage);
-                element.setAttribute("src", QUrl::fromLocalFile(localCacheImage).toString());
-            }else{
-                //Need to download the image
-                element.setAttribute("id", imageSRC);
-                if(m_myself->isAutoDownloadImageFromContact()){
-                    //Download image
-                    element.setAttribute("src", ImagePath_Downloading);
-                    emit signalRequestDownloadImage(userID, imageSRC);
-                }else{
-                    element.setAttribute("src", ImagePath_Normal);
-                }
-            }
-            //URL: image://imagename
-            QString url = QString("%1://%2@%3").arg(URLScheme_Image).arg(userID).arg(imageSRC);
-            element.setOuterXml(QString("<a href=\"%1\">%2</a>").arg(url).arg(element.toOuterXml()));
-
-        }
-    }
-
-
-
-//    qDebug();
-//    qDebug()<<"------msg:"<<msg;
-//    qDebug();
-//    qDebug()<<"------messageElement: "<<messageElement.toOuterXml();
-
-//    qDebug();
-
-//    qWarning()<<"HTML:\n"<<m_mainWebFrame->toHtml();
-
 
 }
 
 void MessageView::appendHTML(const QString &htmlTag){
     qDebug()<<"----MessageView::appendHTML(...)  htmlTag:"<<htmlTag;;
 
-    QWebElement doc = m_mainWebFrame->documentElement();
-    QWebElement div = doc.findFirst("div");
-    div.appendInside(htmlTag);
+}
+
+void MessageView::setHtml(const QString &html){
 
 }
 
 void MessageView::updateImage(const QString &imageName, ImageDownloadStatus downloadStatus){
 
-    QWebElement doc = m_mainWebFrame->documentElement();
-    QWebElementCollection elements = doc.findAll("img");
-    foreach (QWebElement element, elements){
+//    QWebElement doc = m_mainWebFrame->documentElement();
+//    QWebElementCollection elements = doc.findAll("img");
+//    foreach (QWebElement element, elements){
 
-        //QString imageSRC = element.attribute("src");
-        QString imageID = element.attribute("id").trimmed();
-        if(imageID != imageName){continue;}
-
-
-        //if(imageSRC.trimmed().startsWith("qrc:/", Qt::CaseInsensitive)){
-            switch (downloadStatus) {
-            case ImageDownloading:
-            {
-                element.setAttribute("src", ImagePath_Downloading);
-            }
-                break;
-            case ImageDownloaded:
-            {
-                element.setAttribute("src", "file://" + imageCachePath +"/"+imageName);
-                element.removeAttribute("id");
-            }
-                break;
-
-            case ImageDownloadingFailed:
-            {
-                element.setAttribute("src", ImagePath_DownloadingFailed);
-            }
-                break;
-            default:
-                break;
-            }
-
-        //}
+//        //QString imageSRC = element.attribute("src");
+//        QString imageID = element.attribute("id").trimmed();
+//        if(imageID != imageName){continue;}
 
 
+//        //if(imageSRC.trimmed().startsWith("qrc:/", Qt::CaseInsensitive)){
+//            switch (downloadStatus) {
+//            case ImageDownloading:
+//            {
+//                element.setAttribute("src", ImagePath_Downloading);
+//            }
+//                break;
+//            case ImageDownloaded:
+//            {
+//                element.setAttribute("src", "file://" + imageCachePath +"/"+imageName);
+//                element.removeAttribute("id");
+//            }
+//                break;
 
-    }
+//            case ImageDownloadingFailed:
+//            {
+//                element.setAttribute("src", ImagePath_DownloadingFailed);
+//            }
+//                break;
+//            default:
+//                break;
+//            }
+
+//        //}
+
+//    }
 
 }
 
@@ -237,21 +186,21 @@ void MessageView::updateImage(const QString &imageName, ImageDownloadStatus down
 void MessageView::scrollWebFrame(const QSize & contentsSize){
 
 
-    int frameHeight = m_mainWebFrame->geometry().size().height();
-    if(contentsSize.height() <= frameHeight){
-        m_properScrollBarValue = 0;
-        return;
-    }
+//    int frameHeight = m_mainWebFrame->geometry().size().height();
+//    if(contentsSize.height() <= frameHeight){
+//        m_properScrollBarValue = 0;
+//        return;
+//    }
 
-    int curScrollBarValue = m_mainWebFrame->scrollBarValue(Qt::Vertical);
+//    int curScrollBarValue = m_mainWebFrame->scrollBarValue(Qt::Vertical);
 
-    if(m_properScrollBarValue == curScrollBarValue){
-        m_mainWebFrame->setScrollBarValue(Qt::Vertical, contentsSize.height());
-        m_properScrollBarValue = m_mainWebFrame->scrollBarValue(Qt::Vertical);
-    }else{
-        m_properScrollBarValue = contentsSize.height() - frameHeight;
-        emit signalTipLastUnACKedMessageFromContact(lastUnACKedMessageFromContact);
-    }
+//    if(m_properScrollBarValue == curScrollBarValue){
+//        m_mainWebFrame->setScrollBarValue(Qt::Vertical, contentsSize.height());
+//        m_properScrollBarValue = m_mainWebFrame->scrollBarValue(Qt::Vertical);
+//    }else{
+//        m_properScrollBarValue = contentsSize.height() - frameHeight;
+//        emit signalTipLastUnACKedMessageFromContact(lastUnACKedMessageFromContact);
+//    }
 
     lastUnACKedMessageFromContact = "";
 

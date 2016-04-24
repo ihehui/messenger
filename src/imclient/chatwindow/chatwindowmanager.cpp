@@ -918,7 +918,7 @@ void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const 
 //            }
 //        }
         QFileInfo info(filePath);
-        m_fileTransmissionPacketsParser->requestUploadFile(m_socketConnectedToServer, contact->getUserID(), fileMD5, info.fileName(), info.size());
+        m_fileTransmissionPacketsParser->requestUploadFile(m_socketConnectedToServer, fileMD5, info.fileName(), info.size());
 
     }else{
         emit signalSendUploadingFileRequest(contact, filePath, fileMD5);

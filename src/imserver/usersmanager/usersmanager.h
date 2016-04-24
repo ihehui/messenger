@@ -79,7 +79,10 @@ public:
     void updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
 
     QString searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
-
+    QString searchContact(const QString &keyword, quint8 searchOnlineUsersOnly,
+                       quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
+                       quint8 gender, quint8 age, bool matchExactly, int startIndex
+                       );
 
     bool saveCachedChatMessageFromIMUser(const QString &senderID, const QString &receiverID, const QString &message);
     QStringList cachedChatMessagesForIMUser(UserInfo* userInfo);
@@ -128,7 +131,7 @@ public:
 
     bool getUserAllContactsInfoFromDatabase(UserInfo* info, QString *infoString);
     bool getUserAllContactsInfoVersionFromDatabase(UserInfo* info, QString *infoString);
-    bool createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup);
+    IM::ErrorType createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID = 0);
     bool updateContactGroupNameInDB(UserInfo* info, quint32 groupID, const QString &newGroupName);
 
 

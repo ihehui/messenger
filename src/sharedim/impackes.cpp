@@ -551,7 +551,7 @@ void LoginPacket::init(){
     LoginServerInfo.serverAddress = "";
     LoginServerInfo.serverPort = 0;
 
-    AuthInfo.password = "";
+    AuthInfo.password = QByteArray();
     AuthInfo.stateAfterLoggedin = quint8(IM::ONLINESTATE_ONLINE);
     AuthInfo.deviceInfo = "";
 
@@ -906,7 +906,7 @@ void InterestGroupsInfoPacket::init(){
     GroupsList.groups = "";
     GroupsList.version = 0;
 
-    GroupInfo.id = 0;
+//    GroupInfo.id = 0;
     GroupInfo.infoString = "";
 //    GroupInfo.name = QByteArray();
 //    GroupInfo.creator = "";
@@ -921,9 +921,7 @@ void InterestGroupsInfoPacket::init(){
 
     GroupCreationInfo.name = "";
     GroupCreationInfo.type = 0;
-    GroupCreationInfo.id = 0;
 
-    GroupDeletionInfo.id = 0;
     GroupDeletionInfo.deleted = 0;
 
     MemberApplicationInfo.userID = "";
@@ -957,7 +955,7 @@ void InterestGroupsInfoPacket::parsePacketBody(QByteArray &packetBody){
         break;
     case PIT_GROUP_INFO:
     {
-        in >> GroupInfo.id >> GroupInfo.infoString;
+        in >> GroupInfo.infoString;
         //in >> GroupInfo.id >> GroupInfo.name >> GroupInfo.creator >> GroupInfo.creationTime
         //   >> GroupInfo.type >> GroupInfo.infoVersion >> GroupInfo.members >> GroupInfo.admins;
     }
@@ -969,12 +967,12 @@ void InterestGroupsInfoPacket::parsePacketBody(QByteArray &packetBody){
         break;
     case PIT_GROUP_CREATION:
     {
-        in >> GroupCreationInfo.name >> GroupCreationInfo.type >> GroupCreationInfo.id;
+        in >> GroupCreationInfo.name >> GroupCreationInfo.type;
     }
         break;
     case PIT_GROUP_DELETION:
     {
-        in >> GroupDeletionInfo.id >> GroupDeletionInfo.deleted;
+        in >> GroupDeletionInfo.deleted;
     }
         break;
     case PIT_GROUP_MEMBER_APPLICATION:
@@ -1019,7 +1017,7 @@ QByteArray InterestGroupsInfoPacket::packBodyData(){
         break;
     case PIT_GROUP_INFO:
     {
-        out << GroupInfo.id << GroupInfo.infoString;
+        out << GroupInfo.infoString;
         //out << GroupInfo.id << GroupInfo.name << GroupInfo.creator << GroupInfo.creationTime
         //   << GroupInfo.type << GroupInfo.infoVersion << GroupInfo.members << GroupInfo.admins;
     }
@@ -1031,12 +1029,12 @@ QByteArray InterestGroupsInfoPacket::packBodyData(){
         break;
     case PIT_GROUP_CREATION:
     {
-        out << GroupCreationInfo.name << GroupCreationInfo.type << GroupCreationInfo.id;
+        out << GroupCreationInfo.name << GroupCreationInfo.type;
     }
         break;
     case PIT_GROUP_DELETION:
     {
-        out << GroupDeletionInfo.id << GroupDeletionInfo.deleted;
+        out << GroupDeletionInfo.deleted;
     }
         break;
     case PIT_GROUP_MEMBER_APPLICATION:
@@ -1094,6 +1092,8 @@ void ContactInfoPacket::init(){
     ContactChangeGroup.oldGroupID = 0;
     ContactChangeGroup.newGroupID = 0;
 
+    ContactFriendingRequest.nickName = "";
+    ContactFriendingRequest.userFace = "";
     ContactFriendingRequest.message = "";
     ContactFriendingRequest.groupID = 0;
 
@@ -1130,7 +1130,7 @@ void ContactInfoPacket::parsePacketBody(QByteArray &packetBody){
         break;
     case PIT_FRIENDING_REQUEST:
     {
-        in >> ContactFriendingRequest.message >> ContactFriendingRequest.groupID;
+        in >> ContactFriendingRequest.nickName >> ContactFriendingRequest.userFace >> ContactFriendingRequest.message >> ContactFriendingRequest.groupID;
     }
         break;
     case PIT_FRIENDING_RESULT:
@@ -1179,7 +1179,7 @@ QByteArray ContactInfoPacket::packBodyData(){
 
     case PIT_FRIENDING_REQUEST:
     {
-        out << ContactFriendingRequest.message >> ContactFriendingRequest.groupID;
+        out << ContactFriendingRequest.nickName << ContactFriendingRequest.userFace << ContactFriendingRequest.message >> ContactFriendingRequest.groupID;
     }
         break;
     case PIT_FRIENDING_RESULT:
@@ -1381,6 +1381,7 @@ void ChatMessagePacket::init(){
     GroupChatHistoryMessages.startime = 0;
 
     ChatImage.isRequest = 0;
+    ChatImage.contactID = "";
     ChatImage.name = "";
     ChatImage.image = QByteArray();
 
@@ -1430,7 +1431,7 @@ void ChatMessagePacket::parsePacketBody(QByteArray &packetBody){
         break;
     case PIT_CHAT_IMAGE:
     {
-        in >> ChatImage.isRequest >> ChatImage.name >> ChatImage.image;
+        in >> ChatImage.isRequest >> ChatImage.contactID >> ChatImage.name >> ChatImage.image;
     }
         break;
     case PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT:
@@ -1489,7 +1490,7 @@ QByteArray ChatMessagePacket::packBodyData(){
         break;
     case PIT_CHAT_IMAGE:
     {
-        out << ChatImage.isRequest >> ChatImage.name << ChatImage.image;
+        out << ChatImage.isRequest << ChatImage.contactID << ChatImage.name << ChatImage.image;
     }
         break;
     case PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT:

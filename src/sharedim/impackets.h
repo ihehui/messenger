@@ -325,7 +325,7 @@ public:
     } LoginServerInfo;
 
     struct AuthInfoStruct{
-        QString password;
+        QByteArray password;
         quint8 stateAfterLoggedin;
         QString deviceInfo;
     } AuthInfo;
@@ -501,7 +501,7 @@ public:
     } GroupsList;
 
     struct GroupInfoStruct{
-        quint32 id;
+//        quint32 id;
         QString infoString;
 //        QString name;
 //        QString creator;
@@ -520,11 +520,9 @@ public:
     struct GroupCreationInfoStruct{
         QString  name;
         quint8 type;
-        quint32 id;
     } GroupCreationInfo;
 
     struct GroupDeletionInfoStruct{
-        quint32 id;
         quint8 deleted;
     } GroupDeletionInfo;
 
@@ -604,6 +602,8 @@ public:
 
 
     struct ContactFriendingRequestStruct{
+        QString nickName;
+        QString userFace;
         QString message;
         quint32 groupID;
     } ContactFriendingRequest;
@@ -759,6 +759,7 @@ public:
 
     struct ChatImagesStruct{
         quint8 isRequest;
+        QString contactID;
         QString name;
         QByteArray image;
     } ChatImage;

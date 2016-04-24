@@ -45,7 +45,6 @@ IMServer::IMServer(QObject *parent)
     :QObject(parent)
 {
 
-    m_packetHandler = 0;
     resourcesManager = 0;
 
     serverPacketsParser = 0;
@@ -81,14 +80,6 @@ IMServer::~IMServer(){
     ResourcesManagerInstance::cleanInstance();
     delete resourcesManager;
     resourcesManager = 0;
-
-    if(m_packetHandler){
-        m_packetHandler->clean();
-        delete m_packetHandler;
-        m_packetHandler = 0;
-    }
-    PacketHandlerBase::clean();
-
 
     QList<UserInfo*> clientInfoList = userInfoHash.values();
     userInfoHash.clear();
@@ -339,7 +330,6 @@ void IMServer::start()
     qDebug()<<"----Server::start()";
 
 
-    m_packetHandler = 0;
     resourcesManager = ResourcesManagerInstance::instance();
     serverPacketsParser = 0;
 
@@ -364,9 +354,9 @@ void IMServer::stop()
 //    }
     
     
-    if(serverPacketsParser){
-        serverPacketsParser->sendServerOfflinePacket();
-    }
+//    if(serverPacketsParser){
+//        serverPacketsParser->sendServerOfflinePacket();
+//    }
 
     databaseUtility->closeAllDBConnections();
     DatabaseUtility::closeAllDBConnections();

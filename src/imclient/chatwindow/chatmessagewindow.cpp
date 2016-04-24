@@ -4,6 +4,7 @@
 #include <QColorDialog>
 #include <QColor>
 #include <QDebug>
+#include <QToolTip>
 
 #include <QQuickView>
 #include <QQmlError>

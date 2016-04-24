@@ -209,7 +209,7 @@ public slots:
 
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_INFO;
-        packet.GroupInfo.id = groupID;
+        packet.GroupID = groupID;
 
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
@@ -229,7 +229,7 @@ public slots:
         qDebug()<<"----requestDisbandInterestGroup(...)";
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_DELETION;
-        packet.GroupDeletionInfo.id = groupID;
+        packet.GroupID = groupID;
 
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
@@ -274,8 +274,8 @@ public slots:
         return requestContactInfo(serverSocketID, m_myUserID);
     }
 
-    bool addContact(int serverSocketID, const QString &contactID, const QString &verificationMessage = "", quint32 groupID = ContactGroupBase::Group_Friends_ID){
-        qWarning()<<"--addContact(...)";
+    bool requestFriending(int serverSocketID, const QString &contactID, const QString &verificationMessage = "", quint32 groupID = ContactGroupBase::Group_Friends_ID){
+        qWarning()<<"--requestFriending(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_FRIENDING_REQUEST;
         packet.ContactID = contactID;
@@ -285,8 +285,8 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
 
-    bool responseAddContactRequestFromUser(int serverSocketID, const QString &userID, quint8 errorCode, const QString &extraMessage = ""){
-        qDebug()<<"--responseAddContactRequestFromUser(...)";
+    bool responseFriendingRequestFromUser(int serverSocketID, const QString &userID, quint8 errorCode, const QString &extraMessage = ""){
+        qDebug()<<"--responseFriendingRequestFromUser(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_FRIENDING_RESULT;
         packet.ContactID = userID;
@@ -329,7 +329,7 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
 
-    bool createContactGroup(int serverSocketID, quint32 parentGroupID, const QString &groupName, bool create = true){
+    bool createContactGroup(int serverSocketID, quint32 parentGroupID, const QString &groupName){
         qDebug()<<"--createContactGroup(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_CREATION;
@@ -410,22 +410,24 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
     }
 
-    bool sendImageToContact(int peerSocketID, const QString &imageName, const QByteArray &image, const QByteArray &sessionEncryptionKey){
+    bool sendImageToContact(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image){
         qDebug()<<"--sendImageToContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 0;
+        packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
         packet.ChatImage.image = image;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool requestDownloadImageFromContact(int peerSocketID, const QString &imageName, const QByteArray &sessionEncryptionKey){
+    bool requestDownloadImageFromContact(int peerSocketID, const QString &contactID, const QString &imageName){
         qDebug()<<"--requestImageFromContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 1;
+        packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());

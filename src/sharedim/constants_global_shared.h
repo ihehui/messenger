@@ -251,6 +251,9 @@ enum ErrorType {
     ERROR_IDNotExist,
     ERROR_PasswordIncorrect,
     ERROR_Duplicate_Login,
+
+    ERROR_GROUP_ID_NotExist,
+
     
     ERROR_Timeout,
     ERROR_ConnectionFailed,

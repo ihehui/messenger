@@ -464,6 +464,94 @@ QString UsersManager::searchContact(const QString &propertiesString, bool matchE
     
 }
 
+QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineUsersOnly,
+                   quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
+                   quint8 gender, quint8 age, bool matchExactly, int startIndex
+                   ){
+
+    if(matchExactly && keyword.isEmpty()){
+        qWarning()<<"ERROR! Invalid keyword!";
+        return QString();
+    }
+
+    IMUserBase::AgeSection as = IMUserBase::AgeSection(age);
+    quint8 startAge = 0, endAge = 120;
+    switch(as){
+    case IMUserBase::Age_Any:
+        break;
+    case IMUserBase::Age_1_18:
+        startAge = 1;
+        endAge = 18;
+        break;
+    case IMUserBase::Age_19_30:
+        startAge = 19;
+        endAge = 30;
+        break;
+    case IMUserBase::Age_31_40:
+        startAge = 31;
+        endAge = 40;
+        break;
+    case IMUserBase::Age_40_:
+        startAge = 41;
+        endAge = 120;
+        break;
+    default:
+        break;
+    }
+
+    //    User::Gender gd = User::Gender(genderString.toInt());
+
+    quint32 pageSize = SEARCH_RESULT_PAGE_SIZE;
+
+    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly?1:0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(businessAddress).arg(startIndex).arg(pageSize);
+    qDebug()<<"----queryString:"<<queryString;
+
+    if(!db.isValid()){
+        if(!openDatabase()){
+            return QString();
+        }
+    }
+    QSqlQuery query(db);
+
+    if(!query.exec(queryString)){
+        QSqlError error = query.lastError();
+        QString msg = QString("Can not search contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
+        qCritical()<<msg;
+
+        return QString();
+    }
+
+    QStringList usersInfoList;
+    while(query.next()){
+        //TODO:query安全性
+        QString userID = query.value(0).toString();
+        IM::OnlineState onlineState = IM::ONLINESTATE_OFFLINE;
+        if(searchOnlineUsersOnly){
+            UserInfo *info = getOnlineUserInfo(userID);
+            if(!info || (info->getOnlineState() != IM::ONLINESTATE_ONLINE)){
+                continue;
+            }else{
+                onlineState = IM::ONLINESTATE_ONLINE;
+            }
+        }
+
+        //TODO
+        //FORMAT:UserID,NickName,Gender,Age,Face,FriendshipApply,BusinessAddress,OnlineState
+        QStringList userInfoList;
+        userInfoList.append(userID);
+        for(int i=1; i<7; i++){
+            userInfoList.append(query.value(i).toString());
+            //qWarning()<<i<<":"<<query.value(i).toString();
+        }
+        userInfoList.append(QString::number(onlineState));
+
+        usersInfoList.append(userInfoList.join(QChar(SEPARTOR_RECORD)));
+    }
+
+    return usersInfoList.join(QChar(SEPARTOR_GROUP));
+}
+
+
 bool UsersManager::saveCachedChatMessageFromIMUser(const QString &senderID, const QString &receiverID, const QString &message){
 
     if(!db.isValid()){
@@ -1386,13 +1474,13 @@ bool UsersManager::getUserAllContactsInfoVersionFromDatabase(UserInfo* info, QSt
 
 }
 
-bool UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup){
+IM::ErrorType UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID){
     qDebug()<<"--UsersManager::createOrDeleteContactGroupInDB(...)  UserID:"<<info->getUserID()<<" groupName:"<<groupName<<" createGroup:"<<createGroup;
 
     Q_ASSERT(groupID);
 
     if(!info){
-        return false;
+        return IM::ERROR_IDNotExist;
     }
 
     quint32 gID = *groupID;
@@ -1401,20 +1489,20 @@ bool UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *group
         int newGroupID = info->getUnusedContactGroupID();
         if(newGroupID < 0){
             qCritical()<<"ERROR! Invalid unused contact group ID!"<<" Name:"<<groupName;
-            return false;
+            return IM::ERROR_ServerError;
         }else{
             gID = newGroupID;
         }
     }else if(!info->hasContactGroup(gID)){
         qCritical()<<"ERROR! Contact group does not exist!"<<" ID:"<<groupID;
-        return false;
+        return IM::ERROR_GROUP_ID_NotExist;
     }
 
 
 
     if(!db.isValid()){
         if(!openDatabase()){
-            return false;
+            return IM::ERROR_ServerError;
         }
     }
     QSqlQuery query(db);
@@ -1425,7 +1513,7 @@ bool UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *group
         QString msg = QString("Can not %1 contact group '%2' for user '%3'! %4 Error Type:%5 Error NO.:%6").arg(createGroup?"create":"delete").arg(groupName).arg(info->getUserID()).arg(error.text()).arg(error.type()).arg(error.number());
         qCritical()<<msg;
 
-        return false;
+        return IM::ERROR_ServerError;
     }
 
     //    statement = QString(" select @GroupInfoVersion; ");
@@ -1450,7 +1538,7 @@ bool UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *group
     //    qDebug()<<"Contact Groups:"<<info->getContactGroupsInfoString();
 
 
-    return true;
+    return IM::ERROR_NoError;
 
 }
 

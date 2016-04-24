@@ -59,7 +59,7 @@ MessageHistoryView::MessageHistoryView(QWidget *parent) :
 
 MessageHistoryView::~MessageHistoryView()
 {
-    m_messageView->stop();
+    //m_messageView->stop();
 }
 
 void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, bool canFetchMore){

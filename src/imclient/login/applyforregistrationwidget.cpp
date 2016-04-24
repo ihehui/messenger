@@ -89,7 +89,7 @@ void ApplyForRegistrationWidget::changeEvent(QEvent *e)
 
 void ApplyForRegistrationWidget::slotProcessRegistrationPacket(const RgeistrationPacket &packet){
 
-    RgeistrationPacket::PacketInfoType InfoType = RgeistrationPacket::PacketInfoType(type);
+    RgeistrationPacket::PacketInfoType InfoType = RgeistrationPacket::PacketInfoType(packet.InfoType);
 
     switch (InfoType) {
     case RgeistrationPacket::REGISTRATION_SERVER_INFO:
@@ -105,8 +105,8 @@ void ApplyForRegistrationWidget::slotProcessRegistrationPacket(const Rgeistratio
         break;
 
     case RgeistrationPacket::REGISTRATION_RESULT:
-    {
-        slotProcessRegistrationResult();
+    {             
+        slotProcessRegistrationResult(packet.RgeistrationResult.errorCode, packet.RgeistrationResult.sysID, "");
     }
         break;
 

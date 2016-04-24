@@ -10,7 +10,7 @@ import QtGraphicalEffects 1.0
 
 //聊天显示框
 Rectangle {
-    id: displayRect
+    id: root
 
 
     width : 500
@@ -21,7 +21,7 @@ Rectangle {
     border.color: "lightgray"
 
     ListView {
-        id: chatList
+        id: chatMessagesList
         anchors.fill: parent
         anchors.margins: 5
         clip: true
@@ -30,13 +30,18 @@ Rectangle {
         ScrollBar.vertical: ScrollBar { }
 
         signal linkActivated(string url);
+        function appendMessage(usrID, name, icon, msg, timestamp){
+            model.append({"userID":usrID, "nickName":name, "headICON":icon, "content":msg, "timestamp":timestamp})
+
+        }
+
 
         property string systemID: "0";
-        property string peerID: "10";
+        //property string peerID: "10";
         property string myID: "11";
 
-        property string peerNickName: "Test";
-        property string peerHeadICON: "qrc:/head/3.jpg";
+        //property string peerNickName: "Test";
+        //property string peerHeadICON: "qrc:/head/3.jpg";
         property string myHeadICON: "qrc:/head/4.jpg";
         property string peerBorderImage: "qrc:/img/chat_to_bg_normal.9.png";
         property string myBorderImage: "qrc:/img/chat_from_bg_normal.9.png";
@@ -44,10 +49,12 @@ Rectangle {
 
         model: ListModel {
             ListElement {
-                userID: "0"
-                content: "你好"
+                userID: "0";
+                nickName: "Test";
+                headICON: "";
+                content: "你好";
+                timestamp: 0
             }
-
         }
 
         delegate: Item {
@@ -58,8 +65,8 @@ Rectangle {
             height: Math.max(52, 16 + borderImageContent.height)
 
 
-            property bool isPeer: userID != chatList.myID ? true : false ;
-            property bool isSystem: userID == chatList.systemID ? true : false ;
+            property bool isPeer: userID != chatMessagesList.myID ? true : false ;
+            property bool isSystem: userID == chatMessagesList.systemID ? true : false ;
 
 
 
@@ -70,17 +77,19 @@ Rectangle {
                 x: isPeer ? parent.width - width - 2 : 2
                 y: 2
 
-               visible: isSystem ? false : true
-                source:isPeer ? chatList.peerHeadICON : chatList.myHeadICON
+                visible: isSystem ? false : true
+                //source:isPeer ? chatList.peerHeadICON : chatList.myHeadICON
+                source: headICON;
+
 
             }
             BorderImage {
                 id: msgWrapper
-                source: isPeer ? chatList.peerBorderImage : chatList.myBorderImage
+                source: isPeer ? chatMessagesList.peerBorderImage : chatMessagesList.myBorderImage
                 width: borderImageContent.width + 40
                 height: borderImageContent.height + 20
                 x: isPeer ? headPortrait.x - 2 - width :
-                                    headPortrait.x + headPortrait.width + 2
+                            headPortrait.x + headPortrait.width + 2
                 border.left: isPeer ? 6 : 16
                 border.top: 38
                 border.right: isPeer ? 16 : 6

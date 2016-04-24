@@ -75,8 +75,8 @@ public slots:
         ServerDiscoveryPacket packet;
         packet.responseFromServer = 1;
         packet.version = QString(APP_VERSION);
-        packet.rtpPort = localRTPListeningPort;
-        packet.tcpPort = m_localTCPServerListeningPort;
+        packet.rtpPort = 0;
+        packet.tcpPort = 0;
         packet.serverInstanceID = serverInstanceID;
 
         return m_ipmcServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
@@ -94,51 +94,35 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool sendServerAnnouncementPacket(const QHostAddress peerAddress, quint16 peerPort, const QString &announcement, bool mustRead = true){
+    bool sendServerAnnouncementPacket(const QHostAddress peerAddress, quint16 peerPort, const QByteArray &sessionEncryptionKey, unsigned int id , const QString &announcement, bool mustRead = true){
         qDebug()<<"----sendServerAnnouncementPacket(...)";
-
-
-        AnnouncementPacket packet(QByteArray());
+        AnnouncementPacket packet(sessionEncryptionKey);
         packet.InfoType = AnnouncementPacket::ANNOUNCEMENT_INFO;
-        packet.AnnouncementInfo.announcementID = ;
-        packet.AnnouncementInfo.content = "";
+        packet.AnnouncementInfo.announcementID = id;
+        packet.AnnouncementInfo.content = announcement;
 
-        QByteArray ba;
-
-
-        out << m_serverName << announcement << (mustRead?quint8(1):quint8(0));
-        packet->setPacketData(ba);
-
-        QByteArray ba = p.toByteArray();
-        if(ba.isEmpty()){return false;}
-
-        return m_ipmcServer->sendDatagram(ba, peerAddress, peerPort);
-
+        return m_ipmcServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
     }
 
 
-    bool sendRegistrationServerInfoPacket(int peerSocketID, const RgeistrationPacket &peerPacket){
+    bool sendRegistrationServerInfoPacket(int peerSocketID, quint8 regMode, const QString &message, const QString &serverAddress){
         qDebug()<<"--sendRegistrationServerInfoPacket(...)";
-
-        //TODO
-        RgeistrationPacket packet(QByteArray());
+        QByteArray key = QByteArray();
+        RgeistrationPacket packet(key);
         packet.InfoType = RgeistrationPacket::REGISTRATION_SERVER_INFO;
         packet.ServerInfo.requestServerInfo = 0;
         packet.ServerInfo.version = APP_VERSION;
-        packet.ServerInfo.regMode = quint8(RgeistrationPacket::REG_MODE_USER_CREATE_ALL);
-        packet.ServerInfo.activationMode = quint8(RgeistrationPacket::ACT_MODE_AUTO);;
-        packet.ServerInfo.message = "";
-        packet.ServerInfo.address = 0;
-        packet.ServerInfo.port = 0;
+        packet.ServerInfo.regMode = regMode;
+        packet.ServerInfo.message = message;
+        packet.ServerInfo.address = serverAddress;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
     bool sendClientRegistrationResultPacket(int peerSocketID, quint32 sysID, const QString &userID, const QString &password, quint8 errorTypeCode){
         qWarning()<<"--sendClientRegistrationResultPacket(...)";
-        
-        //TODO
-        RgeistrationPacket packet(QByteArray());
+        QByteArray key = QByteArray();
+        RgeistrationPacket packet(key);
         packet.InfoType = RgeistrationPacket::REGISTRATION_RESULT;
         packet.RgeistrationResult.sysID = sysID;
         packet.RgeistrationResult.userID = userID;
@@ -149,18 +133,18 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendUpdatePasswordAuthInfoPacket(int peerSocketID, quint8 authMode, const QByteArray &captchaImage, const QString &userID, const QString &securityQuestion, const QString &email, const QString &cellphoneNO, const QString &url){
+    bool sendUpdatePasswordAuthInfoPacket(int peerSocketID, const QString &userID, quint8 authMode, const QByteArray &captchaImage, const QString &securityQuestion, const QString &email, quint32 cellphoneNO, const QString &url){
         qWarning()<<"--sendUpdatePasswordAuthInfoPacket(...)";
 
         //TODO
-        UpdatePasswordPacket packet(QByteArray());
+        UpdatePasswordPacket packet(getUserSessionEncryptionKey(userID));
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_SERVER;
         packet.AuthInfo.authMode = authMode;
         packet.AuthInfo.captchaImage = captchaImage;
         packet.AuthInfo.userID = userID;
         packet.AuthInfo.securityQuestion = securityQuestion;
         packet.AuthInfo.email = email;
-        packet.AuthInfo.cellphoneNO =cellphoneNO;
+        packet.AuthInfo.cellphoneNO = cellphoneNO;
         packet.AuthInfo.url = url;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
@@ -222,7 +206,7 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendClientLastLoginInfoPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, const QString &extIPAddress, uint loginTime, uint logoutTime, const QString &clientVersion, const QString &deviceInfo ){
+    bool sendClientLastLoginInfoPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, const QString &extIPAddress, uint loginTime, uint logoutTime, const QString &deviceInfo ){
         qDebug()<<"--sendClientLastLoginInfoPacket(...)";
 
         LoginPacket packet(sessionEncryptionKey);
@@ -230,7 +214,6 @@ public slots:
         packet.PreviousLoginInfo.loginIP = extIPAddress;
         packet.PreviousLoginInfo.loginTime = loginTime;
         packet.PreviousLoginInfo.logoutTime = logoutTime;
-        packet.PreviousLoginInfo.clientVersion = clientVersion;
         packet.PreviousLoginInfo.deviceInfo = deviceInfo;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
@@ -279,7 +262,7 @@ public slots:
     }
 
     bool sendUserInterestGroupsListPacket(int peerSocketID, UserInfo *userInfo){
-        InterestGroupsInfoPacket packet(sessionEncryptionKey);
+        InterestGroupsInfoPacket packet(userInfo->getSessionEncryptionKey());
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUPS_LIST;
         packet.GroupsList.groups = getInterestGroupsListForUser(userInfo);
         packet.GroupsList.version = userInfo->getInterestGroupInfoVersion();
@@ -290,7 +273,7 @@ public slots:
     bool sendUserInterestGroupInfoPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID){
         InterestGroupsInfoPacket packet(userInfo->getSessionEncryptionKey());
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_INFO;
-        packet.GroupInfo.id = groupID;
+        packet.GroupID = groupID;
         packet.GroupInfo.infoString = getInterestGroupInfoStringForUser(userInfo, groupID);
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
@@ -300,11 +283,59 @@ public slots:
         qDebug()<<"--sendCreateInterestGroupResultPacket() "<<" groupID:"<<groupID<<" peerSocketID:"<<peerSocketID;
         InterestGroupsInfoPacket packet(userInfo->getSessionEncryptionKey());
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_CREATION;
-        packet.GroupCreationInfo.id = groupID;
+        packet.GroupID = groupID;
         packet.GroupCreationInfo.name = groupName;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
+
+    bool sendDisbandInterestGroupResultPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID, bool result){
+        qDebug()<<"--sendDisbandInterestGroupResultPacket() "<<" groupID:"<<groupID<<" peerSocketID:"<<peerSocketID;
+        InterestGroupsInfoPacket packet(userInfo->getSessionEncryptionKey());
+        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_DELETION;
+        packet.GroupID = groupID;
+        packet.GroupDeletionInfo.deleted = result;
+
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
+
+    bool sendUserJoinInterestGroupResultToUserPacket(int peerSocketID, quint32 groupID, const QString &memberID, bool approved, const QString &message, const QString &admin, const QByteArray &sessionEncryptionKey){
+        qDebug()<<"--sendUserJoinInterestGroupResultToUserPacket(...)";
+        InterestGroupsInfoPacket packet(sessionEncryptionKey);
+        packet.GroupID = groupID;
+        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION;
+        packet.MemberApplicationInfo.userID = memberID;
+        packet.MemberApplicationInfo.message = message;
+        packet.MemberApplicationInfo.approved = approved;
+        packet.MemberApplicationInfo.admin = admin;
+
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
+
+    bool sendUserJoinInterestGroupRequestToAdminPacket(int peerSocketID, quint32 groupID, const QString &userID, const QString &verificationMessage, const QByteArray &sessionEncryptionKey){
+        qDebug()<<"--sendUserJoinInterestGroupRequestToAdminPacket(...)";
+        InterestGroupsInfoPacket packet(sessionEncryptionKey);
+        packet.GroupID = groupID;
+        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION;
+        packet.MemberApplicationInfo.userID = userID;
+        packet.MemberApplicationInfo.message = verificationMessage;
+
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
+
+    bool sendUserQuitInterestGroupResultToUserPacket(int peerSocketID, quint32 groupID, const QString &memberID, const QString &admin, const QByteArray &sessionEncryptionKey){
+        qDebug()<<"--sendUserQuitInterestGroupResultToUserPacket(...)";
+        InterestGroupsInfoPacket packet(sessionEncryptionKey);
+        packet.GroupID = groupID;
+        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_DELETION;
+        packet.MemberDeletionInfo.userID = memberID;
+        packet.MemberDeletionInfo.blockForever = false;
+        packet.MemberDeletionInfo.admin = admin;
+
+        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+    }
+
+
 
     bool sendPersonalContactGroupsInfoPacket(int peerSocketID, const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendPersonalContactGroupsInfoPacket(...)";
@@ -327,7 +358,7 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendDeleteContactGroupResultPacket(int peerSocketID, quint32 groupID, const QString &groupName, quint8 errorCode, bool createGroup, const QByteArray &sessionEncryptionKey){
+    bool sendDeleteContactGroupResultPacket(int peerSocketID, quint32 groupID, quint8 errorCode, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendDeleteContactGroupResultPacket(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_DELETION;
@@ -337,39 +368,6 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendDisbandInterestGroupResultPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID, bool result){
-        qDebug()<<"--sendDisbandInterestGroupResultPacket() "<<" groupID:"<<groupID<<" peerSocketID:"<<peerSocketID;
-        InterestGroupsInfoPacket packet(userInfo->getSessionEncryptionKey());
-        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_DELETION;
-        packet.GroupDeletionInfo.id = groupID;
-        packet.GroupDeletionInfo.deleted = result;
-
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
-    }
-
-    bool sendUserJoinInterestGroupResultToUserPacket(int peerSocketID, quint32 groupID, const QString &memberID, bool approved, const QString &message, const QString &admin, const QByteArray &sessionEncryptionKey){
-        qDebug()<<"--sendUserJoinInterestGroupResultToUserPacket(...)";
-        InterestGroupsInfoPacket packet(sessionEncryptionKey);
-        packet.GroupID = groupID;
-        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION;
-        packet.MemberApplicationInfo.userID = memberID;
-        packet.MemberApplicationInfo.message = message;
-        packet.MemberApplicationInfo.approved = approved;
-        packet.MemberApplicationInfo.admin = admin;
-
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
-    }
-
-    bool sendUserJoinInterestGroupRequestToAdminPacket(int peerSocketID, quint32 groupID, const QString &userID, const QString &verificationMessage){
-        qDebug()<<"--sendUserJoinInterestGroupRequestToAdminPacket(...)";
-        InterestGroupsInfoPacket packet(sessionEncryptionKey);
-        packet.GroupID = groupID;
-        packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION;
-        packet.MemberApplicationInfo.userID = userID;
-        packet.MemberApplicationInfo.message = verificationMessage;
-
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
-    }
 
     bool sendUserInfoPacket(int peerSocketID, const QString &contactID, bool isSummaryInfo, const QString &infoString, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendUserInfoPacket(...)";
@@ -382,12 +380,13 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendAddContactRequestFromUserPacket(int peerSocketID, const QString &userID, const QString &verificationMessage, const QByteArray &sessionEncryptionKey){
+    bool sendAddContactRequestFromUserPacket(int serverSocketID, const QString &userID, const QString &nickName, const QString &userFace, const QString &verificationMessage, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendAddContactRequestFromUserPacket(...)";
-
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_FRIENDING_REQUEST;
         packet.ContactID = userID;
+        packet.ContactFriendingRequest.nickName = nickName;
+        packet.ContactFriendingRequest.userFace = userFace;
         packet.ContactFriendingRequest.message = verificationMessage;
 
         return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
@@ -405,7 +404,7 @@ public slots:
     }
 
 
-    bool sendDeleteContactResultPacket(int peerSocketID, const QString &contactID, bool blockForever, quint8 errorCode, const QByteArray &sessionEncryptionKey){
+    bool sendDeleteContactResultPacket(int peerSocketID, const QString &contactID, quint8 blockForever, quint8 errorCode, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendDeleteContactResultPacket(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_CONTACT_DELETION;
@@ -463,40 +462,42 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendInterestGroupChatMessagesToMemberPacket(int peerSocketID, quint32 interestGroupID, const QString &senderID, const QString &message, const QStringList &imageNameList, const QByteArray &sessionEncryptionKey){
+    bool sendInterestGroupChatMessagesToMemberPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, quint32 interestGroupID, const QString &senderID, const QString &message, const QString &imageNames){
         qDebug()<<"--sendInterestGroupChatMessagesToMemberPacket(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_GROUP_CHAT_MESSAGE;
         packet.GroupChatMessage.groupID = interestGroupID;
         packet.GroupChatMessage.memberID = senderID;
         packet.GroupChatMessage.message = message;
-        packet.GroupChatMessage.imageNames = imageNameList.join(",");;
+        packet.GroupChatMessage.imageNames = imageNames;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendRequestImagePacket(int peerSocketID, const QString &imageName, const QByteArray &sessionEncryptionKey){
+    bool sendRequestImagePacket(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendRequestImagePacket(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 1;
+        packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendImagePacket(int peerSocketID, const QString &imageName, const QByteArray &image, const QByteArray &sessionEncryptionKey){
+    bool sendImagePacket(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendImagePacket(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 0;
+        packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
         packet.ChatImage.image = image;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool sendSessionEncryptionKeyWithContact(int peerSocketID, const QString &contactID, const QByteArray &sessionEncryptionKeyWithContact){
+    bool sendSessionEncryptionKeyWithContact(int peerSocketID, const QString &contactID, const QByteArray &sessionEncryptionKeyWithContact, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendSessionEncryptionKeyWithContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT;
@@ -506,8 +507,8 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }
 
-    bool responseFileServerInfo(SOCKETID socketID, const QString &serverAddress, quint16 serverPort){
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
+    bool responseFileServerInfo(SOCKETID socketID, const QString &serverAddress, quint16 serverPort, const QByteArray &sessionEncryptionKey){
+        FileTransferPacket packet(sessionEncryptionKey);
         packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
         packet.FileServerInfo.address = serverAddress;
         packet.FileServerInfo.port = serverPort;
@@ -565,7 +566,7 @@ public slots:
         foreach (QString contact, contacts) {
             UserInfo *contactInfo = getOnlineUserInfo(contact);
             if(contactInfo){
-                sendContactOnlineStatusChangedPacket(contactInfo->getSocketID(), userInfo->getUserID(), onlineStateCode, contactInfo->getSessionEncryptionKey(), userHostAddress, userHostPort, contactInfo->getLastLoginExternalHostAddress(), contactInfo->getLastLoginExternalHostPort());
+                sendContactOnlineStatusChangedPacket(contactInfo->getSocketID(), contactInfo->getSessionEncryptionKey(), onlineStateCode, userInfo->getUserID(),  userHostAddress, userHostPort);
             }
         }
 
@@ -598,7 +599,7 @@ private slots:
 
     void peerDisconnected(int socketID);
 
-    void sendInterestGroupChatMessageToMembers(quint32 interestGroupID, UserInfo *sender, const QString &message);
+    void sendInterestGroupChatMessageToMembers(quint32 interestGroupID, UserInfo *sender, const QString &message, const QString &imageNames);
 
     void addContactForUser(UserInfo *userInfo, UserInfo *contactInfo, quint32 groupID);
 
@@ -618,17 +619,8 @@ private slots:
 
 
 signals:
-    //void  signalHeartbeatPacketReceived(const QString &clientAddress, const QString &userID);
-    //void  signalConfirmationOfReceiptPacketReceived(quint16 packetSerialNumber1, quint16 packetSerialNumber2);
 
     void signalClientLookForServerPacketReceived(const QHostAddress &clientAddress, quint16 clientTCPListeningPort, const QString &clientName);
-
-    //    void signalUserRequestLoginPacketReceived(const QString &userID, const QString &clientVersion);
-    //    void signalUserLoginInfoPacketReceived(const QString &userID, QByteArray encryptedPassword, IM::OnlineState state);
-    //    void signalUserOnlineStateChanged(const QString &userID, const QByteArray &encryptedOnlineState);
-    //    void signalUserRequestUserInfo(const QString &userID, const QByteArray &encryptedUserID);
-
-    //    void signalUserUpdatePassword(const QString &userID, const QByteArray &encryptedNewPassword);
 
 
 private:
@@ -637,16 +629,12 @@ private:
 
 
 private:
-    //    QHostAddress serverTCPListeningAddress;
-    //    quint16 serverTCPListeningPort;
+
     QString m_serverName;
     quint16 m_localRTPListeningPort;
 
     QString m_chatImageCacheDir;
 
-
-    //    QTimer *heartbeatTimer;
-    //        QTimer *processWaitingForReplyPacketsTimer;
 
     UDPServer *m_ipmcServer;
     RTP *m_rtp;
@@ -656,7 +644,6 @@ private:
     QMultiHash<QString/*Image Name*/, UserInfo* /*UserInfo*/> imageDownloadingRequestHash;
 
 
-    //UsersManager usersManager;
     Cryptography *cryptography;
 
     QMutex mutex;

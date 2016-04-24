@@ -57,7 +57,7 @@ signals:
     void signalContactOnlineStateChanged(const QString &contactID, quint8 onlineStateCode);
     void signalServerOnlineStateChanged(bool online);
 
-    void signalDeleteContactResultPacketReceived(const QString &contactID, bool contactDeleted, bool addToBlacklist = false);
+    void signalDeleteContactResultPacketReceived(const QString &contactID, bool contactDeleted);
     void signalSearchContactsResultPacketReceived(const QString &result);
 
 
@@ -95,7 +95,7 @@ private slots:
     void slotMoveContactToGroup();
 //    void slotMoveContactToBlacklist();
     void slotRequestDeleteContact(const QString &contactID, bool deleteMeFromOpposition = false, bool addToBlacklist = false);
-    void slotDeleteContactResultReceived(const QString &contactID, bool contactDeleted = false, bool addToBlacklist = false);
+    void slotDeleteContactResultReceived(const QString &contactID, bool deleted = quint8(IM::ERROR_NoError), bool addToBlacklist = false);
 
     void slotProcessUpdatePasswordResult(quint8 errorTypeCode, const QString &message);
 
@@ -115,27 +115,27 @@ private slots:
 
 
     //void slotProcessSearchContactsResult(const QString &users);
-    void slotProcessAddContactResult(const QString &contactID, const QString &userNickName, const QString &userFace, int contactGroupID, quint8 errorTypeCode, const QString &reasonMessage, quint8 onlineStateCode);
+    void slotProcessAddContactResult(const QString &contactID, quint8 errorTypeCode, const QString &reasonMessage);
     void getNewContactSettings(const QString &contactID);
 
     void slotSearch();
-    void searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
+    void searchContact(const QString &keyword, quint8 searchOnlineUsersOnly, quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown, quint8 gender, quint8 age, bool matchExactly, int startIndex);
     void searchInterestGroup(const QString &keyword, int startIndex = 0);
 
     void addContact(const QString &userID, const QString &verificationMessage);
 
 
-    void slotProcessContactRequestFromUser(const QString &userID, const QString &userNickName, const QString &userFace, const QString &verificationMessage);
+    void slotProcessFriendingRequestFromUser(const QString &userID, const QString &userNickName, const QString &userFace, const QString &verificationMessage);
     void showContactRequestFromUser(const QString &userID, const QString &userNickName, const QString &userFace, const QString &verificationMessage);
 
-    void slotProcessChatMessageReceivedFromContact(const QString &contactID, const QString &message, const QString &time);
+    void slotProcessChatMessageReceivedFromContact(const QString &contactID, const QString &message, const QString &imageNames);
     void slotProcessChatMessageCachedOnServer(const QStringList &messages);
     void slotProcessImageDownloadResult(const QString &contactID, const QString &imageName, const QByteArray &image);
     void slotProcessImageDownloadRequest(const QString &contactID, const QString &imageName);
     void requestDownloadImage(const QString &contactID, const QString &imageName);
 
 
-    void slotProcessInterestGroupChatMessagesReceivedFromContact(quint32 interestGroupID, const QString &contactID, const QString &message, const QString &time);
+    void slotProcessInterestGroupChatMessagesReceivedFromContact(quint32 interestGroupID, const QString &contactID, uint time, const QString &message, const QString &imageNames);
     void slotProcessInterestGroupChatMessagesCachedOnServer(const QStringList &messages);
 
     void slotSendChatMessageToContact(Contact *contact, const QString &message, const QStringList &imageNameList);
@@ -163,7 +163,6 @@ private slots:
     void slotProcessInterestGroupMembersInfo(const QString &interestGroupMembersInfoFromServer, quint32 interestGroupMembersInfoVersionOnServer, quint32 groupID);
     void slotProcessCreateInterestGroupResult(quint32 groupID, const QString &groupName);
     void slotProcessDisbandInterestGroupResult(quint32 groupID, bool result);
-    void slotProcessUserRequestJoinInterestGroup(quint32 groupID, const QString &verificationMessage, const QString &userID, const QString &nickName, const QString &face);
     void slotProcessUserJoinOrQuitInterestGroup(quint32 groupID, const QString &memberID, bool join);
 
 

@@ -89,7 +89,6 @@ private:
 
 private:
 
-    PacketHandlerBase *m_packetHandler;
     ResourcesManagerInstance *resourcesManager;
     ServerPacketsParser *serverPacketsParser;
 
