@@ -337,12 +337,13 @@ public slots:
 
 
 
-    bool sendPersonalContactGroupsInfoPacket(int peerSocketID, const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer, const QByteArray &sessionEncryptionKey){
+    bool sendPersonalContactGroupsInfoPacket(int peerSocketID, const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer, const QString &contactInfoVersionList, const QByteArray &sessionEncryptionKey){
         qDebug()<<"--sendPersonalContactGroupsInfoPacket(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUPS_LIST;
         packet.GroupsList.groupsInfo = contactGroupsInfo;
         packet.GroupsList.version = personalContactGroupsInfoVersionOnServer;
+        packet.GroupsList.contactInfoVersionList = contactInfoVersionList;
 
         return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
     }

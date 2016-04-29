@@ -772,6 +772,7 @@ void ContactGroupsInfoPacket::init(){
 
     GroupsList.groupsInfo = "";
     GroupsList.version = 0;
+    GroupsList.contactInfoVersionList = "";
 
     GroupParentInfo.groupID = 0;
     GroupParentInfo.parentID = 0;
@@ -802,7 +803,7 @@ void ContactGroupsInfoPacket::parsePacketBody(QByteArray &packetBody){
     switch (InfoType) {
     case PIT_GROUPS_LIST:
     {
-        in >> GroupsList.groupsInfo >> GroupsList.version;
+        in >> GroupsList.groupsInfo >> GroupsList.version >> GroupsList.contactInfoVersionList;
     }
         break;
     case PIT_GROUP_CHANGE_PARENT:
@@ -845,7 +846,7 @@ QByteArray ContactGroupsInfoPacket::packBodyData(){
     switch (InfoType) {
     case PIT_GROUPS_LIST:
     {
-        out << GroupsList.groupsInfo << GroupsList.version;
+        out << GroupsList.groupsInfo << GroupsList.version >> GroupsList.contactInfoVersionList;
     }
         break;
     case PIT_GROUP_CHANGE_PARENT:

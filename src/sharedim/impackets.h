@@ -432,6 +432,7 @@ public:
     struct GroupsListStruct{
         QString groupsInfo;
         quint32 version;
+        QString contactInfoVersionList;
     } GroupsList;
 
     struct GroupParentInfoStruct{

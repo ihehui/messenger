@@ -616,16 +616,14 @@ void ServerPacketsParser::processLoginPacket(const LoginPacket &packet){
                                            );
 
 
-            //Send all contact groups info to user
-            sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), userInfo->getSessionEncryptionKey());
 
             //Send all contacts version info to user
-            QString contactsInfoString = "";
-            if(getUserAllContactsInfoVersionFromDatabase(userInfo, &contactsInfoString)){
-                if(!contactsInfoString.trimmed().isEmpty()){
-                    sendPersonalContactsInfoVersionPacket(socketID, contactsInfoString, userInfo->getPersonalContactGroupsVersion(), sessionEncryptionKey);
-                }
-            }
+            QString contactInfoVersionListString = "";
+            getUserAllContactsInfoVersionFromDatabase(userInfo, &contactInfoVersionListString);
+
+            //Send all contact groups info to user
+            sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), contactInfoVersionListString, userInfo->getSessionEncryptionKey());
+
 
             //Send last login info
             sendClientLastLoginInfoPacket(socketID, sessionEncryptionKey,
@@ -724,7 +722,12 @@ void ServerPacketsParser::processContactGroupsInfoPacket(const ContactGroupsInfo
     switch (infoType) {
     case ContactGroupsInfoPacket::PIT_GROUPS_LIST:
     {
-        sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), sessionEncryptionKey);
+        //Send all contacts version info to user
+        QString contactInfoVersionListString = "";
+        getUserAllContactsInfoVersionFromDatabase(userInfo, &contactInfoVersionListString);
+
+        //Send all contact groups info to user
+        sendPersonalContactGroupsInfoPacket(socketID, userInfo->getContactGroupsInfoString(), userInfo->getPersonalContactGroupsVersion(), contactInfoVersionListString, sessionEncryptionKey);
     }
         break;
     case ContactGroupsInfoPacket::PIT_GROUP_CHANGE_PARENT:

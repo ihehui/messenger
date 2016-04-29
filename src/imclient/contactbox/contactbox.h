@@ -123,7 +123,7 @@ private:
 
     QTimer *flashTimer;
     int flashIndex;
-    QHash<Contact *, QTreeWidgetItem*/*ContactGroup Item*/> flashContactItems;
+    QHash<Contact *, QTreeWidgetItem* /*ContactGroup Item*/> flashContactItems;
 
 };
 

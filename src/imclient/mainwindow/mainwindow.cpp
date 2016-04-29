@@ -1909,7 +1909,7 @@ void MainWindow::slotProcessUserInfo(const QString &userID/*, const QString &use
 
 }
 
-void MainWindow::slotProcessContactGroupsInfo(const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer){
+void MainWindow::slotProcessContactGroupsInfo(const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer, const QString &contactInfoVersionList){
     qDebug()<<"--MainWindow::slotProcessContactGroupsInfo(...)"<<" -contactGroupsInfo:"<<contactGroupsInfo;
 
     //STRING FORMATE: GroupID,GroupName,UserID,,UserID,...||GroupID,...
@@ -2003,7 +2003,7 @@ void MainWindow::slotProcessContactGroupsInfo(const QString &contactGroupsInfo, 
         QMessageBox::critical(this, tr("Error"), tr("Invalid contact groups info!"));
     }
 
-
+    slotProcessContactsInfoVersion(contactInfoVersionList);
 
 }
 
@@ -2067,8 +2067,8 @@ void MainWindow::slotProcessContactGroupsInfo2(const QString &contactGroupsInfo,
 
 }
 
-void MainWindow::slotProcessContactsInfoVersion(const QString &contactsInfoVersionString, quint32 contactGroupsInfoVersionOnServer){
-    qDebug()<<"--MainWindow::slotProcessContactsInfoVersion(...)"<<" -contactsInfoVersionString:"<<contactsInfoVersionString <<"   contactGroupsInfoVersionOnServer:"<<contactGroupsInfoVersionOnServer;
+void MainWindow::slotProcessContactsInfoVersion(const QString &contactsInfoVersionString){
+    qDebug()<<"--MainWindow::slotProcessContactsInfoVersion(...)"<<" -contactsInfoVersionString:"<<contactsInfoVersionString ;
 
     //FORMATE: UserID,PersonalSummaryInfoVersion,PersonalDetailInfoVersion,PersonalMessageInfoVersion;UserID,...
     //e.g. user1,10,10,2;user2,5,6,15;user3,11,10,20
@@ -2695,9 +2695,9 @@ void MainWindow::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &p
     switch (infoType) {
     case ContactGroupsInfoPacket::PIT_GROUPS_LIST:
     {
-        slotProcessContactGroupsInfo(packet.GroupsList.groupsInfo, packet.GroupsList.version);
+        slotProcessContactGroupsInfo(packet.GroupsList.groupsInfo, packet.GroupsList.version, packet.GroupsList.contactInfoVersionList);
         //slotProcessContactsInfoVersion();
-        //out << GroupsList.groupsInfo << GroupsList.version;
+        //out << GroupsList.groupsInfo << GroupsList.version << GroupsList.contactInfoVersionList;
     }
         break;
     case ContactGroupsInfoPacket::PIT_GROUP_CHANGE_PARENT:
