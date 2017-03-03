@@ -22,7 +22,8 @@ QT -= gui
 include( ../config.pri )
 HHSharedLibs += HHSharedCore \
     HHSharedNetwork \
-    HHSharedUDT
+    HHSharedUDT \
+    HHSharedENET
 include(../../HHSharedLibs.pri)
 HHSharedLibs += HHSharedIM
 include (../sharedim/sharedim.pri)

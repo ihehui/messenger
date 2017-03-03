@@ -64,6 +64,6 @@ win32:target.path += %windir%/system32
 INSTALLS += target
 
 # define some usefull values
-# QMAKE_TARGET_COMPANY	= "He Hui Team"
+# QMAKE_TARGET_COMPANY	= "He Hui"
 QMAKE_TARGET_PRODUCT = "Shared Library For IM"
 QMAKE_TARGET_DESCRIPTION = "Crossplatform Shared Library For IM Based On Qt"

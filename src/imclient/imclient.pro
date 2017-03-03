@@ -17,7 +17,8 @@ include( ../config.pri )
 HHSharedLibs += HHSharedCore \
     HHSharedGUI \
     HHSharedNetwork \
-    HHSharedUDT
+    HHSharedUDT \
+    HHSharedENET
 include(../../HHSharedLibs.pri)
 
 HHSharedLibs += HHSharedIM

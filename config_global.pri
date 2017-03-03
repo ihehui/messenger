@@ -2,7 +2,7 @@
 PACKAGE_PWD = $$PWD
 
 #SOURCE_TREE = $$PWD/../
-SOURCE_TREE = $$PWD/
+SOURCE_TREE = $$PWD
 
 CONFIG( debug, debug|release ) {
         BIN_PATH = $${SOURCE_TREE}/bin/debug

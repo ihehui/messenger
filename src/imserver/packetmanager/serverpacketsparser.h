@@ -116,7 +116,8 @@ public slots:
         packet.ServerInfo.message = message;
         packet.ServerInfo.address = serverAddress;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientRegistrationResultPacket(int peerSocketID, quint32 sysID, const QString &userID, const QString &password, quint8 errorTypeCode){
@@ -130,7 +131,8 @@ public slots:
         packet.RgeistrationResult.errorCode = errorTypeCode;
         packet.RgeistrationResult.activationMode = UsersManager::activationMode();
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUpdatePasswordAuthInfoPacket(int peerSocketID, const QString &userID, quint8 authMode, const QByteArray &captchaImage, const QString &securityQuestion, const QString &email, quint32 cellphoneNO, const QString &url){
@@ -147,7 +149,8 @@ public slots:
         packet.AuthInfo.cellphoneNO = cellphoneNO;
         packet.AuthInfo.url = url;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientUpdatePasswordResultPacket(int peerSocketID, const QString &userID, quint8 updateResult){
@@ -157,7 +160,8 @@ public slots:
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_UPDATE_RESULT;
         packet.AuthInfo.updateResult = updateResult;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientCanLoginPacket(int peerSocketID, const QString &userID, const QHostAddress &serverAddress, quint16 serverPort){
@@ -168,7 +172,8 @@ public slots:
         packet.LoginServerInfo.serverAddress = serverAddress.toString();
         packet.LoginServerInfo.serverPort = serverPort;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientLoginFailedPacket(int peerSocketID, const QString &userID, quint8 errorTypeCode, const QString &errorMessage = ""){
@@ -179,7 +184,8 @@ public slots:
         packet.AuthResultInfo.loggedin = 0;
         packet.AuthResultInfo.errorType = errorTypeCode;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientLoginSucceededPacket(int peerSocketID, const QString &userID, const QByteArray &encryptedPassword, const QByteArray &sessionEncryptionKey, quint32 personalSummaryInfoVersion,
@@ -203,7 +209,8 @@ public slots:
         uint serverTime = QDateTime::currentDateTime().toUTC().toTime_t();
         packet.AuthResultInfo.serverTime = serverTime;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendClientLastLoginInfoPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, const QString &extIPAddress, uint loginTime, uint logoutTime, const QString &deviceInfo ){
@@ -216,7 +223,8 @@ public slots:
         packet.PreviousLoginInfo.logoutTime = logoutTime;
         packet.PreviousLoginInfo.deviceInfo = deviceInfo;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendContactOnlineStatusChangedPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, quint8 onlineStateCode, const QString &contactID, const QString &contactHostAddress, quint16 contactHostPort){
@@ -228,7 +236,8 @@ public slots:
         packet.contactIP = contactHostAddress;
         packet.contactPort = contactHostPort;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendContactsOnlineInfo(int peerSocketID, UserInfo *userInfo){
@@ -258,7 +267,8 @@ public slots:
         OnlineContacts packet(userInfo->getSessionEncryptionKey());
         packet.contactsOnlineInfoString = contactsOnlineInfo.join(QString(UNIT_SEPARTOR));
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUserInterestGroupsListPacket(int peerSocketID, UserInfo *userInfo){
@@ -267,7 +277,8 @@ public slots:
         packet.GroupsList.groups = getInterestGroupsListForUser(userInfo);
         packet.GroupsList.version = userInfo->getInterestGroupInfoVersion();
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUserInterestGroupInfoPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID){
@@ -276,7 +287,8 @@ public slots:
         packet.GroupID = groupID;
         packet.GroupInfo.infoString = getInterestGroupInfoStringForUser(userInfo, groupID);
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendCreateInterestGroupResultPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID, const QString &groupName){
@@ -286,7 +298,8 @@ public slots:
         packet.GroupID = groupID;
         packet.GroupCreationInfo.name = groupName;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendDisbandInterestGroupResultPacket(int peerSocketID, UserInfo *userInfo, quint32 groupID, bool result){
@@ -296,7 +309,8 @@ public slots:
         packet.GroupID = groupID;
         packet.GroupDeletionInfo.deleted = result;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUserJoinInterestGroupResultToUserPacket(int peerSocketID, quint32 groupID, const QString &memberID, bool approved, const QString &message, const QString &admin, const QByteArray &sessionEncryptionKey){
@@ -309,7 +323,8 @@ public slots:
         packet.MemberApplicationInfo.approved = approved;
         packet.MemberApplicationInfo.admin = admin;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUserJoinInterestGroupRequestToAdminPacket(int peerSocketID, quint32 groupID, const QString &userID, const QString &verificationMessage, const QByteArray &sessionEncryptionKey){
@@ -320,7 +335,8 @@ public slots:
         packet.MemberApplicationInfo.userID = userID;
         packet.MemberApplicationInfo.message = verificationMessage;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendUserQuitInterestGroupResultToUserPacket(int peerSocketID, quint32 groupID, const QString &memberID, const QString &admin, const QByteArray &sessionEncryptionKey){
@@ -332,7 +348,8 @@ public slots:
         packet.MemberDeletionInfo.blockForever = false;
         packet.MemberDeletionInfo.admin = admin;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
 
@@ -345,7 +362,8 @@ public slots:
         packet.GroupsList.version = personalContactGroupsInfoVersionOnServer;
         packet.GroupsList.contactInfoVersionList = contactInfoVersionList;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendCreateContactGroupResultPacket(int peerSocketID, quint32 groupID, const QString &groupName, quint8 errorCode, const QByteArray &sessionEncryptionKey){
@@ -356,7 +374,8 @@ public slots:
         packet.GroupCreationInfo.groupID = groupID;
         packet.GroupCreationInfo.errorCode = errorCode;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendDeleteContactGroupResultPacket(int peerSocketID, quint32 groupID, quint8 errorCode, const QByteArray &sessionEncryptionKey){
@@ -366,7 +385,8 @@ public slots:
         packet.GroupDeletionInfo.groupID = groupID;
         packet.GroupDeletionInfo.errorCode = errorCode;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
 
@@ -378,7 +398,8 @@ public slots:
         packet.info.isSummaryInfo = quint8(isSummaryInfo?1:0);
         packet.info.infoString = infoString;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendAddContactRequestFromUserPacket(int serverSocketID, const QString &userID, const QString &nickName, const QString &userFace, const QString &verificationMessage, const QByteArray &sessionEncryptionKey){
@@ -390,7 +411,8 @@ public slots:
         packet.ContactFriendingRequest.userFace = userFace;
         packet.ContactFriendingRequest.message = verificationMessage;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool sendAddContactResultPacket(int peerSocketID, const QString &contactID, quint8 errorCode, const QString &reasonMessage, const QByteArray &sessionEncryptionKey){
@@ -401,7 +423,8 @@ public slots:
         packet.ContactFriendingResult.errorCode = errorCode;
         packet.ContactFriendingResult.message = reasonMessage;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
 
@@ -413,7 +436,8 @@ public slots:
         packet.ContactDeletionInfo.blockForever = blockForever;
         packet.ContactDeletionInfo.errorCode = errorCode;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendSearchContactResultPacket(int peerSocketID, const QString &result, const QByteArray &sessionEncryptionKey){
@@ -422,7 +446,8 @@ public slots:
         packet.InfoType = SearchInfoPacket::PIT_SEARCH_CONTACT_RESULT;
         packet.SearchContactResult.result = result;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendSearchInterestGroupResultPacket(int peerSocketID, const QString &result, const QByteArray &sessionEncryptionKey){
@@ -431,7 +456,8 @@ public slots:
         packet.InfoType = SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_RESULT;
         packet.SearchInterestGroupResult.result = result;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendContactChatMessagePacket(int peerSocketID, const QString &senderID, const QString &message, const QString &imageNames, const QByteArray &sessionEncryptionKey){
@@ -442,7 +468,8 @@ public slots:
         packet.ContactChatMessage.message = message;
         packet.ContactChatMessage.imageNames = imageNames;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendCachedChatMessagesPacket(int peerSocketID, const QStringList &messages, const QByteArray &sessionEncryptionKey){
@@ -451,7 +478,8 @@ public slots:
         packet.InfoType = ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGES_CACHED_ON_SERVER;
         packet.ContactChatMessagesCachedOnServer.messages = messages.join(QString(UNIT_SEPARTOR));
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendCachedInterestGroupChatMessagesPacket(int peerSocketID, const QStringList &messages, const QByteArray &sessionEncryptionKey){
@@ -460,7 +488,8 @@ public slots:
         packet.InfoType = ChatMessagePacket::PIT_GROUP_CHAT_MESSAGES_CACHED_ON_SERVER;
         packet.GroupChatMessagesCachedOnServer.messages = messages.join(QString(UNIT_SEPARTOR));
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendInterestGroupChatMessagesToMemberPacket(int peerSocketID, const QByteArray &sessionEncryptionKey, quint32 interestGroupID, const QString &senderID, const QString &message, const QString &imageNames){
@@ -472,7 +501,8 @@ public slots:
         packet.GroupChatMessage.message = message;
         packet.GroupChatMessage.imageNames = imageNames;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendRequestImagePacket(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &sessionEncryptionKey){
@@ -483,7 +513,8 @@ public slots:
         packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendImagePacket(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image, const QByteArray &sessionEncryptionKey){
@@ -495,7 +526,8 @@ public slots:
         packet.ChatImage.name = imageName;
         packet.ChatImage.image = image;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendSessionEncryptionKeyWithContact(int peerSocketID, const QString &contactID, const QByteArray &sessionEncryptionKeyWithContact, const QByteArray &sessionEncryptionKey){
@@ -505,7 +537,8 @@ public slots:
         packet.SessionEncryptionKeyWithContact.contactID = contactID;
         packet.SessionEncryptionKeyWithContact.key = sessionEncryptionKeyWithContact;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool responseFileServerInfo(SOCKETID socketID, const QString &serverAddress, quint16 serverPort, const QByteArray &sessionEncryptionKey){
@@ -514,7 +547,8 @@ public slots:
         packet.FileServerInfo.address = serverAddress;
         packet.FileServerInfo.port = serverPort;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
 

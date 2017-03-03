@@ -109,7 +109,8 @@ public slots:
         //packet.FileServerInfo.address = "";
         //packet.FileServerInfo.port = 0;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
     bool responseFileServerInfo(SOCKETID socketID, const QString &address, quint16 port){
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
@@ -117,7 +118,8 @@ public slots:
         packet.FileServerInfo.address = address;
         packet.FileServerInfo.port = port;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath){
@@ -125,7 +127,8 @@ public slots:
         packet.InfoType = FileTransferPacket::FT_FileSystemInfoRequest;
         packet.FileSystemInfoRequest.parentDirPath = parentDirPath;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool responseFileSystemInfo(SOCKETID socketID, const QString &baseDirPath, const QByteArray &fileSystemInfoData){
@@ -135,7 +138,8 @@ public slots:
         packet.FileSystemInfoResponse.baseDirPath = baseDirPath;
         packet.FileSystemInfoResponse.fileSystemInfoData = fileSystemInfoData;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestDeleteFiles(SOCKETID socketID, const QString &remoteBaseDir, const QStringList &remoteFiles){
@@ -145,7 +149,8 @@ public slots:
         packet.FileDeletingRequest.baseDirPath = remoteBaseDir;
         packet.FileDeletingRequest.files = remoteFiles;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool responseDeletingFiles(SOCKETID socketID, const QString &baseDirPath, const QStringList &failedFiles){
@@ -155,7 +160,8 @@ public slots:
         packet.FileDeletingResponse.baseDirPath = baseDirPath;
         packet.FileDeletingResponse.failedFiles = failedFiles;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestRenameFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &oldFileName, const QString &newFileName){
@@ -166,7 +172,8 @@ public slots:
         packet.FileRenamingRequest.oldFileName = oldFileName;
         packet.FileRenamingRequest.newFileName = newFileName;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool responseRenamingFiles(SOCKETID socketID, const QString &baseDirPath, const QString &fileName, bool renamed, const QString &message){
@@ -178,7 +185,8 @@ public slots:
         packet.FileRenamingResponse.renamed = renamed;
         packet.FileRenamingResponse.message = message;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestUploadFile(SOCKETID socketID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = ""){
@@ -190,7 +198,8 @@ public slots:
         packet.FileUploadingRequest.size = size;
         packet.FileUploadingRequest.fileSaveDir = remoteFileSaveDir;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestDownloadFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &remoteFileName, const QString &localFileSaveDir){
@@ -201,7 +210,8 @@ public slots:
         packet.FileDownloadingRequest.fileName = remoteFileName;
         packet.FileDownloadingRequest.dirToSaveFile = localFileSaveDir;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool responseFileDownloadRequest(SOCKETID socketID, bool accepted, const QString &fileName, const QByteArray &fileMD5Sum = QByteArray(), quint64 size = 0){
@@ -214,7 +224,8 @@ public slots:
         packet.FileDownloadingResponse.fileMD5Sum = fileMD5Sum;
         packet.FileDownloadingResponse.size = size;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message){
@@ -225,7 +236,8 @@ public slots:
         packet.FileUploadingResponse.accepted = accepted;
         packet.FileUploadingResponse.message = message;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestFileData(SOCKETID socketID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex){
@@ -237,7 +249,8 @@ public slots:
         packet.FileDataRequest.startPieceIndex = startPieceIndex;
         packet.FileDataRequest.endPieceIndex = endPieceIndex;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool sendFileData(SOCKETID socketID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *pieceMD5){
@@ -249,7 +262,8 @@ public slots:
         packet.FileDataResponse.data = *data;
         packet.FileDataResponse.pieceMD5 = *pieceMD5;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool fileTXStatusChanged(SOCKETID socketID, const QByteArray &fileMD5, quint8 status){
@@ -259,7 +273,8 @@ public slots:
         packet.FileTXStatus.fileMD5 = fileMD5;
         packet.FileTXStatus.status = status;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool fileTXError(SOCKETID socketID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString){
@@ -270,7 +285,8 @@ public slots:
         packet.FileTXError.errorCode = errorCode;
         packet.FileTXError.message = errorString;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
     bool stopFileTX(SOCKETID socketID, const QString &remoteFileName, const QByteArray &fileMD5){
@@ -279,7 +295,8 @@ public slots:
         packet.FileTXError.fileName = remoteFileName;
         packet.FileTXError.fileMD5 = fileMD5;
 
-        return m_rtp->sendReliableData(socketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
     }
 
 

@@ -124,7 +124,8 @@ public slots:
         packet.ServerInfo.requestServerInfo = 1;
         packet.ServerInfo.version = clientVersion;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool registration(int serverSocketID, const QString &userID, const QString &password){
@@ -135,7 +136,8 @@ public slots:
         packet.RgeistrationInfo.userID = userID;
         packet.RgeistrationInfo.password = password;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestUpdatePassword(int serverSocketID){
@@ -144,7 +146,8 @@ public slots:
         UpdatePasswordPacket packet(sessionEncryptionKey);
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool updatePassword(int serverSocketID, const QString &captcha, const QString &userID, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &email, const QString &smsCaptcha){
@@ -160,7 +163,8 @@ public slots:
         packet.AuthInfo.email = email;
         packet.AuthInfo.smsCaptcha = smsCaptcha;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestLogin(int serverSocketID, const QString &clientVersion = APP_VERSION){
@@ -180,7 +184,8 @@ public slots:
         packet.InfoType = LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO;
         packet.LoginServerInfo.version = APP_VERSION;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool changeMyOnlineState(int serverSocketID, quint8 onlineStateCode){
@@ -188,7 +193,9 @@ public slots:
 
         OnlineStateChangedPacket packet(sessionEncryptionKey);
         packet.stateCode = onlineStateCode;
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool logout(int serverSocketID){
@@ -202,7 +209,8 @@ public slots:
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUPS_LIST;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestInterestGroupInfo(int serverSocketID, quint32 groupID){
@@ -211,7 +219,8 @@ public slots:
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_INFO;
         packet.GroupID = groupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestCreateInterestGroup(int serverSocketID, const QString &groupName, quint8 groupType){
@@ -222,7 +231,8 @@ public slots:
         packet.GroupCreationInfo.name = groupName;
         packet.GroupCreationInfo.type = groupType;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestDisbandInterestGroup(int serverSocketID, quint32 groupID){
@@ -231,7 +241,8 @@ public slots:
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_DELETION;
         packet.GroupID = groupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool joinOrQuitInterestGroup(int serverSocketID, quint32 groupID, bool join, const QString &verificationMessage = ""){
@@ -248,7 +259,8 @@ public slots:
             packet.MemberDeletionInfo.userID = m_myUserID;
         }
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestPersonalContactGroupsInfo(int serverSocketID){
@@ -256,7 +268,8 @@ public slots:
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUPS_LIST;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestContactInfo(int serverSocketID, const QString &contactID, bool summaryInfo = true){
@@ -266,7 +279,8 @@ public slots:
         packet.ContactID = contactID;
         packet.info.isSummaryInfo = quint8(summaryInfo?1:0);
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestPersonalInfo(int serverSocketID){
@@ -282,7 +296,8 @@ public slots:
         packet.ContactFriendingRequest.message = verificationMessage;
         packet.ContactFriendingRequest.groupID = groupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool responseFriendingRequestFromUser(int serverSocketID, const QString &userID, quint8 errorCode, const QString &extraMessage = ""){
@@ -293,7 +308,8 @@ public slots:
         packet.ContactFriendingResult.errorCode = errorCode;
         packet.ContactFriendingResult.message = extraMessage;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool deleteContact(int serverSocketID, const QString &contactID, bool deleteMeFromOpposition = false, bool blockForever = false){
@@ -305,7 +321,8 @@ public slots:
         packet.ContactDeletionInfo.blockForever = blockForever;
         //packet.ContactDeletionInfo.errorCode = errorCode;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool moveContactToGroup(int serverSocketID, const QString &contactID, quint32 oldGroupID, quint32 newGroupID){
@@ -316,7 +333,8 @@ public slots:
         packet.ContactChangeGroup.oldGroupID = oldGroupID;
         packet.ContactChangeGroup.newGroupID = newGroupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool updateContactRemarkInfo(int serverSocketID, quint32 contactID, const QString &remarkName, const QString &extraRemarkInfo){
@@ -326,7 +344,8 @@ public slots:
         packet.ContactID = contactID;
         packet.ContactRemarkInfo.newRemarkName = remarkName;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool createContactGroup(int serverSocketID, quint32 parentGroupID, const QString &groupName){
@@ -336,7 +355,8 @@ public slots:
         packet.GroupCreationInfo.name = groupName;
         packet.GroupCreationInfo.parentID = parentGroupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool deleteContactGroup(int serverSocketID, quint32 groupID){
@@ -345,7 +365,8 @@ public slots:
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_DELETION;
         packet.GroupDeletionInfo.groupID = groupID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool renameContactGroup(int serverSocketID, quint32 groupID, const QString &newGroupName){
@@ -355,7 +376,8 @@ public slots:
         packet.GroupRenamingInfo.groupID = groupID;
         packet.GroupRenamingInfo.newName = newGroupName;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool searchContact(int serverSocketID, const QString &keyword, quint8 searchOnlineUsersOnly,
@@ -375,7 +397,8 @@ public slots:
         packet.SearchContactConditions.matchExactly = matchExactly;
         packet.SearchContactConditions.startIndex = startIndex;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool searchInterestGroup(int serverSocketID, const QString &keyword, int startIndex){
@@ -385,7 +408,8 @@ public slots:
         packet.SearchInterestGroupConditions.keyword = keyword;
         packet.SearchInterestGroupConditions.startIndex = startIndex;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool sendChatMessageToContact(int peerSocketID, const QString &contactID, const QString &message, const QStringList &imageNameList){
@@ -396,7 +420,8 @@ public slots:
         packet.ContactChatMessage.message = message;
         packet.ContactChatMessage.imageNames = imageNameList.join(",");;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool sendInterestGroupChatMessageToServer(int serverSocketID, quint32 interestGroupID ,const QString &message, const QStringList &imageNameList){
@@ -407,7 +432,8 @@ public slots:
         packet.GroupChatMessage.message = message;
         packet.GroupChatMessage.imageNames = imageNameList.join(",");;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool sendImageToContact(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image){
@@ -419,7 +445,8 @@ public slots:
         packet.ChatImage.name = imageName;
         packet.ChatImage.image = image;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool requestDownloadImageFromContact(int peerSocketID, const QString &contactID, const QString &imageName){
@@ -430,7 +457,8 @@ public slots:
         packet.ChatImage.contactID = contactID;
         packet.ChatImage.name = imageName;
 
-        return m_rtp->sendReliableData(peerSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
     bool requestSessionEncryptionKeyWithContact(int serverSocketID, quint32 contactID){
@@ -439,7 +467,8 @@ public slots:
         packet.InfoType = ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT;
         packet.SessionEncryptionKeyWithContact.contactID = contactID;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
     bool requestCaptcha(int serverSocketID){
@@ -448,7 +477,8 @@ public slots:
         CaptchaInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = CaptchaInfoPacket::CAPTCHA_REQUEST;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
 
@@ -492,7 +522,8 @@ public slots:
         //packet.FileServerInfo.address = "";
         //packet.FileServerInfo.port = 0;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
 
@@ -522,7 +553,8 @@ private slots:
         packet.AuthInfo.stateAfterLoggedin = quint8(myself->getStateAfterLoggedin());
         packet.AuthInfo.deviceInfo = deviceInfo;
 
-        return m_rtp->sendReliableData(serverSocketID, &packet.toByteArray());
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
 
