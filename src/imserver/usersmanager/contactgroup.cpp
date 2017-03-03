@@ -7,16 +7,18 @@
 
 #include "contactgroup1.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 ContactGroup::ContactGroup(quint32 groupID, const QString &groupName, QObject *parent)
-    :ContactGroupBase(groupID, groupName, parent)
+    : ContactGroupBase(groupID, groupName, parent)
 {
 
 
 }
 
-ContactGroup::~ContactGroup() {
+ContactGroup::~ContactGroup()
+{
     // TODO Auto-generated destructor stub
 }
 

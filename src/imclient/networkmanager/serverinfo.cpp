@@ -29,20 +29,22 @@
 
 #include "serverinfo.h"
 
-namespace HEHUI {
-
-ServerInfo::ServerInfo(const QString &ip, uint port, QObject *parent)
-	:QObject(parent)
+namespace HEHUI
 {
 
-	setIp(ip);
-	setPort(port);
-	setCurState(NotTested);
+ServerInfo::ServerInfo(const QString &ip, uint port, QObject *parent)
+    : QObject(parent)
+{
+
+    setIp(ip);
+    setPort(port);
+    setCurState(NotTested);
 
 }
 
-ServerInfo::~ServerInfo() {
-	// TODO Auto-generated destructor stub
+ServerInfo::~ServerInfo()
+{
+    // TODO Auto-generated destructor stub
 }
 
 }

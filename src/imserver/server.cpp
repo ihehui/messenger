@@ -38,11 +38,12 @@
 #include "../sharedim/constants_global_shared.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 IMServer::IMServer(QObject *parent)
-    :QObject(parent)
+    : QObject(parent)
 {
 
     resourcesManager = 0;
@@ -69,8 +70,9 @@ IMServer::IMServer(QObject *parent)
 
 }
 
-IMServer::~IMServer(){
-    qDebug()<<"Server::~Server()";
+IMServer::~IMServer()
+{
+    qDebug() << "Server::~Server()";
 
 
     delete serverPacketsParser;
@@ -81,9 +83,9 @@ IMServer::~IMServer(){
     delete resourcesManager;
     resourcesManager = 0;
 
-    QList<UserInfo*> clientInfoList = userInfoHash.values();
+    QList<UserInfo *> clientInfoList = userInfoHash.values();
     userInfoHash.clear();
-    foreach(UserInfo *info, clientInfoList){
+    foreach(UserInfo *info, clientInfoList) {
         delete info;
         info = 0;
     }
@@ -97,33 +99,34 @@ IMServer::~IMServer(){
     delete query;
     query = 0;
 
-        
+
     mainServiceStarted = false;
 
 
 }
 
 
-bool IMServer::startMainService(){
+bool IMServer::startMainService()
+{
 
-    if(mainServiceStarted){
-        qWarning()<<"Main service has already started!";
+    if(mainServiceStarted) {
+        qWarning() << "Main service has already started!";
         return true;
     }
 
 
     //TODO
-    if(openDatabase()){
+    if(openDatabase()) {
         qApp->exit();
     }
 
 
-    if(m_serverType != ST_FILE_SERVER){
+    if(m_serverType != ST_FILE_SERVER) {
         startIMServer();
     }
 
 
-    if(m_serverType != ST_IM_SERVER){
+    if(m_serverType != ST_IM_SERVER) {
         startFileServer();
     }
 
@@ -133,14 +136,15 @@ bool IMServer::startMainService(){
     return true;
 }
 
-void IMServer::saveClientLog(const QString &computerName, const QString &users, const QString &log, const QString &clientAddress){
+void IMServer::saveClientLog(const QString &computerName, const QString &users, const QString &log, const QString &clientAddress)
+{
     //    qWarning()<<"Server::saveClientLog(...)";
 
-    if(!query){
-        if(!openDatabase()){
+    if(!query) {
+        if(!openDatabase()) {
             return;
         }
-    }else{
+    } else {
         query->clear();
     }
 
@@ -153,13 +157,13 @@ void IMServer::saveClientLog(const QString &computerName, const QString &users, 
     query->bindValue(":Content", log);
 
 
-    if(!query->exec()){
+    if(!query->exec()) {
         QSqlError error = query->lastError();
         QString msg = QString("Can not write log to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<< msg;
+        qCritical() << msg;
 
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query->clear();
             openDatabase(true);
         }
@@ -171,14 +175,15 @@ void IMServer::saveClientLog(const QString &computerName, const QString &users, 
 }
 
 
-void IMServer::saveFileLog(const QString &sender, const QString &receiver, const QString &fileName, const QString &md5Hex, quint64 size){
+void IMServer::saveFileLog(const QString &sender, const QString &receiver, const QString &fileName, const QString &md5Hex, quint64 size)
+{
     //    qWarning()<<"Server::saveFileLog(...)";
 
-    if(!query){
-        if(!openDatabase()){
+    if(!query) {
+        if(!openDatabase()) {
             return;
         }
-    }else{
+    } else {
         query->clear();
     }
 
@@ -192,13 +197,13 @@ void IMServer::saveFileLog(const QString &sender, const QString &receiver, const
     query->bindValue(":Size", size);
 
 
-    if(!query->exec()){
+    if(!query->exec()) {
         QSqlError error = query->lastError();
         QString msg = QString("Can not write log to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<< msg;
+        qCritical() << msg;
 
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query->clear();
             openDatabase(true);
         }
@@ -209,29 +214,33 @@ void IMServer::saveFileLog(const QString &sender, const QString &receiver, const
 
 }
 
-void IMServer::peerConnected(const QHostAddress &peerAddress, quint16 peerPort){
-    qWarning()<<QString("Connected! "+peerAddress.toString()+":"+QString::number(peerPort));
+void IMServer::peerConnected(const QHostAddress &peerAddress, quint16 peerPort)
+{
+    qWarning() << QString("Connected! " + peerAddress.toString() + ":" + QString::number(peerPort));
 
 }
 
-void IMServer::signalConnectToPeerTimeout(const QHostAddress &peerAddress, quint16 peerPort){
-    qCritical()<<QString("Connecting Timeout! "+peerAddress.toString()+":"+QString::number(peerPort));
+void IMServer::signalConnectToPeerTimeout(const QHostAddress &peerAddress, quint16 peerPort)
+{
+    qCritical() << QString("Connecting Timeout! " + peerAddress.toString() + ":" + QString::number(peerPort));
 
 }
 
-void IMServer::peerDisconnected(const QHostAddress &peerAddress, quint16 peerPort, bool normalClose){
-    qDebug()<<QString("Client Disconnected! "+peerAddress.toString()+":"+QString::number(peerPort));
+void IMServer::peerDisconnected(const QHostAddress &peerAddress, quint16 peerPort, bool normalClose)
+{
+    qDebug() << QString("Client Disconnected! " + peerAddress.toString() + ":" + QString::number(peerPort));
 
-    if(!normalClose){
+    if(!normalClose) {
         serverPacketsParser->userExceptionalOffline(peerAddress.toString(), peerPort);
-        qCritical()<<QString("ERROR! Peer %1:%2 Closed Unexpectedly!").arg(peerAddress.toString()).arg(peerPort);
+        qCritical() << QString("ERROR! Peer %1:%2 Closed Unexpectedly!").arg(peerAddress.toString()).arg(peerPort);
 
     }
 
 
 }
 
-void IMServer::peerDisconnected(int socketID){
+void IMServer::peerDisconnected(int socketID)
+{
     //TODO
 
 
@@ -246,10 +255,11 @@ void IMServer::peerDisconnected(int socketID){
 
 
 
-bool IMServer::openDatabase(bool reopen){
+bool IMServer::openDatabase(bool reopen)
+{
 
-    if(reopen){       
-        if(query){
+    if(reopen) {
+        if(query) {
             query->clear();
             delete query;
             query = 0;
@@ -269,7 +279,7 @@ bool IMServer::openDatabase(bool reopen){
 
 
     QSqlDatabase db = QSqlDatabase::database(Server_DB_CONNECTION_NAME);
-    if(!db.isValid()){
+    if(!db.isValid()) {
         QSqlError err;
         //        err = databaseUtility->openDatabase(MYSQL_DB_CONNECTION_NAME,
         //                                            REMOTE_SITOY_COMPUTERS_DB_DRIVER,
@@ -296,12 +306,12 @@ bool IMServer::openDatabase(bool reopen){
     }
 
     db = QSqlDatabase::database(Server_DB_CONNECTION_NAME);
-    if(!db.isOpen()){
-        qCritical()<<QString("Database is not open! %1").arg(db.lastError().text());
+    if(!db.isOpen()) {
+        qCritical() << QString("Database is not open! %1").arg(db.lastError().text());
         return false;
     }
 
-    if(!query){
+    if(!query) {
         query = new QSqlQuery(db);
 
         //        recordsInDatabase.clear();
@@ -327,7 +337,7 @@ bool IMServer::openDatabase(bool reopen){
 void IMServer::start()
 {
 
-    qDebug()<<"----Server::start()";
+    qDebug() << "----Server::start()";
 
 
     resourcesManager = ResourcesManagerInstance::instance();
@@ -352,8 +362,8 @@ void IMServer::stop()
 //    if(sendServerOnlinePacketTimer){
 //        sendServerOnlinePacketTimer->stop();
 //    }
-    
-    
+
+
 //    if(serverPacketsParser){
 //        serverPacketsParser->sendServerOfflinePacket();
 //    }
@@ -362,33 +372,35 @@ void IMServer::stop()
     DatabaseUtility::closeAllDBConnections();
 
 
-    if(m_udpServer){
+    if(m_udpServer) {
         m_udpServer->close();
     }
-    if(m_rtp){
+    if(m_rtp) {
         m_rtp->stopServers();
     }
 
-    
+
 
 
 }
 
-void IMServer::setServerTye(ServerType serverType){
+void IMServer::setServerTye(ServerType serverType)
+{
     this->m_serverType = serverType;
 }
 
-bool IMServer::startIMServer(){
+bool IMServer::startIMServer()
+{
 
-    if(!serverPacketsParser){
+    if(!serverPacketsParser) {
 
         QString errorMessage = "";
         m_udpServer = resourcesManager->startIPMCServer(QHostAddress(IM_SERVER_IPMC_ADDRESS), quint16(IM_SERVER_IPMC_LISTENING_PORT), &errorMessage);
-        if(!m_udpServer){
-            qCritical()<<QString("Can not start IP Multicast listening on address '%1', port %2! %3").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT).arg(errorMessage);
+        if(!m_udpServer) {
+            qCritical() << QString("Can not start IP Multicast listening on address '%1', port %2! %3").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT).arg(errorMessage);
             m_udpServer = resourcesManager->startUDPServer(QHostAddress::AnyIPv4, quint16(IM_SERVER_IPMC_LISTENING_PORT), true, &errorMessage);
-        }else{
-            qWarning()<<QString("IP Multicast listening on address '%1', port %2!").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT);
+        } else {
+            qWarning() << QString("IP Multicast listening on address '%1', port %2!").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT);
         }
 
         m_rtp = resourcesManager->startRTP(QHostAddress::Any, IM_SERVER_RTP_LISTENING_PORT, true, &errorMessage);
@@ -400,11 +412,11 @@ bool IMServer::startIMServer(){
         //Single Process Thread
         //QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::run);
         //IMPORTANT For Multi-thread
-    //    QThreadPool::globalInstance()->setMaxThreadCount(MIN_THREAD_COUNT);
-    //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startparseIncomingPackets);
-    //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startparseIncomingPackets);
-    //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startprocessOutgoingPackets);
-    //    serverPacketsParser->startCheckIMUsersOnlineStateTimer();
+        //    QThreadPool::globalInstance()->setMaxThreadCount(MIN_THREAD_COUNT);
+        //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startparseIncomingPackets);
+        //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startparseIncomingPackets);
+        //    QtConcurrent::run(serverPacketsParser, &ServerPacketsParser::startprocessOutgoingPackets);
+        //    serverPacketsParser->startCheckIMUsersOnlineStateTimer();
 
 
         serverPacketsParser->sendServerDeclarePacket(QHostAddress(IM_SERVER_IPMC_ADDRESS), quint16(IM_SERVER_IPMC_LISTENING_PORT));
@@ -417,9 +429,10 @@ bool IMServer::startIMServer(){
 
 }
 
-bool IMServer::startFileServer(){
+bool IMServer::startFileServer()
+{
 
-    if(!m_fileTransmissionPacketsParser){
+    if(!m_fileTransmissionPacketsParser) {
         QString m_serverName = QHostInfo::localHostName().toLower();
         m_fileTransmissionPacketsParser = new ServerFileTransmissionPacketsParser(m_serverName, this);
         m_fileTransmissionManager = new ServerFileTransmissionManager(m_serverName, m_fileTransmissionPacketsParser, this);

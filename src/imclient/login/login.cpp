@@ -20,10 +20,11 @@
 
 #include "HHSharedGUI/hdatabaseconnecter.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 Login::Login(IMUser *user, QObject *parent)
-    :LoginBase(user, parent), user(user)
+    : LoginBase(user, parent), user(user)
 {
 
     //localServer = new QLocalServer(this);
@@ -32,16 +33,17 @@ Login::Login(IMUser *user, QObject *parent)
 
 }
 
-Login::~Login() {
+Login::~Login()
+{
 
     /*
- if(localServer->isListening()){
+    if(localServer->isListening()){
         localServer->close();
     }
 
     localServer->deleteLater();
 
-*/
+    */
 
 }
 
@@ -114,7 +116,8 @@ bool Login::canLogin(){
 }
 */
 
-bool Login::verifyUser() {
+bool Login::verifyUser()
+{
 
     DatabaseConnecter dc(this);
     QString userPrivateDataFilePath = Settings::instance()->getCurrentUserPrivateDataFilePath();
@@ -126,7 +129,7 @@ bool Login::verifyUser() {
                             "",
                             userPrivateDataFilePath,
                             HEHUI::SQLITE
-                            )){
+                           )) {
 
         QMessageBox::critical(getParentWidget(), tr("Fatal Error"), tr("Database Connection Failed! Query Failed!"));
         qCritical() << QString("Error: Database Connection Failed! Query Failed!");
@@ -141,7 +144,7 @@ bool Login::verifyUser() {
 
 
     QString queryString =
-            QString("select * from userinfo where UID = '%1'") .arg(user->getUserID());
+        QString("select * from userinfo where UID = '%1'") .arg(user->getUserID());
 
     model.setQuery(QSqlQuery(queryString, db));
 
@@ -171,9 +174,9 @@ bool Login::verifyUser() {
                                   "<font color=red>Sorry,Password incorrect!<br>  "
                                   "Please check out your password.</font>"));
         return false;
-    } else if(role == ""){
+    } else if(role == "") {
         QMessageBox::critical(getParentWidget(), tr("Authentication Failed"), tr("Cannot access the specified server: <font color=red>Permission Denied!</font>"));
-    }else{
+    } else {
 
 
         int userRole = QVariant(model.record(0).value("UserRole")).toInt();
@@ -217,7 +220,8 @@ bool Login::verifyUser() {
  * verify the user
  *
  */
-bool Login::isVerified() {
+bool Login::isVerified()
+{
 
 
     //检查用户是否验证成功
@@ -227,9 +231,9 @@ bool Login::isVerified() {
 
     //RestoreMode 无需服务器密码验证,直接返回真
     //RestoreMode returns true, no need server authentication
-    if(user->isRootMode()){
+    if(user->isRootMode()) {
         isSuccesseful = true;
-    }else{
+    } else {
         //服务器认证
         //Server Authentication
         isSuccesseful = verifyUser();

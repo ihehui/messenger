@@ -11,13 +11,14 @@
 
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 
 ContactWidget::ContactWidget(Contact *contact, QWidget *parent)
     : QWidget(parent), m_contact(contact)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
 
     Q_ASSERT(m_contact);
 
@@ -38,7 +39,7 @@ ContactWidget::ContactWidget(Contact *contact, QWidget *parent)
 ContactWidget::~ContactWidget()
 {
 
-    if(timer){
+    if(timer) {
         timer->stop();
         delete timer;
     }
@@ -46,20 +47,22 @@ ContactWidget::~ContactWidget()
 
 }
 
-void ContactWidget::updateContactToUI(){
+void ContactWidget::updateContactToUI()
+{
 
     ui.pushButtonFace->setIcon(ImageResource::createIconForContact(m_contact->getFace(), m_contact->getOnlineState()));
     ui.labelDisplayName->setText(m_contact->displayName());
 }
 
-void ContactWidget::setExpanded(bool expand){
+void ContactWidget::setExpanded(bool expand)
+{
 
-    if(expand){
+    if(expand) {
         ui.frameTools->show();
         ui.pushButtonFace->setIconSize(QSize(36, 36));
         setBackgroundRole(QPalette::Highlight);
 
-    }else{
+    } else {
         ui.frameTools->hide();
         ui.pushButtonFace->setIconSize(QSize(22, 22));
         setBackgroundRole(QPalette::Base);
@@ -69,27 +72,30 @@ void ContactWidget::setExpanded(bool expand){
 
 }
 
-bool ContactWidget::isExpanded(){
+bool ContactWidget::isExpanded()
+{
     return ui.frameTools->isVisible();
 }
 
-bool ContactWidget::isMouseUnderFace(){
+bool ContactWidget::isMouseUnderFace()
+{
     QPoint mousePoint = mapFromGlobal(QCursor::pos());
     return ui.pushButtonFace->rect().contains(mousePoint);
 }
 
-void ContactWidget::flashFace(bool flash){
+void ContactWidget::flashFace(bool flash)
+{
 
-    if(flash){
-        if(!timer){
+    if(flash) {
+        if(!timer) {
             timer = new QTimer(this);
             timer->setInterval(500);
             connect(timer, SIGNAL(timeout()), this, SLOT(slotFlashFace()));
         }
 
         timer->start();
-    }else{
-        if(timer){
+    } else {
+        if(timer) {
             //disconnect(timer, SIGNAL(timeout()), 0, 0);
             timer->stop();
             delete timer;
@@ -108,29 +114,27 @@ bool ContactWidget::eventFilter(QObject *obj, QEvent *event)
 
 
     switch (event->type()) {
-    case QEvent::Enter:
-    {
+    case QEvent::Enter: {
         //qDebug()<<"----QEvent::Enter"<<" "<<this;
 
-        if(!isExpanded()){
+        if(!isExpanded()) {
             setBackgroundRole(QPalette::Midlight);
         }
 
         return true;
     }
-        break;
-    case QEvent::Leave:
-    {
+    break;
+    case QEvent::Leave: {
         //qDebug()<<"----QEvent::Leave"<<" "<<this;
 
-        if(!isExpanded()){
+        if(!isExpanded()) {
             setBackgroundRole(QPalette::Base);
         }
 
 
         return true;
     }
-        break;
+    break;
 
 //    case QEvent::MouseButtonPress:
 //    {
@@ -171,15 +175,16 @@ bool ContactWidget::eventFilter(QObject *obj, QEvent *event)
 //}
 
 
-void ContactWidget::slotFlashFace(){
+void ContactWidget::slotFlashFace()
+{
     iconIndex++;
-    if(iconIndex > 1){
+    if(iconIndex > 1) {
         iconIndex = 0;
     }
 
-    if(iconIndex){
+    if(iconIndex) {
         ui.pushButtonFace->setIcon(ImageResource::createIconForContact(m_contact->getFace(), m_contact->getOnlineState()));
-    }else{
+    } else {
         ui.pushButtonFace->setIcon(ImageResource::emptyIcon());
     }
 

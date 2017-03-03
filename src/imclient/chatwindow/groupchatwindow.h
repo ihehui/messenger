@@ -6,7 +6,8 @@
 
 #include "messagehistoryview.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class GroupChatWindow : public QWidget
 {
@@ -16,7 +17,7 @@ public:
     GroupChatWindow(InterestGroup *interestGroup, QWidget *parent = 0);
     ~GroupChatWindow();
 
-    InterestGroup * interestGroup();
+    InterestGroup *interestGroup();
 
     bool isDownloadingImage(const QString &imageName);
     void processImageDownloadResult(const QString &imageName, bool downloaded);
@@ -30,7 +31,7 @@ public:
 
 
 protected:
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent *event);
 
 signals:
     void sendMsgButtonClicked(InterestGroup *interestGroup, const QString &message, const QStringList &imageList);
@@ -55,7 +56,7 @@ private slots:
     void setPreferedSize();
 
 private:
-    QListWidgetItem * memberItem(const QString &memberID);
+    QListWidgetItem *memberItem(const QString &memberID);
 
 
 private:

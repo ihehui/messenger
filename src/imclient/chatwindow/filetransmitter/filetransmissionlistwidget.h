@@ -11,11 +11,13 @@
 //namespace HEHUI {
 
 
-namespace Ui {
+namespace Ui
+{
 class FileTransmissionListWidget;
 }
 
-namespace HEHUI{
+namespace HEHUI
+{
 class ContactChatWidget;
 }
 
@@ -57,13 +59,13 @@ public slots:
 
 private:
     int findListWidgetItemIndex(ProgressInfoWidget *wgt);
-    ProgressInfoWidget * createProgressInfoWidgetItem(const QByteArray &fileMD5);
+    ProgressInfoWidget *createProgressInfoWidgetItem(const QByteArray &fileMD5);
 
 private:
     Ui::FileTransmissionListWidget *ui;
 
     //QHash<QString /*File MD5*/, QString /*File Name*/> fileInfoHash;
-    QHash<QString /*File MD5*/, ProgressInfoWidget*> progressInfoWidgetHash;
+    QHash<QString /*File MD5*/, ProgressInfoWidget *> progressInfoWidgetHash;
 
     HEHUI::ContactChatWidget *m_contactChatWidget;
 

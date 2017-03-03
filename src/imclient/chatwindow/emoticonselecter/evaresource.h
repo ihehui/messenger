@@ -32,8 +32,8 @@
 #include <qsize.h>
 
 #ifndef MaxFaceNumber
-//#define MaxFaceNumber 117
-#define MaxFaceNumber 134
+    //#define MaxFaceNumber 117
+    #define MaxFaceNumber 134
 #endif
 
 //class EvaSetting;
@@ -44,120 +44,144 @@
 
 class EvaImageResource : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	EvaImageResource();
-	~EvaImageResource();
+    EvaImageResource();
+    ~EvaImageResource();
 
 
-	const QString getPortraitsPath() const;
-	const QString getIconPath() ;
-	const QString getEmoticonsPath() const;
-	const QString getQQShowPath() const;
+    const QString getPortraitsPath() const;
+    const QString getIconPath() ;
+    const QString getEmoticonsPath() const;
+    const QString getQQShowPath() const;
 
-	/*const*/ int getFaceID(const int fileIndex) const ;
-	/*const*/ int getFaceFileIndex(const int faceId);
-	QPixmap *getFace(const int fileIndex, const bool on = true);
-	QPixmap *getFaceByID( const unsigned short faceId, const bool on = true);
-	QPixmap *getIcon(QString name);
-	const QString getIconFullPath(QString name);
-	const QString getSmiley(const int fileIndex);
+    /*const*/ int getFaceID(const int fileIndex) const ;
+    /*const*/ int getFaceFileIndex(const int faceId);
+    QPixmap *getFace(const int fileIndex, const bool on = true);
+    QPixmap *getFaceByID( const unsigned short faceId, const bool on = true);
+    QPixmap *getIcon(QString name);
+    const QString getIconFullPath(QString name);
+    const QString getSmiley(const int fileIndex);
 
-	const QMovie *getLoginMovie();
+    const QMovie *getLoginMovie();
 
-	 bool loadImage() ;
-	const QString &getImageRootPath() const { return imageRoot; }
-	void setImageRootPath( QString &path) { imageRoot = path; }
+    bool loadImage() ;
+    const QString &getImageRootPath() const
+    {
+        return imageRoot;
+    }
+    void setImageRootPath( QString &path)
+    {
+        imageRoot = path;
+    }
 
-	const QString getThemePath() const { return themePath; }
-	void setThemePath( const QString &path) { themePath = path; }
+    const QString getThemePath() const
+    {
+        return themePath;
+    }
+    void setThemePath( const QString &path)
+    {
+        themePath = path;
+    }
 
-	QPixmap *getQQShow(const unsigned int id);
-	void setUserHeadImage(QMap<unsigned int, QImage> imageOnList, QMap<unsigned int, QImage> imageOffList);
-	void addUserHeadImage(const unsigned int id, QImage imgOn, QImage imgOff);
-	QPixmap *getUserHeadPixmap(const unsigned int id, bool isGrayscale = false);
+    QPixmap *getQQShow(const unsigned int id);
+    void setUserHeadImage(QMap<unsigned int, QImage> imageOnList, QMap<unsigned int, QImage> imageOffList);
+    void addUserHeadImage(const unsigned int id, QImage imgOn, QImage imgOff);
+    QPixmap *getUserHeadPixmap(const unsigned int id, bool isGrayscale = false);
 signals:
-	void qqShowReady(const unsigned int);
+    void qqShowReady(const unsigned int);
 public slots:
-	void requestQQShow(const unsigned int id);
+    void requestQQShow(const unsigned int id);
 private:
-	bool loadFace(const QSize &size);
-	bool loadIcon();
-	bool loadSmiley();
-	QMap<QString, QPixmap> faceList;
-	QMap<QString, QPixmap> iconList;
-	QMap<QString, QString> iconFileNameMap;
-	QMap<QString, QMovie*> smileyList;
-	QMap<int, QPixmap> imgOnList;
-	QMap<int, QPixmap> imgOffList;
-	QMovie *loginMng;
-	int faceId[MaxFaceNumber];  // store faceID, index is the fileID
-	QString imageRoot;
-	QString themePath;
-	QSize faceSize;
+    bool loadFace(const QSize &size);
+    bool loadIcon();
+    bool loadSmiley();
+    QMap<QString, QPixmap> faceList;
+    QMap<QString, QPixmap> iconList;
+    QMap<QString, QString> iconFileNameMap;
+    QMap<QString, QMovie *> smileyList;
+    QMap<int, QPixmap> imgOnList;
+    QMap<int, QPixmap> imgOffList;
+    QMovie *loginMng;
+    int faceId[MaxFaceNumber];  // store faceID, index is the fileID
+    QString imageRoot;
+    QString themePath;
+    QSize faceSize;
 
-	bool isDownloadingQQShow;
-	int downloadID;
-	QFile qqshowFile;
-	QString qqshowFilename;
-	//EvaHttp *http;
+    bool isDownloadingQQShow;
+    int downloadID;
+    QFile qqshowFile;
+    QString qqshowFilename;
+    //EvaHttp *http;
 
 private slots:
-	void slotQQShowDone(bool error);
+    void slotQQShowDone(bool error);
 
 private:
-	friend class EvaGlobal;
+    friend class EvaGlobal;
 };
 
 class EvaSoundResource
 {
 public:
-	EvaSoundResource();
-	~EvaSoundResource(){}
-	//const bool loadSound(){ return false; }
-	void playNewMessage();
-	void playSysMessage();
-	void playOnlineSound();
-	void setSoundDir(const QString &path) { soundRoot = path; }
-	const QString &getSoundDir() const { return soundRoot; }
+    EvaSoundResource();
+    ~EvaSoundResource() {}
+    //const bool loadSound(){ return false; }
+    void playNewMessage();
+    void playSysMessage();
+    void playOnlineSound();
+    void setSoundDir(const QString &path)
+    {
+        soundRoot = path;
+    }
+    const QString &getSoundDir() const
+    {
+        return soundRoot;
+    }
 private:
-	void playSound(const QString &filename);
-	QString soundRoot;
+    void playSound(const QString &filename);
+    QString soundRoot;
 };
 
 class EvaGlobal
 {
 public:
-	EvaGlobal();
-	virtual ~EvaGlobal();
+    EvaGlobal();
+    virtual ~EvaGlobal();
 
-	static QString getDataDirPath();
+    static QString getDataDirPath();
 
-	 bool loadImage() const;
-        //const bool loadFace();
-	//const bool loadSound();
-	 bool loadEvaSetting() const;
+    bool loadImage() const;
+    //const bool loadFace();
+    //const bool loadSound();
+    bool loadEvaSetting() const;
 
-	EvaImageResource *getImageResource() { return imgResource;}
-	EvaSoundResource *getSoundResource() { return sndResource;}
-	//EvaSetting *getEvaSetting() { return system; }
-	//EvaServers *getEvaServers() { return servers; }
+    EvaImageResource *getImageResource()
+    {
+        return imgResource;
+    }
+    EvaSoundResource *getSoundResource()
+    {
+        return sndResource;
+    }
+    //EvaSetting *getEvaSetting() { return system; }
+    //EvaServers *getEvaServers() { return servers; }
 
-	const QSize &getFaceSize() const;
-	void setFaceSize( const QSize size);
+    const QSize &getFaceSize() const;
+    void setFaceSize( const QSize size);
 private:
-	void initialize();
-	void initImage();
-	void initSound();
-	void initEvaSetting();
-	void initServers();
+    void initialize();
+    void initImage();
+    void initSound();
+    void initEvaSetting();
+    void initServers();
 
-	static QString dataDirPath;
-	//EvaSetting *system;
-	//EvaServers *servers;
-	EvaImageResource *imgResource;
-	EvaSoundResource *sndResource;
-	QSize faceSize;
+    static QString dataDirPath;
+    //EvaSetting *system;
+    //EvaServers *servers;
+    EvaImageResource *imgResource;
+    EvaSoundResource *sndResource;
+    QSize faceSize;
 };
 
 #endif

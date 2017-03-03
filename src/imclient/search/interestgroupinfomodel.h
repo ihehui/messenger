@@ -17,10 +17,11 @@
 #include "contactsmanager/interestgroup.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-struct GroupInfo{
+struct GroupInfo {
     GroupInfo(quint32 groupID = 0, const QString groupName = "");
     bool isNull();
 
@@ -41,9 +42,9 @@ public:
 
     void setGroupsInfo(const QString &groupsListString);
 
-    int rowCount ( const QModelIndex & parent = QModelIndex() ) const ;
-    int	columnCount ( const QModelIndex & parent = QModelIndex() ) const;
-    QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const ;
+    int rowCount ( const QModelIndex &parent = QModelIndex() ) const ;
+    int	columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const ;
     QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
     GroupInfo getGroupInfo(int row);

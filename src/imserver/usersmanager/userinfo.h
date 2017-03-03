@@ -42,7 +42,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class UserInfo : public IMUserBase
@@ -64,22 +65,29 @@ public:
 
     void setOnline();
     void setOffline();
-    
+
     QString databaseColumnName(IM::PropertyIDOfUser propertyID) const;
-    
+
     //    QString getUpdateSQLStatement() const;
     //    void clearUpdatedProperties();
 
 
 
-    void setSysID(quint32 sysID){this->m_sysID = sysID;}
-    quint32 getSysID(){return m_sysID;}
+    void setSysID(quint32 sysID)
+    {
+        this->m_sysID = sysID;
+    }
+    quint32 getSysID()
+    {
+        return m_sysID;
+    }
 
     QList<quint32> getInterestGroups() const
     {
         return interestGroups;
     }
-    void setInterestGroups(const QStringList &groups){
+    void setInterestGroups(const QStringList &groups)
+    {
         this->interestGroups.clear();
         foreach (QString groupID, groups) {
             this->interestGroups.append(groupID.toUInt());
@@ -105,7 +113,7 @@ private:
 
 
     //QHash<IM::PropertyID/*Property ID*/, QString/*Property Value*/> updatedProperties;
-    
+
     //    QHash<IM::PropertyID/*Property ID*/, QString/*SQL Update Statement*/> updatedProperties;
     //    QMutex *updatedPropertiesMutex;
 

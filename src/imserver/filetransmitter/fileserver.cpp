@@ -1,6 +1,7 @@
 #include "fileserver.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 FileServer::FileServer(const QString &hostName, quint16 port, const QHostAddress &address, QObject *parent) :
@@ -9,27 +10,33 @@ FileServer::FileServer(const QString &hostName, quint16 port, const QHostAddress
 
 }
 
-void FileServer::setHostName(const QString &hostName){
+void FileServer::setHostName(const QString &hostName)
+{
     m_hostName = hostName;
 }
 
-QString FileServer::getHostName(){
+QString FileServer::getHostName()
+{
     return m_hostName;
 }
 
-void FileServer::setPort(quint16 port){
+void FileServer::setPort(quint16 port)
+{
     m_port = port;
 }
 
-quint16 FileServer::getPort(){
+quint16 FileServer::getPort()
+{
     return m_port;
 }
 
-void FileServer::setHostAddress(const QHostAddress &address){
+void FileServer::setHostAddress(const QHostAddress &address)
+{
     m_hostAddress = address;
 }
 
-QHostAddress FileServer::getHostAddress(){
+QHostAddress FileServer::getHostAddress()
+{
     return m_hostAddress;
 }
 

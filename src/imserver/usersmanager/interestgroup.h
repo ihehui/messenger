@@ -17,9 +17,11 @@
 #include "../../sharedim/interestgroupbase.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class InterestGroup : public InterestGroupBase {
+class InterestGroup : public InterestGroupBase
+{
     Q_OBJECT
 public:
     InterestGroup(quint32 groupID = 0, QObject *parent = 0);
@@ -32,7 +34,7 @@ public:
 protected:
 
 private:
-    
+
 
 
 

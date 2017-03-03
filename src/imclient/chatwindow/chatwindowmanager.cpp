@@ -11,12 +11,13 @@
 #include "HHSharedCore/hutilities.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 ChatWindowManager::ChatWindowManager(QWidget *parent)
     : QMainWindow(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
 
     connect(ui.mdiArea, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
@@ -40,20 +41,19 @@ ChatWindowManager::~ChatWindowManager()
 
 }
 
-void ChatWindowManager::closeEvent(QCloseEvent *e) {
+void ChatWindowManager::closeEvent(QCloseEvent *e)
+{
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         int tabPages = ui.tabWidget->count();
-        for(int i = tabPages-1; i >= 0; i--){
+        for(int i = tabPages - 1; i >= 0; i--) {
             ui.tabWidget->setCurrentIndex(i);
             slotcloseTab();
         }
     }
-        break;
-    case MDIChatWindow:
-    {
+    break;
+    case MDIChatWindow: {
         foreach (QMdiSubWindow *window, ui.mdiArea->subWindowList()) {
             window->close();
 //            ContactChatWidget *messageWindow = qobject_cast<ContactChatWidget *>(window->widget());
@@ -79,41 +79,45 @@ void ChatWindowManager::closeEvent(QCloseEvent *e) {
 //    updateGeometry();
 
 
-/*
-    if (Settings::instance()->getHideOnClose()) {
-    	showMinimized();
-        hide();
-        e->ignore();
-    }else{
+    /*
+        if (Settings::instance()->getHideOnClose()) {
+        	showMinimized();
+            hide();
+            e->ignore();
+        }else{
 
-    ui.mdiArea->closeAllSubWindows();
- 	//Clear the pairList
-    	pairList.clear();
+        ui.mdiArea->closeAllSubWindows();
+     	//Clear the pairList
+        	pairList.clear();
 
-	e->accept();
-    }
-*/
+    	e->accept();
+        }
+    */
 
 
 }
 
-void ChatWindowManager::setChatWindowDisplayStyle(ChatWindowManager::ChatWindowDisplayStyle style){
+void ChatWindowManager::setChatWindowDisplayStyle(ChatWindowManager::ChatWindowDisplayStyle style)
+{
     m_chatWindowDisplayStyle = style;
 }
 
-ChatWindowManager::ChatWindowDisplayStyle ChatWindowManager::getChatWindowDisplayStyle(){
+ChatWindowManager::ChatWindowDisplayStyle ChatWindowManager::getChatWindowDisplayStyle()
+{
     return m_chatWindowDisplayStyle;
 }
 
-void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWindowDisplayStyle style){
+void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWindowDisplayStyle style)
+{
 
-    if(style == m_chatWindowDisplayStyle){return;}
+    if(style == m_chatWindowDisplayStyle) {
+        return;
+    }
 
 
     //TODO
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         while (ui.tabWidget->count()) {
             QWidget *wgt = ui.tabWidget->currentWidget();
             ui.tabWidget->removeTab(ui.tabWidget->indexOf(wgt));
@@ -123,9 +127,8 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         showMinimized();
         hide();
     }
-        break;
-    case MDIChatWindow:
-    {
+    break;
+    case MDIChatWindow: {
         foreach (QMdiSubWindow *window, ui.mdiArea->subWindowList()) {
             ui.mdiArea->removeSubWindow(window);
             window->widget()->setParent(0);
@@ -135,9 +138,8 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         showMinimized();
         hide();
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         foreach (ContactChatWidget *ccw, m_contactChatWidgetHash.values()) {
             ccw->hide();
         }
@@ -146,15 +148,14 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         }
 
     }
-        break;
+    break;
     default:
         break;
     }
 
 
     switch (style) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         foreach (ContactChatWidget *ccw, m_contactChatWidgetHash.values()) {
             ui.tabWidget->addTab(ccw, ccw->displayName());
             ui.tabWidget->setCurrentWidget(ccw);
@@ -171,9 +172,8 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         activateWindow();
         raise();
     }
-        break;
-    case MDIChatWindow:
-    {
+    break;
+    case MDIChatWindow: {
         foreach (ContactChatWidget *ccw, m_contactChatWidgetHash.values()) {
             QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(ccw);
             Contact *contact = ccw->contact();
@@ -194,9 +194,8 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         activateWindow();
         raise();
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         foreach (ContactChatWidget *ccw, m_contactChatWidgetHash.values()) {
             ccw->showNormal();
         }
@@ -207,7 +206,7 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
         showMinimized();
         hide();
     }
-        break;
+    break;
     default:
         break;
     }
@@ -217,87 +216,103 @@ void ChatWindowManager::switchChatWindowDisplayStyle(ChatWindowManager::ChatWind
 
 }
 
-bool ChatWindowManager::isContactChatWindowOpen(const QString &contactID){
+bool ChatWindowManager::isContactChatWindowOpen(const QString &contactID)
+{
     ContactChatWidget *ccw = m_contactChatWidgetHash.value(contactID);
     return ccw;
 }
 
-bool ChatWindowManager::isInterestGroupChatWindowOpen(int groupID){
+bool ChatWindowManager::isInterestGroupChatWindowOpen(int groupID)
+{
     GroupChatWindow *gcw = m_groupChatWidgetHash.value(groupID);
     return gcw;
 }
 
-bool ChatWindowManager::closeContactChatWindow(Contact *contact){
+bool ChatWindowManager::closeContactChatWindow(Contact *contact)
+{
 
     Q_ASSERT(contact);
 
     ContactChatWidget *ccw = m_contactChatWidgetHash.value(contact->getUserID());
-    if(!ccw){return true;}
+    if(!ccw) {
+        return true;
+    }
 
     return ccw->close();
 
 }
 
-bool ChatWindowManager::closeInterestGroupChatWindow(InterestGroup *group){
+bool ChatWindowManager::closeInterestGroupChatWindow(InterestGroup *group)
+{
 
     Q_ASSERT(group);
 
     GroupChatWindow *gcw = m_groupChatWidgetHash.value(group->getGroupID());
-    if(!gcw){return true;}
+    if(!gcw) {
+        return true;
+    }
 
     return gcw->close();
 
 }
 
-void ChatWindowManager::interestGroupMemberJoinedOrQuitted(quint32 groupID, const QString &memberID, bool join){
+void ChatWindowManager::interestGroupMemberJoinedOrQuitted(quint32 groupID, const QString &memberID, bool join)
+{
 
     GroupChatWindow *gcw = m_groupChatWidgetHash.value(groupID);
-    if(!gcw){return;}
+    if(!gcw) {
+        return;
+    }
 
     gcw->memberJoinedOrQuitted(memberID, join);
 
 }
 
-void ChatWindowManager::contactOnlineStateChanged(Contact *contact){
+void ChatWindowManager::contactOnlineStateChanged(Contact *contact)
+{
 
-    if(!contact){return;}
+    if(!contact) {
+        return;
+    }
 
     foreach (GroupChatWindow *gcw, m_groupChatWidgetHash.values()) {
         gcw->contactOnlineStateChanged(contact);
     }
 
     ContactChatWidget *ccw = m_contactChatWidgetHash.value(contact->getUserID());
-    if(!ccw){return;}
+    if(!ccw) {
+        return;
+    }
     ccw->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
     ccw->contactOnlineStateChanged();
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         ui.tabWidget->setTabIcon(ui.tabWidget->indexOf(ccw), ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = findChatWithContactMdiSubWindow(contact);
-        if(!subWindow){break;}
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = findChatWithContactMdiSubWindow(contact);
+        if(!subWindow) {
+            break;
+        }
         subWindow->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
 //        ccw = m_contactChatWidgetHash.value(contactID);
 //        if(!ccw){break;}
 //        ccw->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
     }
-        return;
+    return;
     default:
         break;
     }
 
 }
 
-void ChatWindowManager::processImageDownloadResult(const QString &contactID, const QString &imageName, bool downloaded){
+void ChatWindowManager::processImageDownloadResult(const QString &contactID, const QString &imageName, bool downloaded)
+{
 
 //    ContactChatWidget *ccw = m_contactChatWidgetHash.value(contactID);
 //    if(ccw){
@@ -307,97 +322,101 @@ void ChatWindowManager::processImageDownloadResult(const QString &contactID, con
 //    }
 
     foreach (ContactChatWidget *ccw, m_contactChatWidgetHash.values()) {
-        if(ccw->isDownloadingImage(imageName)){
+        if(ccw->isDownloadingImage(imageName)) {
             ccw->processImageDownloadResult(imageName, downloaded);
         }
     }
 
 
     foreach (GroupChatWindow *gcw, m_groupChatWidgetHash.values()) {
-        if(gcw->isDownloadingImage(imageName)){
+        if(gcw->isDownloadingImage(imageName)) {
             gcw->processImageDownloadResult(imageName, downloaded);
         }
     }
 
 }
 
-void ChatWindowManager::processContactHistoryMessage(const QStringList &messages, bool canFetchMore, const QString &contactID){
+void ChatWindowManager::processContactHistoryMessage(const QStringList &messages, bool canFetchMore, const QString &contactID)
+{
 
     Contact *contact = ContactsManager::instance()->getUser(contactID);
-    if(!contact){
-        qCritical()<<"Error:No such contact:"<<contactID;
+    if(!contact) {
+        qCritical() << "Error:No such contact:" << contactID;
         return;
     }
 
     ContactChatWidget *contactChatWindow = m_contactChatWidgetHash.value(contactID);
-    if(!contactChatWindow){return;}
+    if(!contactChatWindow) {
+        return;
+    }
 
     contactChatWindow->processContactHistoryMessage(messages, canFetchMore);
 }
 
-void ChatWindowManager::processGrouptHistoryMessage(const QStringList &messages, bool canFetchMore, quint32 groupID){
+void ChatWindowManager::processGrouptHistoryMessage(const QStringList &messages, bool canFetchMore, quint32 groupID)
+{
 
     InterestGroup *group = ContactsManager::instance()->getInterestGroup(groupID);
-    if(!group){
-        qCritical()<<"Error:No such interest group:"<<groupID;
+    if(!group) {
+        qCritical() << "Error:No such interest group:" << groupID;
         return;
     }
 
 
     GroupChatWindow *groupChatWindow = m_groupChatWidgetHash.value(groupID);
-    if(!groupChatWindow){return;}
+    if(!groupChatWindow) {
+        return;
+    }
 
     groupChatWindow->processGrouptHistoryMessage(messages, canFetchMore);
 
 }
 
-void ChatWindowManager::slotNewChatWithContact(const QString &contactID){
-    qDebug()<<"----ChatWindowManager::slotNewChatWithContact(const QString &id)~~~ contactID:"<<contactID;
+void ChatWindowManager::slotNewChatWithContact(const QString &contactID)
+{
+    qDebug() << "----ChatWindowManager::slotNewChatWithContact(const QString &id)~~~ contactID:" << contactID;
 
     Contact *contact = ContactsManager::instance()->getUser(contactID);
-    if(!contact){
-        qCritical()<<"ERROR! No such contact:"<<contactID;
+    if(!contact) {
+        qCritical() << "ERROR! No such contact:" << contactID;
         return;
     }
 
     ContactChatWidget *ccw = 0;
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         ccw = findContactChatTabWidget(contact);
-        if(!ccw){
+        if(!ccw) {
             ccw = createContactChatWindow(contact);
             ui.tabWidget->addTab(ccw, ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()), ccw->displayName());
         }
         ui.tabWidget->setCurrentWidget(ccw);
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = findChatWithContactMdiSubWindow(contact);
-        if(!subWindow){
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = findChatWithContactMdiSubWindow(contact);
+        if(!subWindow) {
             ccw = createContactChatWindow(contact);
             QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(ccw);
             subWindow->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
             //connect(subWindow, SIGNAL(destroyed()), this, SLOT(handleChatWindowClosed()));
             ccw->show();
-        }else{
+        } else {
             ui.mdiArea->setActiveSubWindow(subWindow);
         }
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         ccw = m_contactChatWidgetHash.value(contactID);
-        if(!ccw){
+        if(!ccw) {
             ccw = createContactChatWindow(contact);
         }
         ccw->show();
         ccw->activateWindow();
         QApplication::alert(ccw);
     }
-        break;
+    break;
     default:
         break;
     }
@@ -409,7 +428,7 @@ void ChatWindowManager::slotNewChatWithContact(const QString &contactID){
     }
 
 
-    if(m_chatWindowDisplayStyle != SeparatedChatWindow){
+    if(m_chatWindowDisplayStyle != SeparatedChatWindow) {
         showNormal();
     }
 
@@ -419,24 +438,24 @@ void ChatWindowManager::slotNewChatWithContact(const QString &contactID){
 
 }
 
-void ChatWindowManager::slotNewMessageReceivedFromContact(const QString &contactID, const QString &message, const QString &time){
+void ChatWindowManager::slotNewMessageReceivedFromContact(const QString &contactID, const QString &message, const QString &time)
+{
     //TODO:
-    qWarning()<< "----ChatWindowManager::slotNewMessageReceivedFromContact(....)~~From:"<<contactID<<" msg:"<<message<<" Time:"<<time;
+    qWarning() << "----ChatWindowManager::slotNewMessageReceivedFromContact(....)~~From:" << contactID << " msg:" << message << " Time:" << time;
 
 
     Contact *contact = ContactsManager::instance()->getUser(contactID);
-    if(!contact){
-        qCritical()<<"Error:No such contact:"<<contactID;
+    if(!contact) {
+        qCritical() << "Error:No such contact:" << contactID;
         return;
     }
 
     ContactChatWidget *contactChatWindow = 0;
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         contactChatWindow = findContactChatTabWidget(contact);
-        if(!contactChatWindow){
+        if(!contactChatWindow) {
             contactChatWindow = createContactChatWindow(contact);
             ui.tabWidget->addTab(contactChatWindow, contactChatWindow->displayName());
         }
@@ -447,17 +466,16 @@ void ChatWindowManager::slotNewMessageReceivedFromContact(const QString &contact
         raise();
         QApplication::alert(this);
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = findChatWithContactMdiSubWindow(contact);
-        if(!subWindow){
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = findChatWithContactMdiSubWindow(contact);
+        if(!subWindow) {
             contactChatWindow = createContactChatWindow(contact);
             QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(contactChatWindow);
             subWindow->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
             //connect(subWindow, SIGNAL(destroyed()), this, SLOT(handleChatWindowClosed()));
             contactChatWindow->show();
-        }else{
+        } else {
             ui.mdiArea->setActiveSubWindow(subWindow);
         }
 
@@ -467,18 +485,17 @@ void ChatWindowManager::slotNewMessageReceivedFromContact(const QString &contact
         QApplication::alert(this);
 
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         contactChatWindow = m_contactChatWidgetHash.value(contactID);
-        if(!contactChatWindow){
+        if(!contactChatWindow) {
             contactChatWindow = createContactChatWindow(contact);
         }
         contactChatWindow->show();
         contactChatWindow->activateWindow();
         QApplication::alert(contactChatWindow);
     }
-        break;
+    break;
     default:
         break;
     }
@@ -488,52 +505,50 @@ void ChatWindowManager::slotNewMessageReceivedFromContact(const QString &contact
 
 }
 
-void ChatWindowManager::slotNewChatWithInterestGroup(quint32 interestGroupID){
+void ChatWindowManager::slotNewChatWithInterestGroup(quint32 interestGroupID)
+{
 
     InterestGroup *group = ContactsManager::instance()->getInterestGroup(interestGroupID);
-    if(!group){
-        qCritical()<<"Error:No such interest group:"<<interestGroupID;
+    if(!group) {
+        qCritical() << "Error:No such interest group:" << interestGroupID;
         return;
     }
 
     GroupChatWindow *groupChatWindow = 0;
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         groupChatWindow = findInterestGroupChatTabWidget(group);
-        if(!groupChatWindow){
+        if(!groupChatWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
             ui.tabWidget->addTab(groupChatWindow, ImageResource::createIconForInterestGroup(), group->getGroupName());
         }
         ui.tabWidget->setCurrentWidget(groupChatWindow);
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = findChatWithInterestGroupMdiSubWindow(group);
-        if(!subWindow){
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = findChatWithInterestGroupMdiSubWindow(group);
+        if(!subWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
             QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(groupChatWindow);
             subWindow->setWindowIcon(ImageResource::createIconForInterestGroup());
             //connect(subWindow, SIGNAL(destroyed()), this, SLOT(handleChatWindowClosed()));
             groupChatWindow->show();
-        }else{
+        } else {
             ui.mdiArea->setActiveSubWindow(subWindow);
         }
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         groupChatWindow = m_groupChatWidgetHash.value(interestGroupID);
-        if(!groupChatWindow){
+        if(!groupChatWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
         }
         groupChatWindow->show();
         groupChatWindow->activateWindow();
         QApplication::alert(groupChatWindow);
     }
-        break;
+    break;
     default:
         break;
     }
@@ -541,7 +556,7 @@ void ChatWindowManager::slotNewChatWithInterestGroup(quint32 interestGroupID){
 
     QList<InterestGroup::GroupChatMessage> unreadMessages = group->takeUnreadMessages();
 
-    for(int i=0; i<unreadMessages.size(); i++){
+    for(int i = 0; i < unreadMessages.size(); i++) {
         InterestGroup::GroupChatMessage chatMessage = unreadMessages.at(i);
         groupChatWindow->appendMessageReceivedFromContact(chatMessage.message, chatMessage.contact, chatMessage.time);
     }
@@ -552,7 +567,7 @@ void ChatWindowManager::slotNewChatWithInterestGroup(quint32 interestGroupID){
 //    }
 
 
-    if(m_chatWindowDisplayStyle != SeparatedChatWindow){
+    if(m_chatWindowDisplayStyle != SeparatedChatWindow) {
         showNormal();
     }
 
@@ -565,21 +580,22 @@ void ChatWindowManager::slotNewChatWithInterestGroup(quint32 interestGroupID){
 
 }
 
-void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interestGroupID, const QString &contactID, const QString &message, const QString &time){
-    qDebug()<<"--ChatWindowManager::slotNewMessageReceivedFromInterestGroup(...) interestGroupID:"<<interestGroupID<<" contactID:"<<contactID<<" message:"<<message;
+void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interestGroupID, const QString &contactID, const QString &message, const QString &time)
+{
+    qDebug() << "--ChatWindowManager::slotNewMessageReceivedFromInterestGroup(...) interestGroupID:" << interestGroupID << " contactID:" << contactID << " message:" << message;
 
     InterestGroup *group = ContactsManager::instance()->getInterestGroup(interestGroupID);
-    if(!group){
-        qCritical()<<"Error:No such interest group:"<<interestGroupID;
+    if(!group) {
+        qCritical() << "Error:No such interest group:" << interestGroupID;
         return;
     }
-    if(!group->hasMember(contactID)){
-        qCritical()<<QString("Error:No such member '%1' in group '%2'!").arg(contactID).arg(interestGroupID);
+    if(!group->hasMember(contactID)) {
+        qCritical() << QString("Error:No such member '%1' in group '%2'!").arg(contactID).arg(interestGroupID);
         return;
     }
     Contact *contact = ContactsManager::instance()->getUser(contactID);
-    if(!contact){
-        qCritical()<<"Error:No such contact:"<<contactID;
+    if(!contact) {
+        qCritical() << "Error:No such contact:" << contactID;
         return;
     }
 
@@ -587,10 +603,9 @@ void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interest
     GroupChatWindow *groupChatWindow = 0;
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         groupChatWindow = findInterestGroupChatTabWidget(group);
-        if(!groupChatWindow){
+        if(!groupChatWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
             ui.tabWidget->addTab(groupChatWindow, group->getGroupName());
         }
@@ -600,17 +615,16 @@ void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interest
         showNormal();
         raise();
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = findChatWithInterestGroupMdiSubWindow(group);
-        if(!subWindow){
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = findChatWithInterestGroupMdiSubWindow(group);
+        if(!subWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
             QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(groupChatWindow);
             subWindow->setWindowIcon(ImageResource::createIconForInterestGroup());
             //connect(subWindow, SIGNAL(destroyed()), this, SLOT(handleChatWindowClosed()));
             groupChatWindow->show();
-        }else{
+        } else {
             ui.mdiArea->setActiveSubWindow(subWindow);
         }
 
@@ -618,18 +632,17 @@ void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interest
         showNormal();
         raise();
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         groupChatWindow = m_groupChatWidgetHash.value(interestGroupID);
-        if(!groupChatWindow){
+        if(!groupChatWindow) {
             groupChatWindow = createInterestGroupChatWindow(group);
         }
         groupChatWindow->show();
         groupChatWindow->activateWindow();
         QApplication::alert(groupChatWindow);
     }
-        break;
+    break;
     default:
         break;
     }
@@ -639,7 +652,8 @@ void ChatWindowManager::slotNewMessageReceivedFromInterestGroup(quint32 interest
 
 }
 
-void ChatWindowManager::initTabWidget(){
+void ChatWindowManager::initTabWidget()
+{
 
     connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotTabPageChanged()));
 
@@ -678,7 +692,8 @@ void ChatWindowManager::initTabWidget(){
 
 }
 
-void ChatWindowManager::slotTabPageChanged(){
+void ChatWindowManager::slotTabPageChanged()
+{
 
 //    SystemManagementWidget *systemManagementWidget = qobject_cast<SystemManagementWidget *>(ui.tabWidget->currentWidget());
 //    if(systemManagementWidget){
@@ -694,7 +709,8 @@ void ChatWindowManager::slotTabPageChanged(){
 
 }
 
-void ChatWindowManager::slotNewTab(){
+void ChatWindowManager::slotNewTab()
+{
 
     if(m_chatWindowDisplayStyle != TabbedChatWindow) {
         return;
@@ -717,13 +733,14 @@ void ChatWindowManager::slotNewTab(){
 
 }
 
-void ChatWindowManager::slotcloseTab(){
+void ChatWindowManager::slotcloseTab()
+{
 
     QWidget *wgt = ui.tabWidget->currentWidget();
 
     ContactChatWidget *ccw = qobject_cast<ContactChatWidget *>(wgt);
-    if(ccw){
-        if(!ccw->close()){
+    if(ccw) {
+        if(!ccw->close()) {
             return;
         }
         ui.tabWidget->removeTab(ui.tabWidget->currentIndex());
@@ -734,8 +751,8 @@ void ChatWindowManager::slotcloseTab(){
 
 
     GroupChatWindow *gcw = qobject_cast<GroupChatWindow *>(wgt);
-    if(gcw){
-        if(!gcw->close()){
+    if(gcw) {
+        if(!gcw->close()) {
             return;
         }
         ui.tabWidget->removeTab(ui.tabWidget->currentIndex());
@@ -779,60 +796,59 @@ void ChatWindowManager::slotcloseTab(){
 //        showMinimized();
 //        hide();
 //    }
-    
+
 //}
 
-void ChatWindowManager::handleCloseWindowRequest(){
+void ChatWindowManager::handleCloseWindowRequest()
+{
 
     switch (m_chatWindowDisplayStyle) {
-    case TabbedChatWindow:
-    {
+    case TabbedChatWindow: {
         slotcloseTab();
     }
-        break;
-    case MDIChatWindow:
-    {
-        QMdiSubWindow * subWindow = ui.mdiArea->currentSubWindow();
-        if(subWindow){
+    break;
+    case MDIChatWindow: {
+        QMdiSubWindow *subWindow = ui.mdiArea->currentSubWindow();
+        if(subWindow) {
             subWindow->close();
         }
     }
-        break;
-    case SeparatedChatWindow:
-    {
+    break;
+    case SeparatedChatWindow: {
         ContactChatWidget *ccw = qobject_cast<ContactChatWidget *>(sender());
-        if(ccw){
+        if(ccw) {
             ccw->close();
         }
 
         GroupChatWindow *gcw = qobject_cast<GroupChatWindow *>(sender());
-        if(gcw){
+        if(gcw) {
             gcw->close();
         }
 
     }
-        break;
+    break;
     default:
         break;
     }
 
 }
 
-void ChatWindowManager::handleChatWindowClosed(){
-    qDebug()<<"----ChatWindowManager::handleChatWindowClosed()";
+void ChatWindowManager::handleChatWindowClosed()
+{
+    qDebug() << "----ChatWindowManager::handleChatWindowClosed()";
 
     ContactChatWidget *ccw = qobject_cast<ContactChatWidget *>(sender());
-    if(ccw){
+    if(ccw) {
         m_contactChatWidgetHash.remove(ccw->contact()->getUserID());
     }
 
     GroupChatWindow *gcw = qobject_cast<GroupChatWindow *>(sender());
-    if(gcw){
+    if(gcw) {
         m_groupChatWidgetHash.remove(gcw->interestGroup()->getGroupID());
     }
 
     if(((m_chatWindowDisplayStyle == MDIChatWindow) && (!ui.mdiArea->subWindowList().size()))
-            || ((m_chatWindowDisplayStyle == TabbedChatWindow) && (!ui.tabWidget->count())) ){
+            || ((m_chatWindowDisplayStyle == TabbedChatWindow) && (!ui.tabWidget->count())) ) {
         showMinimized();
         hide();
     }
@@ -840,7 +856,8 @@ void ChatWindowManager::handleChatWindowClosed(){
 }
 
 
-void ChatWindowManager::showContextMenu(const QPoint &pos){
+void ChatWindowManager::showContextMenu(const QPoint &pos)
+{
 
     if(m_chatWindowDisplayStyle != MDIChatWindow) {
         return;
@@ -863,41 +880,49 @@ void ChatWindowManager::showContextMenu(const QPoint &pos){
 
 }
 
-void ChatWindowManager::handleContactChatHistoryMenuAction(){
+void ChatWindowManager::handleContactChatHistoryMenuAction()
+{
     QAction *act = qobject_cast<QAction *>(sender());
     QString contactID = act->data().toString();
     slotNewChatWithContact(contactID);
 
 }
 
-void ChatWindowManager::handleGroupChatHistoryMenuAction(){
+void ChatWindowManager::handleGroupChatHistoryMenuAction()
+{
     QAction *act = qobject_cast<QAction *>(sender());
     quint32 groupID = act->data().toUInt();
     slotNewChatWithInterestGroup(groupID);
 
 }
 
-void ChatWindowManager::switchToSubWindowView(){
+void ChatWindowManager::switchToSubWindowView()
+{
     switchChatWindowDisplayStyle(MDIChatWindow);
 }
 
-void ChatWindowManager::switchToTabbedView(){
+void ChatWindowManager::switchToTabbedView()
+{
     switchChatWindowDisplayStyle(TabbedChatWindow);
 }
 
-void ChatWindowManager::switchToSeparatedView(){
+void ChatWindowManager::switchToSeparatedView()
+{
     switchChatWindowDisplayStyle(SeparatedChatWindow);
 }
 
-void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const QByteArray &fileMD5, bool offline){
+void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const QByteArray &fileMD5, bool offline)
+{
 
-    ContactChatWidget *wgt = qobject_cast<ContactChatWidget*>(sender());
-    if(!wgt){return;}
+    ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
+    if(!wgt) {
+        return;
+    }
     Contact *contact = wgt->contact();
     //TODO
 
-    if(offline){
-        if(!initFileTransmission()){
+    if(offline) {
+        if(!initFileTransmission()) {
             wgt->cancelFileTransmission(fileMD5);
             return;
         }
@@ -920,26 +945,32 @@ void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const 
         QFileInfo info(filePath);
         m_fileTransmissionPacketsParser->requestUploadFile(m_socketConnectedToServer, fileMD5, info.fileName(), info.size());
 
-    }else{
+    } else {
         emit signalSendUploadingFileRequest(contact, filePath, fileMD5);
     }
 
 }
 
-void ChatWindowManager::cancelSendingFileRequest(const QByteArray &fileMD5){
+void ChatWindowManager::cancelSendingFileRequest(const QByteArray &fileMD5)
+{
 
-    ContactChatWidget *wgt = qobject_cast<ContactChatWidget*>(sender());
-    if(!wgt){return;}
+    ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
+    if(!wgt) {
+        return;
+    }
     Contact *contact = wgt->contact();
 
     emit signalCancelSendingFileUploadingRequest(contact, fileMD5);
 
 }
 
-void ChatWindowManager::abortFileTransmission(const QByteArray &fileMD5){
+void ChatWindowManager::abortFileTransmission(const QByteArray &fileMD5)
+{
 
-    ContactChatWidget *wgt = qobject_cast<ContactChatWidget*>(sender());
-    if(!wgt){return;}
+    ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
+    if(!wgt) {
+        return;
+    }
     Contact *contact = wgt->contact();
 
     //m_fileTransmissionManagerBase->abortFileTransmission();
@@ -948,10 +979,13 @@ void ChatWindowManager::abortFileTransmission(const QByteArray &fileMD5){
 
 }
 
-void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, const QString &localSavePath){
+void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, const QString &localSavePath)
+{
 
-    ContactChatWidget *wgt = qobject_cast<ContactChatWidget*>(sender());
-    if(!wgt){return;}
+    ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
+    if(!wgt) {
+        return;
+    }
     Contact *contact = wgt->contact();
 
     emit signalAcceptPeerUploadFileRequest(contact, fileMD5, localSavePath);
@@ -962,84 +996,99 @@ void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, c
 
 }
 
-void ChatWindowManager::declineFileRequest(const QByteArray &fileMD5){
+void ChatWindowManager::declineFileRequest(const QByteArray &fileMD5)
+{
 
-    ContactChatWidget *wgt = qobject_cast<ContactChatWidget*>(sender());
-    if(!wgt){return;}
+    ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
+    if(!wgt) {
+        return;
+    }
     Contact *contact = wgt->contact();
 
     emit signalDeclinePeerUploadFileRequest(contact, fileMD5);
 
 }
 
-void ChatWindowManager::contactRequestUploadFile(const QString &contactID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size){
+void ChatWindowManager::contactRequestUploadFile(const QString &contactID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size)
+{
 
     ContactChatWidget *ccw = m_contactChatWidgetHash.value(contactID);
-    if(!ccw){return;}
+    if(!ccw) {
+        return;
+    }
     ccw->slotFileRequestReceivedFromContact(fileName, size, fileMD5Sum);
 }
 
-void ChatWindowManager::contactRequestDownloadFile(const QString &contactID, const QString &localBaseDir, const QString &fileName){
+void ChatWindowManager::contactRequestDownloadFile(const QString &contactID, const QString &localBaseDir, const QString &fileName)
+{
 
 }
 
-void ChatWindowManager::fileDownloadRequestAccepted(const QString &contactID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size){
+void ChatWindowManager::fileDownloadRequestAccepted(const QString &contactID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size)
+{
     //TODO:
 
-    if(!initFileTransmission()){
+    if(!initFileTransmission()) {
         return;
     }
 
 }
 
-void ChatWindowManager::fileDownloadRequestDenied(const QString &contactID, const QString &remoteFileName, const QString &message){
+void ChatWindowManager::fileDownloadRequestDenied(const QString &contactID, const QString &remoteFileName, const QString &message)
+{
     //TODO
 }
 
-void ChatWindowManager::fileUploadRequestResponsed(const QString &contactID, const QByteArray &fileMD5Sum, bool accepted, const QString &message){
+void ChatWindowManager::fileUploadRequestResponsed(const QString &contactID, const QByteArray &fileMD5Sum, bool accepted, const QString &message)
+{
 
     ContactChatWidget *ccw = m_contactChatWidgetHash.value(contactID);
-    if(!ccw){return;}
+    if(!ccw) {
+        return;
+    }
 
     ccw->fileUploadRequestResponsed(fileMD5Sum, accepted, message);
 
     //TODO
-    if(!accepted){return;}
+    if(!accepted) {
+        return;
+    }
 
-    if(!initFileTransmission()){
+    if(!initFileTransmission()) {
         return;
     }
 
 }
 
-ContactChatWidget * ChatWindowManager::createContactChatWindow(Contact *contact){
+ContactChatWidget *ChatWindowManager::createContactChatWindow(Contact *contact)
+{
 
-        ContactChatWidget *contactChatWindow = new ContactChatWidget(contact);
-        contactChatWindow->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
+    ContactChatWidget *contactChatWindow = new ContactChatWidget(contact);
+    contactChatWindow->setWindowIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
 
-        connect(contactChatWindow, SIGNAL(sendMsgButtonClicked(Contact *, const QString &, const QStringList &)), this, SIGNAL(signalSendChatMessageToCantact(Contact *, const QString &, const QStringList &)));
-        connect(contactChatWindow, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)), this, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)));
+    connect(contactChatWindow, SIGNAL(sendMsgButtonClicked(Contact *, const QString &, const QStringList &)), this, SIGNAL(signalSendChatMessageToCantact(Contact *, const QString &, const QStringList &)));
+    connect(contactChatWindow, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)), this, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)));
 
-        connect(contactChatWindow, SIGNAL(signalCloseWindow()), this, SLOT(handleCloseWindowRequest()));
-        connect(contactChatWindow, SIGNAL(toBeDstroyed()), this, SLOT(handleChatWindowClosed()));
-        connect(contactChatWindow, SIGNAL(signalRequestContactHistoryMessage(const QString &, const QString &, const QString &, bool, const QString &)), this, SIGNAL(signalRequestContactHistoryMessage(const QString &, const QString &, const QString &, bool, const QString &)));
-
-
-        //FILE TX
-        connect(contactChatWindow, SIGNAL(signalSendUploadingFileRequest(const QString &, const QByteArray &, bool)), this, SLOT(sendUploadingFileRequest(const QString &, const QByteArray &, bool)) );
-        connect(contactChatWindow, SIGNAL(signalCancelSendingUploadingFileRequest(const QByteArray &)), this, SLOT(cancelSendingFileRequest(const QByteArray &)) );
-        connect(contactChatWindow, SIGNAL(signalAbortFileTransmission(const QByteArray &)), this, SLOT(abortFileTransmission(const QByteArray &)) );
-        connect(contactChatWindow, SIGNAL(signalAcceptPeerUploadFileRequest(const QByteArray &, const QString &)), this, SLOT(acceptPeerUploadFileRequest(const QByteArray &, const QString &)) );
-        connect(contactChatWindow, SIGNAL(signalDeclinePeerUploadFileRequest(const QByteArray &)), this, SLOT(declineFileRequest(const QByteArray &)) );
+    connect(contactChatWindow, SIGNAL(signalCloseWindow()), this, SLOT(handleCloseWindowRequest()));
+    connect(contactChatWindow, SIGNAL(toBeDstroyed()), this, SLOT(handleChatWindowClosed()));
+    connect(contactChatWindow, SIGNAL(signalRequestContactHistoryMessage(const QString &, const QString &, const QString &, bool, const QString &)), this, SIGNAL(signalRequestContactHistoryMessage(const QString &, const QString &, const QString &, bool, const QString &)));
 
 
+    //FILE TX
+    connect(contactChatWindow, SIGNAL(signalSendUploadingFileRequest(const QString &, const QByteArray &, bool)), this, SLOT(sendUploadingFileRequest(const QString &, const QByteArray &, bool)) );
+    connect(contactChatWindow, SIGNAL(signalCancelSendingUploadingFileRequest(const QByteArray &)), this, SLOT(cancelSendingFileRequest(const QByteArray &)) );
+    connect(contactChatWindow, SIGNAL(signalAbortFileTransmission(const QByteArray &)), this, SLOT(abortFileTransmission(const QByteArray &)) );
+    connect(contactChatWindow, SIGNAL(signalAcceptPeerUploadFileRequest(const QByteArray &, const QString &)), this, SLOT(acceptPeerUploadFileRequest(const QByteArray &, const QString &)) );
+    connect(contactChatWindow, SIGNAL(signalDeclinePeerUploadFileRequest(const QByteArray &)), this, SLOT(declineFileRequest(const QByteArray &)) );
 
-        QString contactID = contact->getUserID();
-        m_contactChatWidgetHash.insert(contactID, contactChatWindow);
 
-        if(!m_contactChatHistoryList.contains(contactID, Qt::CaseInsensitive)){
-            m_contactChatHistoryList.append(contactID);
-        }
+
+    QString contactID = contact->getUserID();
+    m_contactChatWidgetHash.insert(contactID, contactChatWindow);
+
+    if(!m_contactChatHistoryList.contains(contactID, Qt::CaseInsensitive)) {
+        m_contactChatHistoryList.append(contactID);
+    }
 
 //        QMdiSubWindow *subWindow = ui.mdiArea->addSubWindow(contactChatWindow);
 //        //subWindow->setWindowIcon(ImageResource::createMixedIcon((QString(RESOURCE_PATH) + "/" +contact->getFace()), contact->getOnlineState()));
@@ -1048,16 +1097,19 @@ ContactChatWidget * ChatWindowManager::createContactChatWindow(Contact *contact)
 //        connect(subWindow, SIGNAL(destroyed()), this, SLOT(chatWindowClosed()));
 
 
-        return contactChatWindow;
+    return contactChatWindow;
 
 }
 
-QMdiSubWindow* ChatWindowManager::findChatWithContactMdiSubWindow(Contact *contact){
+QMdiSubWindow *ChatWindowManager::findChatWithContactMdiSubWindow(Contact *contact)
+{
 
     foreach (QMdiSubWindow *window, ui.mdiArea->subWindowList()) {
         ContactChatWidget *messageWindow = qobject_cast<ContactChatWidget *>(window->widget());
-        if(!messageWindow){continue;}
-        if(messageWindow->contact() == contact){
+        if(!messageWindow) {
+            continue;
+        }
+        if(messageWindow->contact() == contact) {
             return window;
         }
     }
@@ -1066,13 +1118,16 @@ QMdiSubWindow* ChatWindowManager::findChatWithContactMdiSubWindow(Contact *conta
 
 }
 
-ContactChatWidget * ChatWindowManager::findContactChatTabWidget(Contact *contact){
+ContactChatWidget *ChatWindowManager::findContactChatTabWidget(Contact *contact)
+{
 
     int tabPages = ui.tabWidget->count();
-    for(int i = tabPages-1; i >= 0; i--){
+    for(int i = tabPages - 1; i >= 0; i--) {
         ContactChatWidget *ccw = qobject_cast<ContactChatWidget *>(ui.tabWidget->widget(i));
-        if(!ccw){continue;}
-        if(ccw->contact() == contact){
+        if(!ccw) {
+            continue;
+        }
+        if(ccw->contact() == contact) {
             return ccw;
         }
     }
@@ -1080,12 +1135,13 @@ ContactChatWidget * ChatWindowManager::findContactChatTabWidget(Contact *contact
     return 0;
 }
 
-GroupChatWindow* ChatWindowManager::createInterestGroupChatWindow(InterestGroup *group){
+GroupChatWindow *ChatWindowManager::createInterestGroupChatWindow(InterestGroup *group)
+{
 
     //InterestGroup *group = ContactsManager::instance()->getInterestGroup(interestGroupID);
-    if(!group){
-            qCritical()<<"Error:No such interest group!";
-            return 0;
+    if(!group) {
+        qCritical() << "Error:No such interest group!";
+        return 0;
     }
 
     GroupChatWindow *groupChatWindow = new GroupChatWindow(group);
@@ -1102,7 +1158,7 @@ GroupChatWindow* ChatWindowManager::createInterestGroupChatWindow(InterestGroup 
     quint32 groutID = group->getGroupID();
     m_groupChatWidgetHash.insert(groutID, groupChatWindow);
 
-    if(!m_groupChatHistoryList.contains(groutID)){
+    if(!m_groupChatHistoryList.contains(groutID)) {
         m_groupChatHistoryList.append(groutID);
     }
 
@@ -1114,27 +1170,33 @@ GroupChatWindow* ChatWindowManager::createInterestGroupChatWindow(InterestGroup 
     return groupChatWindow;
 }
 
-QMdiSubWindow* ChatWindowManager::findChatWithInterestGroupMdiSubWindow(InterestGroup *group){
+QMdiSubWindow *ChatWindowManager::findChatWithInterestGroupMdiSubWindow(InterestGroup *group)
+{
 
     foreach (QMdiSubWindow *window, ui.mdiArea->subWindowList()) {
-            GroupChatWindow *groupChatWindow = qobject_cast<GroupChatWindow *>(window->widget());
-            if(!groupChatWindow){continue;}
-            if(groupChatWindow->interestGroup() == group){
-                    return window;
-            }
+        GroupChatWindow *groupChatWindow = qobject_cast<GroupChatWindow *>(window->widget());
+        if(!groupChatWindow) {
+            continue;
+        }
+        if(groupChatWindow->interestGroup() == group) {
+            return window;
+        }
     }
 
     return 0;
 
 }
 
-GroupChatWindow * ChatWindowManager::findInterestGroupChatTabWidget(InterestGroup *group){
+GroupChatWindow *ChatWindowManager::findInterestGroupChatTabWidget(InterestGroup *group)
+{
 
     int tabPages = ui.tabWidget->count();
-    for(int i = tabPages-1; i >= 0; i--){
+    for(int i = tabPages - 1; i >= 0; i--) {
         GroupChatWindow *gcw = qobject_cast<GroupChatWindow *>(ui.tabWidget->widget(i));
-        if(!gcw){continue;}
-        if(gcw->interestGroup() == group){
+        if(!gcw) {
+            continue;
+        }
+        if(gcw->interestGroup() == group) {
             return gcw;
         }
     }
@@ -1143,9 +1205,10 @@ GroupChatWindow * ChatWindowManager::findInterestGroupChatTabWidget(InterestGrou
 
 }
 
-bool ChatWindowManager::initFileTransmission(){
+bool ChatWindowManager::initFileTransmission()
+{
 
-    if(!m_fileTransmissionPacketsParser){
+    if(!m_fileTransmissionPacketsParser) {
 
         IMUser *myself = IMUser::instance();
         QString myID = myself->getUserID();
@@ -1159,7 +1222,7 @@ bool ChatWindowManager::initFileTransmission(){
             qApp->processEvents();
 
             n++;
-            if(10 == n){
+            if(10 == n) {
                 QMessageBox::critical(this, tr("Error"), tr("Timeout! Can not get file server info!"));
                 return false;
             }
@@ -1173,12 +1236,12 @@ bool ChatWindowManager::initFileTransmission(){
     while (m_socketConnectedToServer == INVALID_SOCK_ID) {
         m_socketConnectedToServer = m_fileTransmissionPacketsParser->connectToServer();
 
-        if(m_socketConnectedToServer == INVALID_SOCK_ID){
+        if(m_socketConnectedToServer == INVALID_SOCK_ID) {
             int btn = QMessageBox::critical(this, tr("Connection Failed"), tr("Can not connect to file server!"),
                                             QMessageBox::Retry | QMessageBox::Cancel,
                                             QMessageBox::Retry
-                                            );
-            if(btn == QMessageBox::Cancel){
+                                           );
+            if(btn == QMessageBox::Cancel) {
                 return false;
             }
         }
@@ -1189,18 +1252,19 @@ bool ChatWindowManager::initFileTransmission(){
 
 }
 
-QMenu *ChatWindowManager::chatHistoryMenu(){
+QMenu *ChatWindowManager::chatHistoryMenu()
+{
 
     QMenu *menu = new QMenu(tr("History"));
 
     foreach (QString  contactID, m_contactChatHistoryList) {
         Contact *contact = ContactsManager::instance()->getUser(contactID);
-        if(!contact){
+        if(!contact) {
             m_contactChatHistoryList.removeAll(contactID);
             continue;
         }
         QString displayName = contact->displayName();
-        if(contactID != displayName){
+        if(contactID != displayName) {
             displayName = displayName + "("  + contactID + ")";
         }
 
@@ -1210,7 +1274,7 @@ QMenu *ChatWindowManager::chatHistoryMenu(){
 
     foreach (quint32 groupID, m_groupChatHistoryList) {
         InterestGroup *group = ContactsManager::instance()->getInterestGroup(groupID);
-        if(!group){
+        if(!group) {
             m_groupChatHistoryList.removeAll(groupID);
             continue;
         }

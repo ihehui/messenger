@@ -49,10 +49,12 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-class ServerFileTransmissionPacketsParser : public FileTransmissionPacketsParserBase{
+class ServerFileTransmissionPacketsParser : public FileTransmissionPacketsParserBase
+{
     Q_OBJECT
 public:
     ServerFileTransmissionPacketsParser(const QString &myID, QObject *parent = 0);

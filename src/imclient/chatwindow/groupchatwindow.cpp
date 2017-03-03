@@ -8,7 +8,8 @@
 #include "imageresource.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 GroupChatWindow::GroupChatWindow(InterestGroup *interestGroup, QWidget *parent)
@@ -23,8 +24,8 @@ GroupChatWindow::GroupChatWindow(InterestGroup *interestGroup, QWidget *parent)
 
     ui.chatMessageWindow->setInterestGroup(interestGroup);
 
-    connect(ui.chatMessageWindow, SIGNAL(sendMsgButtonClicked(InterestGroup*, const QString&, const QStringList&)), this, SIGNAL(sendMsgButtonClicked(InterestGroup*, const QString&, const QStringList&)));
-    connect(ui.chatMessageWindow, SIGNAL(signalRequestDownloadImage(const QString&, const QString&)), this, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)));
+    connect(ui.chatMessageWindow, SIGNAL(sendMsgButtonClicked(InterestGroup *, const QString &, const QStringList &)), this, SIGNAL(sendMsgButtonClicked(InterestGroup *, const QString &, const QStringList &)));
+    connect(ui.chatMessageWindow, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)), this, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)));
     connect(ui.chatMessageWindow, SIGNAL(signalShowMessageHistory(bool)), this, SLOT(showMessageHistory(bool)));
     connect(ui.chatMessageWindow, SIGNAL(signalCloseWindow()), this, SIGNAL(signalCloseWindow()));
 
@@ -53,7 +54,7 @@ GroupChatWindow::GroupChatWindow(InterestGroup *interestGroup, QWidget *parent)
     ui.listWidgetMembers->addItem(myItem);
 
 
-    connect(ui.listWidgetMembers, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(memberItemActivated(QListWidgetItem*)));
+    connect(ui.listWidgetMembers, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(memberItemActivated(QListWidgetItem *)));
 
     ui.chatMessageWindow->setEnabled(interestGroup->getState());
 
@@ -68,53 +69,65 @@ GroupChatWindow::~GroupChatWindow()
     emit toBeDstroyed();
 }
 
-void GroupChatWindow::closeEvent(QCloseEvent * event){
+void GroupChatWindow::closeEvent(QCloseEvent *event)
+{
 
-    if(ui.chatMessageWindow->close()){
+    if(ui.chatMessageWindow->close()) {
         event->accept();
-    }else{
+    } else {
         event->ignore();
     }
 }
 
-InterestGroup * GroupChatWindow::interestGroup(){
+InterestGroup *GroupChatWindow::interestGroup()
+{
     return m_interestGroup;
 }
 
-bool GroupChatWindow::isDownloadingImage(const QString &imageName){
+bool GroupChatWindow::isDownloadingImage(const QString &imageName)
+{
     return ui.chatMessageWindow->isDownloadingImage(imageName);
 }
 
-void GroupChatWindow::processImageDownloadResult(const QString &imageName, bool downloaded){
+void GroupChatWindow::processImageDownloadResult(const QString &imageName, bool downloaded)
+{
     ui.chatMessageWindow->processImageDownloadResult(imageName, downloaded);
 }
 
-void GroupChatWindow::contactOnlineStateChanged(Contact *contact){
+void GroupChatWindow::contactOnlineStateChanged(Contact *contact)
+{
     //TODO
 
-    if(!m_interestGroup->hasMember(contact->getUserID())){
+    if(!m_interestGroup->hasMember(contact->getUserID())) {
         return;
     }
 
-    QListWidgetItem * item = memberItem(contact->getUserID());
-    if(!item){return;}
+    QListWidgetItem *item = memberItem(contact->getUserID());
+    if(!item) {
+        return;
+    }
 
     item->setIcon(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()));
 }
 
-void GroupChatWindow::memberJoinedOrQuitted(const QString &memberID, bool join){
+void GroupChatWindow::memberJoinedOrQuitted(const QString &memberID, bool join)
+{
 
-    QListWidgetItem * item = memberItem(memberID);
+    QListWidgetItem *item = memberItem(memberID);
 
-    if(join){
-        if(item){return;}
+    if(join) {
+        if(item) {
+            return;
+        }
 
         Contact *contact = ContactsManager::instance()->getUser(memberID);
         QListWidgetItem *item = new QListWidgetItem(ImageResource::createIconForContact(contact->getFace(), contact->getOnlineState()), contact->getNickName(), ui.listWidgetMembers);
         item->setData(Qt::UserRole, contact->getUserID());
         ui.listWidgetMembers->addItem(item);
-    }else{
-        if(!item){return;}
+    } else {
+        if(!item) {
+            return;
+        }
 
         item = ui.listWidgetMembers->takeItem(ui.listWidgetMembers->row(item));
         delete item;
@@ -127,17 +140,20 @@ void GroupChatWindow::memberJoinedOrQuitted(const QString &memberID, bool join){
 //}
 
 
-void GroupChatWindow::appendMessageReceivedFromContact(const QString &message, Contact *contact, const QString &datetime){
+void GroupChatWindow::appendMessageReceivedFromContact(const QString &message, Contact *contact, const QString &datetime)
+{
     ui.chatMessageWindow->appendChatMessage(message, contact, datetime);
 }
 
-void GroupChatWindow::processGrouptHistoryMessage(const QStringList &messages, bool canFetchMore){
-    if(m_messageHistoryView){
+void GroupChatWindow::processGrouptHistoryMessage(const QStringList &messages, bool canFetchMore)
+{
+    if(m_messageHistoryView) {
         m_messageHistoryView->appendHistoryChatMessages(messages, canFetchMore);
     }
 }
 
-void GroupChatWindow::memberItemActivated(QListWidgetItem *memberItem){
+void GroupChatWindow::memberItemActivated(QListWidgetItem *memberItem)
+{
     //TODO:
 
     QString memberID = memberItem->data(Qt::UserRole).toString();
@@ -145,14 +161,15 @@ void GroupChatWindow::memberItemActivated(QListWidgetItem *memberItem){
     QMessageBox::information(this, "memberID", memberID);
 }
 
-void GroupChatWindow::showMessageHistory(bool show){
+void GroupChatWindow::showMessageHistory(bool show)
+{
 
-    ui.chatMessageWindow->resize(0,0);
+    ui.chatMessageWindow->resize(0, 0);
 
-    if(show){
+    if(show) {
         setMinimumSize(QSize(0, 0));
 
-        if(!m_messageHistoryView){
+        if(!m_messageHistoryView) {
             m_messageHistoryView = new MessageHistoryView(this);
             m_messageHistoryView->setMinimumWidth(m_messageHistoryView->width());
 
@@ -161,7 +178,7 @@ void GroupChatWindow::showMessageHistory(bool show){
             ui.tabWidget->addTab(m_messageHistoryView, tr("Message History"));
         }
         ui.tabWidget->setCurrentWidget(m_messageHistoryView);
-    }else{
+    } else {
         setMinimumSize(m_preferedSize);
 
         ui.tabWidget->removeTab(ui.tabWidget->indexOf(m_messageHistoryView));
@@ -173,13 +190,15 @@ void GroupChatWindow::showMessageHistory(bool show){
 
 }
 
-void GroupChatWindow::requestGroupHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword){
+void GroupChatWindow::requestGroupHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword)
+{
     Q_ASSERT(m_interestGroup);
     emit signalRequestGrouptHistoryMessage(startTime, endTime, content, requestBackword, m_interestGroup->getGroupID());
 }
 
-void GroupChatWindow::setPreferedSize(){
-    if(!m_preferedSize.isValid()){
+void GroupChatWindow::setPreferedSize()
+{
+    if(!m_preferedSize.isValid()) {
         m_preferedSize = size();
         setMinimumSize(m_preferedSize);
         ui.chatMessageWindow->setMinimumWidth(ui.chatMessageWindow->width());
@@ -188,13 +207,16 @@ void GroupChatWindow::setPreferedSize(){
 }
 
 
-QListWidgetItem * GroupChatWindow::memberItem(const QString &memberID){
+QListWidgetItem *GroupChatWindow::memberItem(const QString &memberID)
+{
 
     int count = ui.listWidgetMembers->count();
-    for(int i=0; i<count; i++){
+    for(int i = 0; i < count; i++) {
         QListWidgetItem *item = ui.listWidgetMembers->item(i);
-        if(!item){continue;}
-        if(memberID == item->data(Qt::UserRole).toString()){
+        if(!item) {
+            continue;
+        }
+        if(memberID == item->data(Qt::UserRole).toString()) {
             return item;
         }
     }

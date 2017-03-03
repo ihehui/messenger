@@ -14,7 +14,8 @@
 #include "../networkmanager/servermanagerwindow.h"
 #include "applyforregistrationwidget.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 LoginWidget::LoginWidget(QWidget *parent)
@@ -53,17 +54,17 @@ LoginWidget::LoginWidget(QWidget *parent)
     //QTimer::singleShot(1000, this, SLOT(slotCheckAutoLogin()));
 
     /*
-  if(autoLogin){
-  QString uid = Settings::instance()->getRecentUser();
-  QByteArray pswd = QByteArray::fromBase64(Settings::instance()->getRecentUserPassword());
+    if(autoLogin){
+    QString uid = Settings::instance()->getRecentUser();
+    QByteArray pswd = QByteArray::fromBase64(Settings::instance()->getRecentUserPassword());
 
-  this->user->setUserID(uid);
-  this->user->setPassword(pswd);
-  this->user->setOnlineState(invisibleLogin ? User::INVISIBLE : User::ONLINE);
-  verifyUser();
+    this->user->setUserID(uid);
+    this->user->setPassword(pswd);
+    this->user->setOnlineState(invisibleLogin ? User::INVISIBLE : User::ONLINE);
+    verifyUser();
 
- }
-*/
+    }
+    */
 
 
     //        clientPacketsParser = new ClientPacketsParser(this);
@@ -81,7 +82,7 @@ LoginWidget::~LoginWidget()
 //    }
 
 
-    if(localServer->isListening()){
+    if(localServer->isListening()) {
         localServer->close();
     }
 
@@ -90,7 +91,8 @@ LoginWidget::~LoginWidget()
 
 }
 
-void LoginWidget::keyPressEvent(QKeyEvent *e) {
+void LoginWidget::keyPressEvent(QKeyEvent *e)
+{
 
     int key = e->key();
 
@@ -104,26 +106,26 @@ void LoginWidget::keyPressEvent(QKeyEvent *e) {
             ui.passwordLineEdit->setFocus();
         } else if (ui.passwordLineEdit->hasFocus()) {
             ui.loginToolButton->click();
-        }else if(ui.keyLineEdit->hasFocus()){
+        } else if(ui.keyLineEdit->hasFocus()) {
             ui.unlockToolButton->click();
         }
         break;
     case Qt::Key_R:
         //是否进入RestoreMode
         //Whether enter RestoreMode
-        if(ui.loginToolButton->hasFocus()){
+        if(ui.loginToolButton->hasFocus()) {
             bool ok;
             QString text = QInputDialog::getText(this, tr("Privilege Required"),
                                                  tr("Access Code:"), QLineEdit::NoEcho,
                                                  "", &ok);
-            if (ok && !text.isEmpty()){
+            if (ok && !text.isEmpty()) {
                 QString accessCodeString = "iamhehui";
                 accessCodeString.append(QTime::currentTime().toString("hhmm"));
-                if(text.toLower() == accessCodeString){
+                if(text.toLower() == accessCodeString) {
                     user->setRootMode(true);
                     ui.loginToolButton->click();
                     //infoAccepted = true;
-                }else{
+                } else {
                     ui.idComboBox->setFocus();
                 }
             }
@@ -136,17 +138,20 @@ void LoginWidget::keyPressEvent(QKeyEvent *e) {
 
 }
 
-void LoginWidget::languageChange() {
+void LoginWidget::languageChange()
+{
     ui.retranslateUi(this);
 }
 
-LoginWidget::State LoginWidget::getState() const{
+LoginWidget::State LoginWidget::getState() const
+{
     return currentState;
 
 }
 
-void LoginWidget::setupNetworkConfig(){
-    qDebug()<<"LoginWidget::setupNetworkConfig()";
+void LoginWidget::setupNetworkConfig()
+{
+    qDebug() << "LoginWidget::setupNetworkConfig()";
 
     ui.groupBoxConfiguration->hide();
 
@@ -180,57 +185,63 @@ void LoginWidget::setupNetworkConfig(){
 
 }
 
-void LoginWidget::loadServers(){
-    
+void LoginWidget::loadServers()
+{
+
     ui.comboBoxServerIP->clear();
-    
+
     Settings::instance()->sync();
     QStringList servers = Settings::instance()->getServers();
-    if(!servers.isEmpty()){
-        for(int i = 0; i< servers.size(); i++){
+    if(!servers.isEmpty()) {
+        for(int i = 0; i < servers.size(); i++) {
             //QStringList values = servers.at(i).split(":");
             //ui.comboBoxServerIP->addItem(values.at(0), values.at(1));
             ui.comboBoxServerIP->addItem(servers.at(i));
         }
     }
-    
+
     QString lastServer = Settings::instance()->getLastServer();
-    if(!lastServer.isEmpty()){
+    if(!lastServer.isEmpty()) {
         //ui.comboBoxServerIP->setCurrentIndex(ui.comboBoxServerIP->findText(lastServer.split(":").at(0)));
         ui.comboBoxServerIP->setCurrentIndex(ui.comboBoxServerIP->findText(lastServer));
     }
-    
+
 }
 
-inline QString LoginWidget::userName() const {
+inline QString LoginWidget::userName() const
+{
     return ui.idComboBox->currentText();
 }
 
-inline QString LoginWidget::passWord() const {
+inline QString LoginWidget::passWord() const
+{
     return ui.passwordLineEdit->text();
 }
 
-inline QString LoginWidget::serverAddress(){
+inline QString LoginWidget::serverAddress()
+{
     QStringList serverInfo = ui.comboBoxServerIP->currentText().split(":");
-    if(serverInfo.size() == 2){
+    if(serverInfo.size() == 2) {
         return serverInfo.at(0);
     }
 
     return "";
 }
 
-inline quint16 LoginWidget::serverPort(){
+inline quint16 LoginWidget::serverPort()
+{
     QStringList serverInfo = ui.comboBoxServerIP->currentText().split(":");
-    if(serverInfo.size() == 2){
+    if(serverInfo.size() == 2) {
         return serverInfo.at(1).toUInt();
     }
     return 0;
 }
 
-void LoginWidget::lockUI(const QString &key){
-    if(key.isEmpty()){
+void LoginWidget::lockUI(const QString &key)
+{
+    if(key.isEmpty()) {
         this->key = IMUser::instance()->getPassword();
-    }else{
+    } else {
         this->key = key;
     }
 
@@ -239,7 +250,8 @@ void LoginWidget::lockUI(const QString &key){
 }
 
 
-void LoginWidget::switchUI(State state){
+void LoginWidget::switchUI(State state)
+{
     switch (state) {
     case NORMAL:
         showNormalUI();
@@ -259,7 +271,8 @@ void LoginWidget::switchUI(State state){
 
 }
 
-void LoginWidget::showNormalUI(){
+void LoginWidget::showNormalUI()
+{
     ui.topLabel->setPixmap(QPixmap(":/resources/images/logo_128_128.png"));
     ui.loginGroupBox->show();
     ui.unlockGroupBox->hide();
@@ -270,7 +283,8 @@ void LoginWidget::showNormalUI(){
 
 }
 
-void LoginWidget::showVerifyingUI(){
+void LoginWidget::showVerifyingUI()
+{
     //	 QMovie *movie = new QMovie(":/resources/images/verifying.gif");
     ui.topLabel->setMovie(movie);
     movie->start();
@@ -280,7 +294,8 @@ void LoginWidget::showVerifyingUI(){
 
 }
 
-void LoginWidget::showLockedUI(){
+void LoginWidget::showLockedUI()
+{
     ui.topLabel->setPixmap(QPixmap(":/resources/images/locked.png"));
     ui.unlockGroupBox->setEnabled(true);
     ui.unlockGroupBox->setFocus();
@@ -291,15 +306,16 @@ void LoginWidget::showLockedUI(){
 
 }
 
-void LoginWidget::unLockUI(const QString &key){
+void LoginWidget::unLockUI(const QString &key)
+{
 
     QByteArray keyByteArray(key.toUtf8());
     keyByteArray = QCryptographicHash::hash (keyByteArray, QCryptographicHash::Sha1);
 
-    if(keyByteArray.toBase64() == this->key){
+    if(keyByteArray.toBase64() == this->key) {
         emit signalUserVerified();
         ui.keyLineEdit->clear();
-    }else{
+    } else {
         QMessageBox::critical(this, tr("Error"), tr("<b>Do you really know the key?</b>"));
         ui.keyLineEdit->setFocus();
     }
@@ -307,9 +323,10 @@ void LoginWidget::unLockUI(const QString &key){
 
 }
 
-void LoginWidget::slotCheckAutoLogin(){
+void LoginWidget::slotCheckAutoLogin()
+{
 
-    if(autoLogin){
+    if(autoLogin) {
 
         IMUser::instance()->setUserID(Settings::instance()->getRecentUser());
         IMUser::instance()->setPassword(Settings::instance()->getRecentUserPassword());
@@ -322,16 +339,17 @@ void LoginWidget::slotCheckAutoLogin(){
 
 }
 
-void LoginWidget::on_toolButtonApplyForRegistration_clicked(){
+void LoginWidget::on_toolButtonApplyForRegistration_clicked()
+{
 
-    if(!checkServerAddress()){
+    if(!checkServerAddress()) {
         return;
     }
 
 
     QDialog dlg(this);
     QVBoxLayout vbl(&dlg);
-    
+
     ApplyForRegistrationWidget rw(&dlg);
     connect(this, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), &rw, SLOT(slotProcessRegistrationPacket(const RgeistrationPacket &))/*, Qt::QueuedConnection*/);
     //connect(this, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString&)), &rw, SLOT(slotProcessRegistrationResult(quint8, quint32, const QString&))/*, Qt::QueuedConnection*/);
@@ -349,25 +367,27 @@ void LoginWidget::on_toolButtonApplyForRegistration_clicked(){
 
 
     dlg.exec();
-    
+
 }
 
-void LoginWidget::on_invisibleCheckBox_clicked(){
-    if(ui.invisibleCheckBox->isChecked()){
+void LoginWidget::on_invisibleCheckBox_clicked()
+{
+    if(ui.invisibleCheckBox->isChecked()) {
         Settings::instance()->setInvisibleLogin(true);
         invisibleLogin = true;
-    }else{
+    } else {
         Settings::instance()->setInvisibleLogin(false);
         invisibleLogin = false;
     }
 
 }
 
-void LoginWidget::on_autoLoginCheckBox_clicked(){
-    if(ui.autoLoginCheckBox->isChecked()){
+void LoginWidget::on_autoLoginCheckBox_clicked()
+{
+    if(ui.autoLoginCheckBox->isChecked()) {
         Settings::instance()->setAutoLogin(true);
         autoLogin = true;
-    }else{
+    } else {
         Settings::instance()->setAutoLogin(false);
         autoLogin = false;
     }
@@ -380,7 +400,8 @@ void LoginWidget::on_toolButtonConfig_clicked(bool checked)
 
 }
 
-void LoginWidget::on_loginToolButton_clicked() {
+void LoginWidget::on_loginToolButton_clicked()
+{
     //    QString serverHostAddress = serverAddress();
     //    if(serverHostAddress.isEmpty()){
     //        QMessageBox::critical(this, tr("Error"), tr("Server Address Required!"));
@@ -395,10 +416,10 @@ void LoginWidget::on_loginToolButton_clicked() {
     //        return;
     //    }
 
-    if(!checkServerAddress()){
+    if(!checkServerAddress()) {
         return;
     }
-    
+
     if (userName().isEmpty()) {
 
         QMessageBox::critical(this, tr("Error"), tr(
@@ -414,7 +435,7 @@ void LoginWidget::on_loginToolButton_clicked() {
         ui.passwordLineEdit->setFocus();
         return;
 
-    } else{
+    } else {
         QString userID = ui.idComboBox->currentText().trimmed();
         user->setUserID(userID);
         //user->setPassword(ui.passwordLineEdit->text());
@@ -425,10 +446,10 @@ void LoginWidget::on_loginToolButton_clicked() {
         password = QCryptographicHash::hash (password, QCryptographicHash::Sha1);
 
         user->setPassword(password.toBase64());
-        qDebug()<<"----LoginWidget::on_loginToolButton_clicked()~~password:"<<ui.passwordLineEdit->text();
-        qDebug()<<"----LoginWidget::on_loginToolButton_clicked()~~password.toBase64():"<<password.toBase64();
+        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~password:" << ui.passwordLineEdit->text();
+        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~password.toBase64():" << password.toBase64();
 
-        user->setStateAfterLoggedin(invisibleLogin?IM::ONLINESTATE_INVISIBLE:IM::ONLINESTATE_ONLINE);
+        user->setStateAfterLoggedin(invisibleLogin ? IM::ONLINESTATE_INVISIBLE : IM::ONLINESTATE_ONLINE);
 
         ui.passwordLineEdit->clear();
         //infoAccepted = true;
@@ -452,26 +473,27 @@ void LoginWidget::on_loginToolButton_clicked() {
 
 
         /*
-  switchUI(VERIFYING);
-  Login login(user,this);
-  if(login.isVerified()){
-   //发射验证成功的消息
-   emit signalUserVerified();
+        switchUI(VERIFYING);
+        Login login(user,this);
+        if(login.isVerified()){
+        //发射验证成功的消息
+        emit signalUserVerified();
 
-   QString userID = user->getUserID();
-   Settings::instance()->setRecentUser(userID);
+        QString userID = user->getUserID();
+        Settings::instance()->setRecentUser(userID);
 
-  }else{
-   switchUI(NORMAL);
-  }
-*/
+        }else{
+        switchUI(NORMAL);
+        }
+        */
 
     }
 
 }
 
 
-void LoginWidget::on_cancelToolButton_clicked() {
+void LoginWidget::on_cancelToolButton_clicked()
+{
     //	ui.passwordLineEdit->clear();
     //	infoAccepted = false;
     qApp->quit();
@@ -495,7 +517,7 @@ void LoginWidget::on_comboBoxNetworkType_currentIndexChanged ( int index )
 
 }
 
-void LoginWidget::on_comboBoxProtocol_currentIndexChanged ( const QString & text )
+void LoginWidget::on_comboBoxProtocol_currentIndexChanged ( const QString &text )
 {
 
 }
@@ -508,9 +530,10 @@ void LoginWidget::on_comboBoxServerIP_currentIndexChanged ( int index )
 
 }
 
-void LoginWidget::on_toolButtonServersManager_clicked(){
-    
-    
+void LoginWidget::on_toolButtonServersManager_clicked()
+{
+
+
     QDialog dlg(this);
     QVBoxLayout vbl(&dlg);
 
@@ -541,46 +564,51 @@ void LoginWidget::on_toolButtonServersManager_clicked(){
 
 
 
-void LoginWidget::on_unlockToolButton_clicked() {
+void LoginWidget::on_unlockToolButton_clicked()
+{
     QString str = ui.keyLineEdit->text().trimmed();
-    if(str.isEmpty()){
+    if(str.isEmpty()) {
         QMessageBox::critical(this, tr("Lost your key?"), tr(
                                   "<b>Password Required!</b>"));
         ui.keyLineEdit->setFocus();
         return;
-    }else{
+    } else {
         unLockUI(str);
     }
 }
 
-void LoginWidget::slotServersUpdated(){
+void LoginWidget::slotServersUpdated()
+{
 
     loadServers();
 }
 
-void LoginWidget::slotServerSelected(const QString &serverInfoString){
-    
+void LoginWidget::slotServerSelected(const QString &serverInfoString)
+{
+
     loadServers();
-    
+
     ui.comboBoxServerIP->setCurrentIndex(ui.comboBoxServerIP->findText(serverInfoString));
-    
+
     updateUserLoginServerInfo();
-        
+
 }
 
-void LoginWidget::updateUserLoginServerInfo(){
-    qDebug()<<"--LoginWidget::updateUserLoginServerInfo() serverAddress:"<<serverAddress();
+void LoginWidget::updateUserLoginServerInfo()
+{
+    qDebug() << "--LoginWidget::updateUserLoginServerInfo() serverAddress:" << serverAddress();
 
     user->setLoginServerAddress(serverAddress());
     user->setLoginServerPort(serverPort());
 }
 
-void LoginWidget::loginTimeout(){
+void LoginWidget::loginTimeout()
+{
 
-    if(currentState == LoginWidget::VERIFYING){
+    if(currentState == LoginWidget::VERIFYING) {
         slotProcessLoginResult(IM::ERROR_Timeout);
     }
-    
+
 }
 
 //void LoginWidget::serverFound(const QString &serverAddress, quint16 serverUDPListeningPort, quint16 serverTCPListeningPort, const QString &serverName, const QString &version){
@@ -590,13 +618,14 @@ void LoginWidget::loginTimeout(){
 
 
 
-void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage){
+void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage)
+{
 
     IM::ErrorType errorType = IM::ErrorType(errorTypeCode);
-    
-    if(errorType == IM::ERROR_NoError){
+
+    if(errorType == IM::ERROR_NoError) {
         //TODO:保存密码
-        if(autoLogin){
+        if(autoLogin) {
             //Settings::instance()->setRecentUser(ui.idComboBox->currentText());
             Settings::instance()->setRecentUserPassword(user->getPassword());
         }
@@ -606,82 +635,68 @@ void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &er
         //发射验证成功的消息
         emit signalUserVerified();
 
-    }else{
+    } else {
         localServer->close();
 //        switchUI(NORMAL);
         QString errorMsg = "";
 
-        switch(errorType){
-        case IM::ERROR_SoftwareVersionExpired:
-        {
+        switch(errorType) {
+        case IM::ERROR_SoftwareVersionExpired: {
             errorMsg = tr("Application has expired!");
         }
         break;
-        case IM::ERROR_IPBanned:
-        {
+        case IM::ERROR_IPBanned: {
             errorMsg = tr("Your IP address has been banned!");
         }
         break;
-        case IM::ERROR_IDBanned:
-        {
+        case IM::ERROR_IDBanned: {
             errorMsg = tr("Your ID has been banned!");
         }
         break;
-        case IM::ERROR_IDBlacklisted:
-        {
+        case IM::ERROR_IDBlacklisted: {
             errorMsg = tr("Your ID has been blacklisted!");
         }
         break;
-        case IM::ERROR_IDNotExist:
-        {
+        case IM::ERROR_IDNotExist: {
             errorMsg = tr("ID does not exist!");
         }
         break;
-        case IM::ERROR_PasswordIncorrect:
-        {
+        case IM::ERROR_PasswordIncorrect: {
             errorMsg = tr("Incorrect Password!");
         }
         break;
-        case IM::ERROR_KickedOut:
-        {
+        case IM::ERROR_KickedOut: {
             emit signalKickedOff();
             return;
 
             errorMsg = tr("You have been kicked out!");
         }
         break;
-        case IM::ERROR_Timeout:
-        {
+        case IM::ERROR_Timeout: {
             errorMsg = tr("Request Timeout!");
         }
         break;
-        case IM::ERROR_ConnectionFailed:
-        {
+        case IM::ERROR_ConnectionFailed: {
             errorMsg = tr("Connection Failed!");
         }
         break;
-        case IM::ERROR_RequestDenied:
-        {
+        case IM::ERROR_RequestDenied: {
             errorMsg = tr("Request Denied!");
         }
         break;
-        case IM::ERROR_AuthenticationNeeded:
-        {
+        case IM::ERROR_AuthenticationNeeded: {
             errorMsg = tr("Authentication Needed!");
         }
         break;
-        case IM::ERROR_AuthenticationFailed:
-        {
+        case IM::ERROR_AuthenticationFailed: {
             errorMsg = tr("Authentication Failed!");
         }
         break;
-        case IM::ERROR_UnKnownError:
-        {
+        case IM::ERROR_UnKnownError: {
             errorMsg = tr("UnKnown Error!");
         }
         break;
-        default:
-        {
+        default: {
             errorMsg = tr("UnKnown Error!");
         }
         break;
@@ -702,32 +717,34 @@ void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &er
 
 }
 
-bool LoginWidget::checkServerAddress(){
+bool LoginWidget::checkServerAddress()
+{
 
     QString serverHostAddress = serverAddress();
-    if(serverHostAddress.isEmpty()){
+    if(serverHostAddress.isEmpty()) {
         QMessageBox::critical(this, tr("Error"), tr("Server Address Required!"));
         localServer->close();
-        if(ui.groupBoxConfiguration->isHidden()){
+        if(ui.groupBoxConfiguration->isHidden()) {
             ui.toolButtonConfig->setChecked(true);
             ui.groupBoxConfiguration->setVisible(true);
         }
-        if(!ui.comboBoxServerIP->count()){
+        if(!ui.comboBoxServerIP->count()) {
             ui.toolButtonServersManager->click();
-        }  
+        }
         return false;
     }
-    
+
     return true;
-    
+
 }
 
-bool LoginWidget::canLogin(){
+bool LoginWidget::canLogin()
+{
 
 
     return true;
 
-    if(user->isRootMode()){
+    if(user->isRootMode()) {
         return true;
     }
 
@@ -741,15 +758,15 @@ bool LoginWidget::canLogin(){
 
     QLocalSocket socket;
     socket.connectToServer(flagString);
-    if(!socket.waitForConnected(1000)){
-        if(!localServer){
+    if(!socket.waitForConnected(1000)) {
+        if(!localServer) {
             localServer = new QLocalServer(this);
         }
 
-        if(localServer->listen(flagString)){
-            qDebug()<<"----LoginWidget::canLogin()~~ Can Login!";
+        if(localServer->listen(flagString)) {
+            qDebug() << "----LoginWidget::canLogin()~~ Can Login!";
             return true;
-        }else{
+        } else {
             detailMessage += QString(tr("But it seems that the process crashed without closing listen!\n"));
 #ifdef Q_OS_WIN32
             detailMessage += QString(tr("Maybe you should restart your session!\n"));
@@ -772,26 +789,27 @@ bool LoginWidget::canLogin(){
     msgBox.setDetailedText(detailMessage);
     msgBox.exec();
 
-    if(msgBox.clickedButton() == forceLoginButton){
+    if(msgBox.clickedButton() == forceLoginButton) {
         //TODO:检测是否监听成功
         QString newFlagString = flagString + "@" + QDateTime::currentDateTime().toString("hhmmsszzz");
-        qDebug()<<"----LoginWidget::canLogin()~~ newFlagString:"<<newFlagString;
+        qDebug() << "----LoginWidget::canLogin()~~ newFlagString:" << newFlagString;
         localServer->close();
         return localServer->listen(newFlagString);
-    }else if(msgBox.clickedButton() == cancelButton){
-        qDebug()<<"XXXXLoginWidget::canLogin()~~ Can Not Login!";
+    } else if(msgBox.clickedButton() == cancelButton) {
+        qDebug() << "XXXXLoginWidget::canLogin()~~ Can Not Login!";
         return false;
     }
 
-    qDebug()<<"XXXXLoginWidget::canLogin()~~ Can Not Login!";
+    qDebug() << "XXXXLoginWidget::canLogin()~~ Can Not Login!";
     return false;
 
 }
 
 
-void LoginWidget::verifyUser(){
+void LoginWidget::verifyUser()
+{
 
-    if(canLogin()){
+    if(canLogin()) {
         QString serverHostAddress = serverAddress();
         //        if(serverHostAddress.isEmpty()){
         //            QMessageBox::critical(this, tr("Error"), tr("Server Address Required!"));
@@ -805,7 +823,7 @@ void LoginWidget::verifyUser(){
 
         switchUI(VERIFYING);
         emit signalRequestLogin(QHostAddress(serverHostAddress), serverPort());
-        
+
         //QTimer::singleShot(30000, this, SLOT(loginTimeout()));
     }
 

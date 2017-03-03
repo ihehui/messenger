@@ -33,19 +33,21 @@
 #include <QNetworkInterface>
 
 
-namespace HEHUI {
-
-
-ServerFileTransmissionPacketsParser::ServerFileTransmissionPacketsParser(const QString &myID, QObject *parent)
-    :FileTransmissionPacketsParserBase(myID, parent)
+namespace HEHUI
 {
 
 
-    
+ServerFileTransmissionPacketsParser::ServerFileTransmissionPacketsParser(const QString &myID, QObject *parent)
+    : FileTransmissionPacketsParserBase(myID, parent)
+{
+
+
+
 
 }
 
-ServerFileTransmissionPacketsParser::~ServerFileTransmissionPacketsParser() {
+ServerFileTransmissionPacketsParser::~ServerFileTransmissionPacketsParser()
+{
     // TODO Auto-generated destructor stub
 
 

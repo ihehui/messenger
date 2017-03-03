@@ -47,7 +47,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class SERVERLIB_API IMServer : public QObject

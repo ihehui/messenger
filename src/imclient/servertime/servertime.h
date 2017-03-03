@@ -39,7 +39,8 @@
 #include <QTimer>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ServerTime : public QObject
@@ -48,7 +49,7 @@ class ServerTime : public QObject
 
 public:
 
-    static ServerTime * instance();
+    static ServerTime *instance();
     static void destoryInstance();
 
     void startSync(uint time_t);

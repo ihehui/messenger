@@ -2,22 +2,24 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 QString ContactGroupBase::Group_Blacklist_Name = QString(tr("Blacklist"));
 QString ContactGroupBase::Group_Friends_Name = QString(tr("Friends"));
 QString ContactGroupBase::Group_Strangers_Name = QString(tr("Strangers"));
 
 ContactGroupBase::ContactGroupBase(quint32 groupID, const QString &groupName, QObject *parent)
-    :IMGroupBase(groupID, groupName, parent)
+    : IMGroupBase(groupID, groupName, parent)
 {
 
 
 }
 
-bool ContactGroupBase::isUserCreatedGroup(int groupID){
+bool ContactGroupBase::isUserCreatedGroup(int groupID)
+{
 
-    if(groupID == Group_Blacklist_ID || (groupID == Group_Strangers_ID) || (groupID == Group_Friends_ID)){
+    if(groupID == Group_Blacklist_ID || (groupID == Group_Strangers_ID) || (groupID == Group_Friends_ID)) {
         return false;
     }
 
@@ -55,11 +57,13 @@ bool ContactGroupBase::isUserCreatedGroup(int groupID){
 
 //}
 
-void ContactGroupBase::setMembersFromString(const QString &infoString, const QString &fieldSepartor){
+void ContactGroupBase::setMembersFromString(const QString &infoString, const QString &fieldSepartor)
+{
     membersList = infoString.split(fieldSepartor);
 }
 
-QString ContactGroupBase::getMembersAsString(const QString &fieldSepartor){
+QString ContactGroupBase::getMembersAsString(const QString &fieldSepartor)
+{
     return membersList.join(fieldSepartor);
 }
 
@@ -67,33 +71,43 @@ QString ContactGroupBase::getMembersAsString(const QString &fieldSepartor){
 //    return membersList;
 //}
 
-void ContactGroupBase::addMember(const QString &memberuserID){
-    if(membersList.contains(memberuserID)){return;}
+void ContactGroupBase::addMember(const QString &memberuserID)
+{
+    if(membersList.contains(memberuserID)) {
+        return;
+    }
     membersList.append(memberuserID);
     updateMemberListInfoVersion();
 }
 
-void ContactGroupBase::deleteMember(const QString &memberuserID){
-    if(!membersList.contains(memberuserID)){return;}
+void ContactGroupBase::deleteMember(const QString &memberuserID)
+{
+    if(!membersList.contains(memberuserID)) {
+        return;
+    }
     membersList.removeAll(memberuserID);
     updateMemberListInfoVersion();
 }
 
-bool ContactGroupBase::hasMember(const QString &memberUserID){
+bool ContactGroupBase::hasMember(const QString &memberUserID)
+{
 
     return membersList.contains(memberUserID, Qt::CaseInsensitive);
 }
 
-QStringList ContactGroupBase::members() const{
+QStringList ContactGroupBase::members() const
+{
     return membersList;
 }
 
-void ContactGroupBase::setMembers(const QStringList &members){
+void ContactGroupBase::setMembers(const QStringList &members)
+{
     membersList.clear();
     membersList.append(members);
 }
 
-int ContactGroupBase::countOfMembers(){
+int ContactGroupBase::countOfMembers()
+{
     return membersList.size();
 }
 

@@ -34,15 +34,17 @@
 #include <QString>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ServerInfo : public QObject{
+class ServerInfo : public QObject
+{
 
 public:
-	enum State{NotTested, Testing, TestOK, TestFailed};
+    enum State {NotTested, Testing, TestOK, TestFailed};
 
-	ServerInfo(const QString &ip, uint port, QObject *parent = 0);
-	virtual ~ServerInfo();
+    ServerInfo(const QString &ip, uint port, QObject *parent = 0);
+    virtual ~ServerInfo();
 
 
     State getCurState() const
@@ -96,13 +98,13 @@ public:
     }
 
 private:
-	QString ip;
-	uint port;
-	bool valid;
+    QString ip;
+    uint port;
+    bool valid;
 
-	State curState;
+    State curState;
 
-	QString errorInfo;
+    QString errorInfo;
 
 
 };

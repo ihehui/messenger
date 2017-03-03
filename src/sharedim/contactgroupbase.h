@@ -8,14 +8,15 @@
 #include "imgroupbase.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 
 class SHAREDIMLIB_API ContactGroupBase : public IMGroupBase
 {
 public:
-    enum DefaultContactGroupID{
+    enum DefaultContactGroupID {
         Group_Strangers_ID = -1,
         Group_Blacklist_ID = 0,
         Group_Friends_ID = 1

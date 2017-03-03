@@ -5,7 +5,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ContractsTree : public QTreeView
@@ -13,11 +14,11 @@ class ContractsTree : public QTreeView
     Q_OBJECT
 public:
     explicit ContractsTree(QWidget *parent = 0);
-    
+
 signals:
-    
+
 public slots:
-    
+
 };
 
 } //namespace HEHUI

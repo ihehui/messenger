@@ -22,39 +22,47 @@ ImageViewerControler::~ImageViewerControler()
     delete ui;
 }
 
-void ImageViewerControler::reset(){
+void ImageViewerControler::reset()
+{
     ui->dial->setValue(180);
 }
 
-void ImageViewerControler::on_toolButtonRotateLeft_clicked(){
+void ImageViewerControler::on_toolButtonRotateLeft_clicked()
+{
 
 
     int value = ui->dial->value();
 
     int a = value / 90 - 1;
-    if(a <= 0){ a = 4;}
-    ui->dial->setValue(a*90);
+    if(a <= 0) {
+        a = 4;
+    }
+    ui->dial->setValue(a * 90);
 
 }
 
-void ImageViewerControler::on_dial_valueChanged(int value){
+void ImageViewerControler::on_dial_valueChanged(int value)
+{
 
-    if(value <= 180){
+    if(value <= 180) {
         emit signalRotate(180 + value);
-    }else{
+    } else {
         emit signalRotate(value - 180);
     }
 
 
 }
 
-void ImageViewerControler::on_toolButtonRotateRight_clicked(){
+void ImageViewerControler::on_toolButtonRotateRight_clicked()
+{
 
     int value = ui->dial->value();
 
     int a = value / 90 + 1;
-    if(a >= 4){a = 0;}
-    ui->dial->setValue(a*90);
+    if(a >= 4) {
+        a = 0;
+    }
+    ui->dial->setValue(a * 90);
 
 }
 

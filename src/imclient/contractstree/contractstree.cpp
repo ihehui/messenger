@@ -1,7 +1,8 @@
 #include "contractstree.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ContractsTree::ContractsTree(QWidget *parent) :

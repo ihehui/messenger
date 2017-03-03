@@ -14,7 +14,8 @@
 
 #include "HHSharedCore/hsingleton.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class SHAREDIMLIB_API ResourcesManagerInstance: public ResourcesManager, public Singleton<ResourcesManagerInstance>

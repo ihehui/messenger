@@ -39,9 +39,11 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class Contact: public HEHUI::IMUserBase {
+class Contact: public HEHUI::IMUserBase
+{
     Q_OBJECT
 public:
     Contact(QObject *parent = 0);
@@ -75,31 +77,43 @@ public:
 
     //    }
 
-    QString getRemarkName(){
+    QString getRemarkName()
+    {
         return m_remarkName;
     }
-    void setRemarkName(const QString &remarkName){
+    void setRemarkName(const QString &remarkName)
+    {
         //qDebug()<<"---setRemarkName()";
         this->m_remarkName = remarkName;
         addUpdatedPersonalInfoProperty(IM::PI_RemarkName, "'" + m_remarkName + "'", true);
     }
 
 
-    void setShowRemarkName(bool show){m_showRemarkName = show;}
-    QString displayName() const{
-        if(m_showRemarkName && !m_remarkName.trimmed().isEmpty()){
+    void setShowRemarkName(bool show)
+    {
+        m_showRemarkName = show;
+    }
+    QString displayName() const
+    {
+        if(m_showRemarkName && !m_remarkName.trimmed().isEmpty()) {
             return m_remarkName;
         }
         QString nickName = getNickName();
-        if(nickName.trimmed().isEmpty()){
+        if(nickName.trimmed().isEmpty()) {
             return getUserID();
-        }else{
+        } else {
             return nickName;
         }
     }
 
-    void setSocketID(int socketID){this->m_socketID = socketID;}
-    int getSocketID(){return m_socketID;}
+    void setSocketID(int socketID)
+    {
+        this->m_socketID = socketID;
+    }
+    int getSocketID()
+    {
+        return m_socketID;
+    }
 
 
     bool isFriend();
@@ -115,7 +129,7 @@ private:
     int contactGroupID;
     quint32 interestGroupID;
     quint32 systemGroupID;
-    
+
     QString m_remarkName;
     bool m_showRemarkName;
 

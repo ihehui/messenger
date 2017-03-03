@@ -7,7 +7,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class MessageView;
 

@@ -13,14 +13,15 @@
 #include "HHSharedCore/hcryptography.h"
 
 #include "serverlib.h"
- 
 
-namespace HEHUI{
+
+namespace HEHUI
+{
 
 
 class SERVERLIB_API Settings : public SettingsCore
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     Settings(const QString fileBaseName = APP_NAME, const QString fileDirPath = QCoreApplication::applicationDirPath(), QObject *parent = 0 );

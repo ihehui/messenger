@@ -18,9 +18,11 @@
 #include "contact.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class InterestGroup : public InterestGroupBase {
+class InterestGroup : public InterestGroupBase
+{
     Q_OBJECT
 public:
     InterestGroup(quint32 groupID = 0, const QString &groupName = "", QObject *parent = 0);
@@ -30,7 +32,7 @@ public:
     QString databaseColumnName(IM::PropertyIDOfGroup propertyID) const;
 
 
-    struct GroupChatMessage{
+    struct GroupChatMessage {
         Contact *contact;
         QString message;
         QString time;

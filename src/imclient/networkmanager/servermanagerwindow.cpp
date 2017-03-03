@@ -1,23 +1,23 @@
- /****************************************************************************
- * servermanagerwindow.cpp
- *
- * Created On: 2010-5-24
- *     Author: 贺辉
- *    License: LGPL
- *    Comment:
- *
- *
- *    =============================  Usage  =============================
- *|
- *|
- *    ===================================================================
- *
- *
- * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
- ****************************************************************************
- */
+/****************************************************************************
+* servermanagerwindow.cpp
+*
+* Created On: 2010-5-24
+*     Author: 贺辉
+*    License: LGPL
+*    Comment:
+*
+*
+*    =============================  Usage  =============================
+*|
+*|
+*    ===================================================================
+*
+*
+* This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+* WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+*
+****************************************************************************
+*/
 
 /*
  ***************************************************************************
@@ -39,7 +39,8 @@
 #include "../settings.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 ServerManagerWindow::ServerManagerWindow(QWidget *parent)
     : QWidget(parent)
@@ -56,7 +57,7 @@ ServerManagerWindow::ServerManagerWindow(QWidget *parent)
     //connect(clientNetworkManager, SIGNAL(signalServerDeclarePacketReceived(const QString&, quint16, quint16, const QString&, const QString&)), this, SLOT(serverFound(const QString& , quint16, quint16, const QString&, const QString&)), Qt::QueuedConnection);
 
 
-    if(clientNetworkManager->getNetworkType() == ClientResourcesManager::LAN){
+    if(clientNetworkManager->getNetworkType() == ClientResourcesManager::LAN) {
         ui.lineEditIP->setText(QString(IM_SERVER_IPMC_ADDRESS));
         ui.spinBoxPort->setValue(IM_SERVER_IPMC_LISTENING_PORT);
         ui.toolButtonSearchServer->show();
@@ -64,7 +65,7 @@ ServerManagerWindow::ServerManagerWindow(QWidget *parent)
         ui.toolButtonSearchServer->setFocus();
 
         ui.toolButtonAddServer->hide();
-    }else{
+    } else {
         ui.toolButtonSearchServer->hide();
         ui.toolButtonAddServer->show();
     }
@@ -83,36 +84,39 @@ ServerManagerWindow::ServerManagerWindow(QWidget *parent)
 ServerManagerWindow::~ServerManagerWindow()
 {
     slotSaveServers();
-    
+
     delete model;
     model = 0;
 
     qDeleteAll(serversHash);
     serversHash.clear();
-    
+
     this->disconnect();
 
 }
 
-void ServerManagerWindow::closeEvent(QCloseEvent *event){
+void ServerManagerWindow::closeEvent(QCloseEvent *event)
+{
     event->accept();
 
 }
 
-void ServerManagerWindow::updateModel(){
-    
+void ServerManagerWindow::updateModel()
+{
+
     slotSaveServers();
-    
+
     model->setServersList(serversHash.values());
-    
+
     ui.tableViewServers->selectRow(0);
     slotUpdateUI();
-    
+
     //emit signalServersUpdated();
 
 }
 
-bool ServerManagerWindow::isIPAddressValid(){
+bool ServerManagerWindow::isIPAddressValid()
+{
     QRegExpValidator validator(this);
     // Regexp for IP: ^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$
     QRegExp rx("^(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])$");
@@ -121,15 +125,15 @@ bool ServerManagerWindow::isIPAddressValid(){
     int pos = 0;
     QString ip = ui.lineEditIP->text();
 
-    if(validator.validate(ip, pos) == QValidator::Acceptable){
+    if(validator.validate(ip, pos) == QValidator::Acceptable) {
         quint8 number = ip.section(".", 0, 0).toUShort();
-        if((number >= 224 && number <= 239) || (number == 255)){
+        if((number >= 224 && number <= 239) || (number == 255)) {
             ui.toolButtonSearchServer->setEnabled(true);
             ui.toolButtonSearchServer->show();
             ui.toolButtonAddServer->setEnabled(false);
             ui.toolButtonAddServer->hide();
             //ui.spinBoxPort->setValue(IM_SERVER_IPMC_LISTENING_PORT);
-        }else{
+        } else {
             ui.toolButtonAddServer->setEnabled(true);
             ui.toolButtonAddServer->show();
             ui.toolButtonSearchServer->setEnabled(false);
@@ -137,7 +141,7 @@ bool ServerManagerWindow::isIPAddressValid(){
             //ui.spinBoxPort->setValue(IM_SERVER_RTP_LISTENING_PORT);
         }
         return true;
-    }else{
+    } else {
         ui.toolButtonAddServer->setEnabled(false);
         ui.toolButtonSearchServer->setEnabled(false);
         QMessageBox::critical(this, tr("Error"), tr("Invalid IP address!"));
@@ -148,19 +152,20 @@ bool ServerManagerWindow::isIPAddressValid(){
 
 }
 
-void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet){
+void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet)
+{
 
     QString serverAddress = packet.getPeerHostAddress().toString();
     quint16 serverRTPListeningPort = packet.rtpPort;
 
     qWarning();
-    qWarning()<<"Server Found!"<<" Address:"<<serverAddress<<" RTP Port:"<<serverRTPListeningPort<<" Name:"<<packet.getPeerID()<<" Version:"<<packet.version;
+    qWarning() << "Server Found!" << " Address:" << serverAddress << " RTP Port:" << serverRTPListeningPort << " Name:" << packet.getPeerID() << " Version:" << packet.version;
     qWarning();
 
     ServerInfo *info;
-    if(serversHash.contains(serverAddress)){
+    if(serversHash.contains(serverAddress)) {
         info = serversHash.value(serverAddress);
-    }else{
+    } else {
         info = new ServerInfo(serverAddress, serverRTPListeningPort, this);
     }
 
@@ -171,17 +176,19 @@ void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet){
 
 }
 
-void ServerManagerWindow::slotRequestForLANServer(const QString &ip, quint16 port){
+void ServerManagerWindow::slotRequestForLANServer(const QString &ip, quint16 port)
+{
     ui.toolButtonSearchServer->setEnabled(false);
     ui.toolButtonTestServers->setEnabled(false);
 
     emit signalLookForServer(QHostAddress(ip), port);
 }
 
-void ServerManagerWindow::slotTestServers(){
+void ServerManagerWindow::slotTestServers()
+{
 
     ui.toolButtonTestServers->setEnabled(false);
-    foreach(ServerInfo *info, serversHash.values()){
+    foreach(ServerInfo *info, serversHash.values()) {
         //        clientPacketsParser->sendClientLookForServerPacket(QHostAddress(info->getIp()), info->getPort());
         info->setCurState(ServerInfo::Testing);
         emit signalLookForServer(QHostAddress(info->getIp()), info->getPort());
@@ -193,9 +200,10 @@ void ServerManagerWindow::slotTestServers(){
 
 }
 
-void ServerManagerWindow::slotTimeout(){
-    foreach(ServerInfo *info, serversHash.values()){
-        if(info->getCurState() != ServerInfo::TestOK){
+void ServerManagerWindow::slotTimeout()
+{
+    foreach(ServerInfo *info, serversHash.values()) {
+        if(info->getCurState() != ServerInfo::TestOK) {
             info->setCurState(ServerInfo::TestFailed);
         }
     }
@@ -209,11 +217,12 @@ void ServerManagerWindow::slotTimeout(){
 }
 
 
-void ServerManagerWindow::slotSaveServers(){
+void ServerManagerWindow::slotSaveServers()
+{
     QStringList serverList;
-    foreach(ServerInfo *info, serversHash.values()){
+    foreach(ServerInfo *info, serversHash.values()) {
         //if(info->getCurState() == ServerInfo::TestOK){
-        serverList<<info->getIp() + ":" + QString::number(info->getPort());
+        serverList << info->getIp() + ":" + QString::number(info->getPort());
         //}
     }
 
@@ -222,10 +231,11 @@ void ServerManagerWindow::slotSaveServers(){
 
 }
 
-void ServerManagerWindow::slotLoadServers(){
+void ServerManagerWindow::slotLoadServers()
+{
     QStringList serverList = Settings::instance()->getServers();
 
-    foreach(QString server, serverList){
+    foreach(QString server, serverList) {
         QStringList values = server.split(":");
         ServerInfo *info = new ServerInfo(values.at(0), values.at(1).toUInt(), this);
         serversHash.insert(values.at(0), info);
@@ -237,25 +247,27 @@ void ServerManagerWindow::slotLoadServers(){
 
 }
 
-void ServerManagerWindow::slotUpdateUI(){
-    if(ui.tableViewServers->currentIndex().isValid()){
+void ServerManagerWindow::slotUpdateUI()
+{
+    if(ui.tableViewServers->currentIndex().isValid()) {
         ui.toolButtonDeleteServer->setEnabled(true);
-    }else{
+    } else {
         ui.toolButtonDeleteServer->setEnabled(false);
     }
 
-    if(ui.tableViewServers->model()->rowCount()){
+    if(ui.tableViewServers->model()->rowCount()) {
         ui.toolButtonShowAddServer->setChecked(false);
         ui.toolButtonTestServers->setEnabled(true);
-    }else{
+    } else {
         ui.toolButtonShowAddServer->setChecked(true);
         ui.toolButtonTestServers->setEnabled(false);
     }
 
 }
 
-void ServerManagerWindow::on_toolButtonSearchServer_clicked(){
-    if(!isIPAddressValid()){
+void ServerManagerWindow::on_toolButtonSearchServer_clicked()
+{
+    if(!isIPAddressValid()) {
         return;
     }
 
@@ -263,17 +275,18 @@ void ServerManagerWindow::on_toolButtonSearchServer_clicked(){
 
 }
 
-void ServerManagerWindow::on_toolButtonAddServer_clicked(){
-    if(!isIPAddressValid()){
+void ServerManagerWindow::on_toolButtonAddServer_clicked()
+{
+    if(!isIPAddressValid()) {
         return;
     }
 
     QString ip = ui.lineEditIP->text();
     quint16 port = ui.spinBoxPort->value();
     ServerInfo *info;
-    if(serversHash.contains(ip)){
+    if(serversHash.contains(ip)) {
         info = serversHash.value(ip);
-    }else{
+    } else {
         info = new ServerInfo(ip, ui.spinBoxPort->value(), this);
     }
 
@@ -281,30 +294,33 @@ void ServerManagerWindow::on_toolButtonAddServer_clicked(){
     serversHash[ip] = info;
 
     updateModel();
-    
+
     emit signalLookForServer(QHostAddress(ip), port);
-    
-    
+
+
 
 
 }
 
-void ServerManagerWindow::on_toolButtonShowAddServer_toggled(bool checked){
+void ServerManagerWindow::on_toolButtonShowAddServer_toggled(bool checked)
+{
     ui.groupBoxIP->setVisible(checked);
 
 }
 
-void ServerManagerWindow::on_lineEditIP_editingFinished (){
+void ServerManagerWindow::on_lineEditIP_editingFinished ()
+{
 
     isIPAddressValid();
 
 
 }
 
-void ServerManagerWindow::on_toolButtonDeleteServer_clicked(){
+void ServerManagerWindow::on_toolButtonDeleteServer_clicked()
+{
 
     QModelIndex index = ui.tableViewServers->currentIndex();
-    if(!index.isValid()){
+    if(!index.isValid()) {
         return;
     }
 
@@ -318,35 +334,37 @@ void ServerManagerWindow::on_toolButtonDeleteServer_clicked(){
 
 }
 
-void ServerManagerWindow::on_toolButtonTestServers_clicked(){
+void ServerManagerWindow::on_toolButtonTestServers_clicked()
+{
     slotTestServers();
 
 }
 
-void ServerManagerWindow::slotServerSelected(const QModelIndex &index){    
-    
-    if(!index.isValid()){
+void ServerManagerWindow::slotServerSelected(const QModelIndex &index)
+{
+
+    if(!index.isValid()) {
         return;
     }
-    
+
     slotSaveServers();
-    
+
     QStringList server;
 
     int row = index.row();
-    for(int i=0; i<2; i++){
+    for(int i = 0; i < 2; i++) {
         QModelIndex idx = index.sibling(row, i);
         server << idx.data().toString();
     }
-    
+
     emit signalServerSelected(server.join(":"));
-    
+
     QDialog *dlg = qobject_cast<QDialog *> (parentWidget());
-    if(dlg){
+    if(dlg) {
         dlg->accept();
     }
-    
-    
+
+
 }
 
 

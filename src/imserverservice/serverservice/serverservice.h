@@ -38,7 +38,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ServerService : public Service
@@ -73,7 +74,7 @@ private:
 
 
     //    bool mainServiceStarted;
-    
+
     IMServer *m_server;
 
 

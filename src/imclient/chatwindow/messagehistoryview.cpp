@@ -7,7 +7,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 QString MessageHistoryView::htmlForMessagesView = "";
 
@@ -25,11 +26,11 @@ MessageHistoryView::MessageHistoryView(QWidget *parent) :
     ui.verticalLayoutMain->insertWidget(0, m_messageView);
 
 
-    if(htmlForMessagesView.isEmpty()){
+    if(htmlForMessagesView.isEmpty()) {
         QFile file(":/text/resources/text/sample.html");
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             htmlForMessagesView = file.readAll();
-        }else{
+        } else {
             htmlForMessagesView = "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-16\" /><title>Chat</title></head><body><div></div></body></html>";
         }
     }
@@ -62,37 +63,38 @@ MessageHistoryView::~MessageHistoryView()
     //m_messageView->stop();
 }
 
-void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, bool canFetchMore){
+void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, bool canFetchMore)
+{
 
     m_messageView->setHtml(htmlForMessagesView);
     m_startTime = "";
 
-    if(m_searchMode){
+    if(m_searchMode) {
 
-        if(m_curPageIndex == 0){
-            if(m_requestBackword){
+        if(m_curPageIndex == 0) {
+            if(m_requestBackword) {
                 ui.toolButtonNextPage->setEnabled(true);
-            }else{
+            } else {
                 ui.toolButtonNextPage->setEnabled(canFetchMore);
             }
             ui.toolButtonPreviousPage->setEnabled(false);
 
-        }else if(m_curPageIndex > 0){
+        } else if(m_curPageIndex > 0) {
             ui.toolButtonPreviousPage->setEnabled(true);
             ui.toolButtonNextPage->setEnabled(canFetchMore);
         }
 
-    }else{
-        if(m_curPageIndex == 0){
+    } else {
+        if(m_curPageIndex == 0) {
 
-            if(m_requestBackword){
+            if(m_requestBackword) {
                 ui.toolButtonPreviousPage->setEnabled(canFetchMore);
-            }else{
+            } else {
                 ui.toolButtonPreviousPage->setEnabled(true);
             }
             //ui.toolButtonPreviousPage->setEnabled(canFetchMore);
             ui.toolButtonNextPage->setEnabled(false);
-        }else if(m_curPageIndex < 0){
+        } else if(m_curPageIndex < 0) {
             ui.toolButtonPreviousPage->setEnabled(canFetchMore);
             ui.toolButtonNextPage->setEnabled(true);
         }
@@ -101,7 +103,7 @@ void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, 
 
     foreach (QString messageString, messages) {
         QStringList info = messageString.split(QString(PACKET_DATA_SEPARTOR));
-        if(info.size() == 4){
+        if(info.size() == 4) {
             QString userID, displayName, message, datetime;
             userID = info.at(0);
             displayName = info.at(1);
@@ -109,34 +111,36 @@ void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, 
             datetime = info.at(3);
             m_messageView->appendChatMessage(userID, displayName, message, datetime, false);
 
-            if(m_startTime.isEmpty()){
+            if(m_startTime.isEmpty()) {
                 m_startTime = datetime;
             }
             m_endTime = datetime;
 
-        }else{
-            qWarning()<<"Invalid Chat Message Format!";
+        } else {
+            qWarning() << "Invalid Chat Message Format!";
         }
     }
 
 }
 
-void MessageHistoryView::on_toolButtonShowSearchFrame_clicked(bool checked){
+void MessageHistoryView::on_toolButtonShowSearchFrame_clicked(bool checked)
+{
 
     ui.frameSearch->setVisible(checked);
     m_searchMode = checked;
 
-    if(!checked){
+    if(!checked) {
         requestLastChatMessages();
     }
 
 }
 
-void MessageHistoryView::on_toolButtonSearch_clicked(){
+void MessageHistoryView::on_toolButtonSearch_clicked()
+{
 
     QDateTime startTime = ui.dateTimeEditStartTime->dateTime();
     QDateTime endTime = ui.dateTimeEditEndTime->dateTime();
-    if(startTime > endTime){
+    if(startTime > endTime) {
         QMessageBox::critical(this, tr("Error"), tr("End time can not be earlier then Start time! "));
         ui.dateTimeEditStartTime->setFocus();
         return;
@@ -154,15 +158,16 @@ void MessageHistoryView::on_toolButtonSearch_clicked(){
 
 //}
 
-void MessageHistoryView::on_toolButtonPreviousPage_clicked(){
+void MessageHistoryView::on_toolButtonPreviousPage_clicked()
+{
 
     m_curPageIndex--;
 
     m_requestBackword = true;
 
-    if(ui.frameSearch->isVisible()){
+    if(ui.frameSearch->isVisible()) {
         emit signalRequestHistoryMessage(ui.dateTimeEditStartTime->dateTime().toString("yyyy-MM-dd hh:mm:ss"), m_startTime,  ui.lineEditContent->text(), true);
-    }else{
+    } else {
         emit signalRequestHistoryMessage("1970-01-01 00:00:00", m_startTime,  "", true);
     }
 
@@ -173,15 +178,16 @@ void MessageHistoryView::on_toolButtonPreviousPage_clicked(){
 
 //}
 
-void MessageHistoryView::on_toolButtonNextPage_clicked(){
+void MessageHistoryView::on_toolButtonNextPage_clicked()
+{
 
     m_curPageIndex++;
 
     m_requestBackword = false;
 
-    if(ui.frameSearch->isVisible()){
+    if(ui.frameSearch->isVisible()) {
         emit signalRequestHistoryMessage(m_endTime, ui.dateTimeEditEndTime->dateTime().toString("yyyy-MM-dd hh:mm:ss"), ui.lineEditContent->text(), false);
-    }else{
+    } else {
         emit signalRequestHistoryMessage(m_endTime, QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"), "", false);
     }
 }
@@ -190,7 +196,8 @@ void MessageHistoryView::on_toolButtonNextPage_clicked(){
 
 //}
 
-void MessageHistoryView::resetContent(){
+void MessageHistoryView::resetContent()
+{
 
     m_messageView->setHtml(htmlForMessagesView);
 
@@ -206,7 +213,8 @@ void MessageHistoryView::resetContent(){
 
 }
 
-void MessageHistoryView::requestLastChatMessages(){
+void MessageHistoryView::requestLastChatMessages()
+{
 
     m_curPageIndex = 0;
 

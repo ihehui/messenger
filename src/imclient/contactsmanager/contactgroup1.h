@@ -13,21 +13,23 @@
 
 #include "../../sharedim/contactgroupbase.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ContactGroup :public ContactGroupBase{
+class ContactGroup : public ContactGroupBase
+{
     Q_OBJECT
 public:
-    ContactGroup(quint32 groupID, const QString &groupName, QList<Contact*> contactList, QObject *parent = 0);
+    ContactGroup(quint32 groupID, const QString &groupName, QList<Contact *> contactList, QObject *parent = 0);
     virtual ~ContactGroup();
 
 
-    QList<Contact*> getContactList() const
+    QList<Contact *> getContactList() const
     {
         return contactList;
     }
 
-    void setContactList(QList<Contact*> contactList)
+    void setContactList(QList<Contact *> contactList)
     {
         this->contactList = contactList;
     }
@@ -44,10 +46,12 @@ public:
 //    }
 
 
-    void addContact(Contact *contact){
+    void addContact(Contact *contact)
+    {
         contactList.append(contact);
     }
-    void deleteContact(Contact *contact){
+    void deleteContact(Contact *contact)
+    {
         contactList.removeAll(contact);
     }
 
@@ -55,7 +59,7 @@ public:
 private:
 //    int parentGroupID;
 
-    QList<Contact*> contactList;
+    QList<Contact *> contactList;
 
 };
 

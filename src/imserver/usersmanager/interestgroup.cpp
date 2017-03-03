@@ -7,25 +7,28 @@
 
 #include "interestgroup.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 InterestGroup::InterestGroup(quint32 groupID, QObject *parent)
-    :InterestGroupBase(groupID, "", parent)
+    : InterestGroupBase(groupID, "", parent)
 {
-	
 
-    
+
+
 
 }
 
-InterestGroup::~InterestGroup() {
-	// TODO Auto-generated destructor stub
+InterestGroup::~InterestGroup()
+{
+    // TODO Auto-generated destructor stub
 }
 
-QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) const{
-    
+QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) const
+{
+
     QString columnName = "";
-    switch(propertyID){
+    switch(propertyID) {
     case IM::PIG_GroupID:
         columnName = "GroupID";
         break;
@@ -47,19 +50,19 @@ QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) cons
     case IM::PIG_GroupInfoVersion:
         columnName = "GroupInfoVersion";
         break;
-        
+
     case IM::PIG_MemberListInfoVersion:
         columnName = "MemberListVersion";
-        break;  
+        break;
     case IM::PIG_Description:
         columnName = "Description";
-        break;         
+        break;
     case IM::PIG_Announcement:
         columnName = "Announcement";
-        break;  
+        break;
     case IM::PIG_Remark :
         columnName = "Remark";
-        break; 
+        break;
     case IM::PIG_State :
         columnName = "State";
         break;

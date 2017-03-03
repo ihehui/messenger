@@ -14,15 +14,18 @@
 
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 
-GroupInfo::GroupInfo(quint32 groupID, const QString groupName){
+GroupInfo::GroupInfo(quint32 groupID, const QString groupName)
+{
     this->groupID = groupID;
-    this->groupName =groupName;
+    this->groupName = groupName;
 }
 
-bool GroupInfo::isNull(){
+bool GroupInfo::isNull()
+{
     return !groupID;
 }
 
@@ -33,7 +36,8 @@ InterestGroupInfoModel::InterestGroupInfoModel(QObject *parent) :
 
 }
 
-InterestGroupInfoModel::~InterestGroupInfoModel(){
+InterestGroupInfoModel::~InterestGroupInfoModel()
+{
     groups.clear();
 }
 
@@ -46,7 +50,9 @@ void InterestGroupInfoModel::setGroupsInfo(const QString &groupsListString)
     QStringList groupsList = groupsListString.split(QChar(SEPARTOR_GROUP));
     foreach (QString groupInfoString, groupsList) {
         QStringList list = groupInfoString.split(QChar(SEPARTOR_RECORD));
-        if(list.size() < 4){continue;}
+        if(list.size() < 4) {
+            continue;
+        }
         GroupInfo info;
         info.groupID = list.at(0).toUInt();
         info.groupName = list.at(1);
@@ -59,16 +65,18 @@ void InterestGroupInfoModel::setGroupsInfo(const QString &groupsListString)
     endResetModel();
 }
 
-int InterestGroupInfoModel::rowCount ( const QModelIndex & parent) const {
-    if(parent.isValid()){
+int InterestGroupInfoModel::rowCount ( const QModelIndex &parent) const
+{
+    if(parent.isValid()) {
         return 0;
     }
     return groups.size();
 
 }
 
-int InterestGroupInfoModel::columnCount ( const QModelIndex & parent) const{
-    if(parent.isValid()){
+int InterestGroupInfoModel::columnCount ( const QModelIndex &parent) const
+{
+    if(parent.isValid()) {
         return 0;
     }
 
@@ -76,19 +84,20 @@ int InterestGroupInfoModel::columnCount ( const QModelIndex & parent) const{
 
 }
 
-QVariant InterestGroupInfoModel::data ( const QModelIndex & index, int role) const{
-    if(!index.isValid()){
+QVariant InterestGroupInfoModel::data ( const QModelIndex &index, int role) const
+{
+    if(!index.isValid()) {
         return QVariant();
     }
 
     int row = index.row();
-    if((row < 0) || (row >= groups.size())){
+    if((row < 0) || (row >= groups.size())) {
         return QVariant();
     }
 
     GroupInfo info = groups.at(row);
 
-    if(role == Qt::DisplayRole || role == Qt::EditRole){
+    if(role == Qt::DisplayRole || role == Qt::EditRole) {
         switch (index.column()) {
         case 0:
             return info.groupID;
@@ -102,7 +111,7 @@ QVariant InterestGroupInfoModel::data ( const QModelIndex & index, int role) con
         default:
             return QVariant();
         }
-    }else if(role == Qt::DecorationRole){
+    } else if(role == Qt::DecorationRole) {
         switch (index.column()) {
         case 0:
             return ImageResource::createIconForInterestGroup();
@@ -120,12 +129,13 @@ QVariant InterestGroupInfoModel::data ( const QModelIndex & index, int role) con
 
 }
 
-QVariant InterestGroupInfoModel::headerData ( int section, Qt::Orientation orientation, int role) const{
-    if(role != Qt::DisplayRole){
+QVariant InterestGroupInfoModel::headerData ( int section, Qt::Orientation orientation, int role) const
+{
+    if(role != Qt::DisplayRole) {
         return QVariant();
     }
 
-    if(orientation ==  Qt::Horizontal){
+    if(orientation ==  Qt::Horizontal) {
         switch (section) {
         case 0:
             return QString(tr("Group ID"));
@@ -150,7 +160,8 @@ QVariant InterestGroupInfoModel::headerData ( int section, Qt::Orientation orien
 
 }
 
-GroupInfo InterestGroupInfoModel::getGroupInfo(int row){
+GroupInfo InterestGroupInfoModel::getGroupInfo(int row)
+{
     return groups.at(row);
 }
 

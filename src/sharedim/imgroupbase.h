@@ -22,26 +22,28 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class SHAREDIMLIB_API IMGroupBase : public QObject {
+class SHAREDIMLIB_API IMGroupBase : public QObject
+{
     Q_OBJECT
 public:
     IMGroupBase(int groupID = 0, const QString &groupName = "", QObject *parent = 0);
     virtual ~IMGroupBase();
-    
+
     bool isNull();
 
     QString getUpdateSQLStatement() const;
     void addUpdatedProperty(IM::PropertyIDOfGroup propertyID, const QString &value);
     void clearUpdatedProperties();
-    
+
     virtual QString databaseColumnName(IM::PropertyIDOfGroup propertyID) const;
-    
 
 
 
-    
+
+
 
 
     QString getCreatorID() const
@@ -61,7 +63,7 @@ public:
 
     QString getGroupName() const
     {
-        if(groupName.trimmed().isEmpty()){
+        if(groupName.trimmed().isEmpty()) {
             return QString::number(groupID);
         }
         return groupName;
@@ -76,8 +78,8 @@ public:
     void setCreatorID(const QString &creatorID)
     {
         this->creatorID = creatorID;
-        addUpdatedProperty(IM::PIG_CreatorID, "'"+creatorID+"'");
-        
+        addUpdatedProperty(IM::PIG_CreatorID, "'" + creatorID + "'");
+
     }
 
 
@@ -91,14 +93,16 @@ public:
     {
         this->groupInfoVersion = groupInfoVersion;
         addUpdatedProperty(IM::PIG_GroupInfoVersion, QString::number(groupInfoVersion));
-        
+
     }
 
     void setGroupName(QString groupName)
     {
-        if(this->groupName.toLower() == groupName.toLower()){return;}
+        if(this->groupName.toLower() == groupName.toLower()) {
+            return;
+        }
         this->groupName = groupName;
-        addUpdatedProperty(IM::PIG_GroupName, "'"+groupName+"'");  
+        addUpdatedProperty(IM::PIG_GroupName, "'" + groupName + "'");
     }
 
     void setGroupMemberListInfoVersion(quint32 memberListInfoVersion)
@@ -107,7 +111,8 @@ public:
         addUpdatedProperty(IM::PIG_MemberListInfoVersion, QString::number(memberListInfoVersion));
     }
 
-    void updateMemberListInfoVersion(){
+    void updateMemberListInfoVersion()
+    {
         memberListInfoVersion++;
         addUpdatedProperty(IM::PIG_MemberListInfoVersion, QString::number(memberListInfoVersion));
     }
@@ -118,7 +123,7 @@ public:
 protected:
 
 private:
-    
+
     int groupID;
     QString creatorID;
     QString groupName;

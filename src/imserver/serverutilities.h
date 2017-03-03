@@ -22,18 +22,20 @@
 #include "HHSharedCore/hdatabaseutility.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ServerUtilities: public Utilities, public HEHUI::NetworkUtilities {
+class ServerUtilities: public Utilities, public HEHUI::NetworkUtilities
+{
 public:
     ServerUtilities();
     virtual ~ServerUtilities();
 
     static QByteArray generateSessionEncryptionKey();
 
-    static QSqlQuery queryDatabase(const QString & queryString, bool localConfigDatabase) ;
+    static QSqlQuery queryDatabase(const QString &queryString, bool localConfigDatabase) ;
 
-    static QSqlQuery queryDatabase(const QString & queryString, const QString &connectionName, const QString &driver,
+    static QSqlQuery queryDatabase(const QString &queryString, const QString &connectionName, const QString &driver,
                                    const QString &host, int port, const QString &user, const QString &passwd,
                                    const QString &databaseName, HEHUI::DatabaseType databaseType) ;
 

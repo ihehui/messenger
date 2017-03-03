@@ -11,12 +11,13 @@
 
 #include "interestgroupbase.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 InterestGroupBase::InterestGroupBase(quint32 groupID, const QString &groupName, QObject *parent)
-    :IMGroupBase(groupID, groupName, parent)
+    : IMGroupBase(groupID, groupName, parent)
 {
-	
+
     m_groupType = Group_UserCreated;
     parentGroupID = 0;
     creationTime = QDateTime();
@@ -26,18 +27,20 @@ InterestGroupBase::InterestGroupBase(quint32 groupID, const QString &groupName, 
     remark = "";
     state = 1;
     privacy = Allow_Anyone_To_Join;
-        
+
 }
 
-InterestGroupBase::~InterestGroupBase() {
-	// TODO Auto-generated destructor stub
+InterestGroupBase::~InterestGroupBase()
+{
+    // TODO Auto-generated destructor stub
 }
 
-void InterestGroupBase::setGroupInfoString(const QString &infoString){
-    if(infoString.trimmed().isEmpty()){
+void InterestGroupBase::setGroupInfoString(const QString &infoString)
+{
+    if(infoString.trimmed().isEmpty()) {
         return;
     }
-    
+
     QStringList infoList = infoString.split(QString(PACKET_DATA_SEPARTOR));
 
     setGroupID(infoList.at(0).toUInt());
@@ -52,61 +55,70 @@ void InterestGroupBase::setGroupInfoString(const QString &infoString){
     setAnnouncement(infoList.at(9));
     setRemark(infoList.at(10));
 
-    
+
 }
 
-QString InterestGroupBase::getGroupInfoString(){
+QString InterestGroupBase::getGroupInfoString()
+{
     QStringList infoList;
     infoList << QString::number(getGroupID())
              << QString::number(m_groupType) << QString::number(parentGroupID)
              << getCreatorID() << getGroupName() << creationTime.toString("yyyy.MM.dd hh:mm:ss")
-             <<QString::number(getGroupInfoVersion()) <<QString::number(getGroupMemberListInfoVersion())
-             << getDescription() << getAnnouncement() <<getRemark()
-                ;
-    
-    return infoList.join(QString(PACKET_DATA_SEPARTOR));    
-    
+             << QString::number(getGroupInfoVersion()) << QString::number(getGroupMemberListInfoVersion())
+             << getDescription() << getAnnouncement() << getRemark()
+             ;
+
+    return infoList.join(QString(PACKET_DATA_SEPARTOR));
+
 }
 
-void InterestGroupBase::addMember(const QString &memberuserID, MemberRole memberRole){
-    qDebug()<<"--InterestGroupBase::addMember(...) "<<" memberuserID:"<<memberuserID;
+void InterestGroupBase::addMember(const QString &memberuserID, MemberRole memberRole)
+{
+    qDebug() << "--InterestGroupBase::addMember(...) " << " memberuserID:" << memberuserID;
 
     membersHash.insert(memberuserID, memberRole);
 }
 
-void InterestGroupBase::deleteMember(const QString &memberuserID){
+void InterestGroupBase::deleteMember(const QString &memberuserID)
+{
 
     membersHash.remove(memberuserID);
 }
 
-bool InterestGroupBase::hasMember(const QString &memberUserID){
+bool InterestGroupBase::hasMember(const QString &memberUserID)
+{
     QList<QString> members = membersHash.keys();
     return members.contains(memberUserID);
 }
 
-QStringList InterestGroupBase::members() const{
+QStringList InterestGroupBase::members() const
+{
     return membersHash.keys();
 }
 
-InterestGroupBase::MemberRole InterestGroupBase::memberRole(const QString &memberUserID){
+InterestGroupBase::MemberRole InterestGroupBase::memberRole(const QString &memberUserID)
+{
     return membersHash.value(memberUserID);
 }
 
-QStringList InterestGroupBase::getAdmins(bool includeCreator){
+QStringList InterestGroupBase::getAdmins(bool includeCreator)
+{
     QStringList admins = membersHash.keys(Role_Administrator);
-    if(includeCreator){
+    if(includeCreator) {
         admins.append(membersHash.keys(Role_Creator));
     }
 
     return admins;
 }
 
-bool InterestGroupBase::isAdmin(const QString &memberUserID){
+bool InterestGroupBase::isAdmin(const QString &memberUserID)
+{
     MemberRole role = membersHash.value(memberUserID);
     return ( (role == Role_Administrator) || role == Role_Creator );
 }
 
-bool InterestGroupBase::isCreator(const QString &memberUserID){
+bool InterestGroupBase::isCreator(const QString &memberUserID)
+{
     MemberRole role = membersHash.value(memberUserID);
     return ( role == Role_Creator );
 }

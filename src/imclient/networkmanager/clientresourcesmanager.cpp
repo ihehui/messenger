@@ -20,10 +20,11 @@
 #include "HHSharedCore/hutilities.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 ClientResourcesManager::ClientResourcesManager(QObject *parent)
-    :ResourcesManager(parent)
+    : ResourcesManager(parent)
 {
     setNetworkType(LAN);
     setCommunicationMode(P2P);
@@ -38,7 +39,8 @@ ClientResourcesManager::ClientResourcesManager(QObject *parent)
 
 //}
 
-ClientResourcesManager::~ClientResourcesManager() {
+ClientResourcesManager::~ClientResourcesManager()
+{
     // TODO Auto-generated destructor stub
 }
 

@@ -37,11 +37,12 @@
 #include "../serverutilities.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 UserInfo::UserInfo(const QString &userID, QObject *parent)
-    :IMUserBase(userID, parent)
+    : IMUserBase(userID, parent)
 {
 
     init();
@@ -51,7 +52,7 @@ UserInfo::UserInfo(const QString &userID, QObject *parent)
 }
 
 UserInfo::UserInfo(const QString &ipAddress, quint16 port, QObject *parent)
-    :IMUserBase(parent)
+    : IMUserBase(parent)
 {
 
     init();
@@ -64,12 +65,14 @@ UserInfo::UserInfo(const QString &ipAddress, quint16 port, QObject *parent)
 
 }
 
-UserInfo::~UserInfo(){
+UserInfo::~UserInfo()
+{
 
 
 }
 
-void UserInfo::init(){
+void UserInfo::init()
+{
     setPassword("");
     setVerified(false);
 
@@ -87,15 +90,16 @@ void UserInfo::init(){
 
 }
 
-void UserInfo::joinOrLeaveInterestGroup(quint32 interestGroupID, bool join){
+void UserInfo::joinOrLeaveInterestGroup(quint32 interestGroupID, bool join)
+{
 
-    if(join){
-        if(interestGroups.contains(interestGroupID)){
+    if(join) {
+        if(interestGroups.contains(interestGroupID)) {
             return;
-        }else{
+        } else {
             interestGroups.append(interestGroupID);
         }
-    }else{
+    } else {
         interestGroups.removeAll(interestGroupID);
     }
 
@@ -103,17 +107,19 @@ void UserInfo::joinOrLeaveInterestGroup(quint32 interestGroupID, bool join){
 
 }
 
-bool UserInfo::isMemberOfInterestGroup(quint32 interestGroupID){
+bool UserInfo::isMemberOfInterestGroup(quint32 interestGroupID)
+{
     return interestGroups.contains(interestGroupID);
 }
 
-bool UserInfo::isOnLine(){
+bool UserInfo::isOnLine()
+{
     //    if(QDateTime::currentDateTime() < timeLastHeartbeatPacketReceived.addMSecs(ONLINE_STATUS_CHECKING_TIMES*HEARTBEAT_TIMER_INTERVAL)){
     //        return true;
     //    }
     //    return false;
 
-    if(getOnlineState() == IM::ONLINESTATE_OFFLINE){
+    if(getOnlineState() == IM::ONLINESTATE_OFFLINE) {
         return false;
     }
 
@@ -134,11 +140,12 @@ bool UserInfo::isOnLine(){
 
 //}
 
-bool UserInfo::isBanned(){
-    if(bannedFromAuthenticationRequest){
-        if(timeToLiftTheBan > QDateTime::currentDateTime()){
+bool UserInfo::isBanned()
+{
+    if(bannedFromAuthenticationRequest) {
+        if(timeToLiftTheBan > QDateTime::currentDateTime()) {
             return true;
-        }else{
+        } else {
             bannedFromAuthenticationRequest = false;
             remainingAuthenticationRequestTimes = MAX_AUTHENTICATION_REQUEST_TIMES;
             return false;
@@ -148,7 +155,8 @@ bool UserInfo::isBanned(){
     return bannedFromAuthenticationRequest;
 }
 
-void UserInfo::setBanned(bool banned){
+void UserInfo::setBanned(bool banned)
+{
     this->bannedFromAuthenticationRequest = banned;
 }
 
@@ -162,21 +170,23 @@ void UserInfo::setBanned(bool banned){
 //    timeToLiftTheBan = QDateTime();
 //}
 
-void UserInfo::authenticationFailed(){
-    if(bannedFromAuthenticationRequest){
+void UserInfo::authenticationFailed()
+{
+    if(bannedFromAuthenticationRequest) {
         return;
     }
 
     remainingAuthenticationRequestTimes --;
 
-    if(remainingAuthenticationRequestTimes <= 0){
+    if(remainingAuthenticationRequestTimes <= 0) {
         bannedFromAuthenticationRequest = true;
         timeToLiftTheBan = QDateTime::currentDateTime().addMSecs(TIME_FOR_BAN_ON_AUTHENTICATION_REQUEST);
     }
 
 }
 
-void UserInfo::setOnline(){
+void UserInfo::setOnline()
+{
 
     //    remainingOnlineStatusCheckingTimes = ONLINE_STATUS_CHECKING_TIMES;
 
@@ -188,7 +198,8 @@ void UserInfo::setOnline(){
     //    setLastLoginTime(timeLastHeartbeatPacketReceived);
 }
 
-void UserInfo::setOffline(){
+void UserInfo::setOffline()
+{
 
     //QDateTime time = QDateTime::currentDateTime();
     //setLastLoginTime(time);
@@ -203,9 +214,10 @@ void UserInfo::setOffline(){
 
 }
 
-QString UserInfo::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
+QString UserInfo::databaseColumnName(IM::PropertyIDOfUser propertyID) const
+{
     QString columnName = "";
-    switch(propertyID){
+    switch(propertyID) {
     case IM::PI_SysID:
         columnName = "SysID";
         break;
@@ -341,7 +353,7 @@ QString UserInfo::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
 //        columnName = "LastLoginHostPort";
 //        break;
 
-        
+
     default:
         columnName = "";
 

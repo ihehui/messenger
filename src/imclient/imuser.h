@@ -33,11 +33,13 @@
 #include "../sharedim/imuserbase.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class  IMUser: public IMUserBase {
+class  IMUser: public IMUserBase
+{
 public:
-    static IMUser * instance();
+    static IMUser *instance();
     virtual ~IMUser();
 
 
@@ -78,7 +80,7 @@ public:
 
 
 private:
-    IMUser(const QString & userID = "", QObject *parent = 0);
+    IMUser(const QString &userID = "", QObject *parent = 0);
 
 
 public slots:

@@ -50,10 +50,12 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-class IMClientPacketsParser : public QObject{
+class IMClientPacketsParser : public QObject
+{
     Q_OBJECT
 public:
     IMClientPacketsParser(ClientResourcesManager *resourcesManager, QObject *parent = 0);
@@ -68,15 +70,16 @@ public slots:
     void parseIncomingPacketData(PacketBase *packet);
 
 
-    bool sendClientLookForServerPacket(const QString &targetAddress = QString(IM_SERVER_IPMC_ADDRESS), quint16 targetPort = IM_SERVER_IPMC_LISTENING_PORT){
-        qDebug()<<"----sendClientLookForServerPacket(...) targetAddress:"<<targetAddress;
+    bool sendClientLookForServerPacket(const QString &targetAddress = QString(IM_SERVER_IPMC_ADDRESS), quint16 targetPort = IM_SERVER_IPMC_LISTENING_PORT)
+    {
+        qDebug() << "----sendClientLookForServerPacket(...) targetAddress:" << targetAddress;
 
         QHostAddress address = QHostAddress(targetAddress);
-        if(address.isNull()){
+        if(address.isNull()) {
             address = QHostAddress(QString(IM_SERVER_IPMC_ADDRESS));
         }
         quint16 port = targetPort;
-        if(!port){
+        if(!port) {
             port = IM_SERVER_IPMC_LISTENING_PORT;
         }
 
@@ -86,13 +89,16 @@ public slots:
         //packet.udpPort = m_udpServer->localPort();
 
         QByteArray ba = packet.toByteArray();
-        if(ba.isEmpty()){return false;}
+        if(ba.isEmpty()) {
+            return false;
+        }
 
         return m_udpServer->sendDatagram(ba, address, port );
     }
 
-    bool requestDataForward(int socketID, const QString &receiverID, const QByteArray &data){
-        qDebug()<<"--requestDataForward(...) receiverID:"<<receiverID;
+    bool requestDataForward(int socketID, const QString &receiverID, const QByteArray &data)
+    {
+        qDebug() << "--requestDataForward(...) receiverID:" << receiverID;
 
         DataForwardPacket p(sessionEncryptionKey);
         p.data = data;
@@ -100,13 +106,16 @@ public slots:
         p.isRequest = 1;
 
         QByteArray ba = p.toByteArray();
-        if(ba.isEmpty()){return false;}
+        if(ba.isEmpty()) {
+            return false;
+        }
 
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
 
-    bool sendClientLookForServerPacket(const QHostAddress &targetAddress, quint16 targetPort){
+    bool sendClientLookForServerPacket(const QHostAddress &targetAddress, quint16 targetPort)
+    {
         //qDebug()<<"----sendClientLookForServerPacket(...)";
         ServerDiscoveryPacket packet;
         packet.responseFromServer = 0;
@@ -116,8 +125,9 @@ public slots:
     }
 
 
-    bool requestRegistrationServerInfo(int serverSocketID, const QString &clientVersion = APP_VERSION){
-        qWarning()<<"--requestRegistrationServerInfo(...)";
+    bool requestRegistrationServerInfo(int serverSocketID, const QString &clientVersion = APP_VERSION)
+    {
+        qWarning() << "--requestRegistrationServerInfo(...)";
 
         RgeistrationPacket packet(sessionEncryptionKey);
         packet.InfoType = RgeistrationPacket::REGISTRATION_SERVER_INFO;
@@ -128,8 +138,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool registration(int serverSocketID, const QString &userID, const QString &password){
-        qWarning()<<"--registration(...)";
+    bool registration(int serverSocketID, const QString &userID, const QString &password)
+    {
+        qWarning() << "--registration(...)";
 
         RgeistrationPacket packet(sessionEncryptionKey);
         packet.InfoType = RgeistrationPacket::REGISTRATION_INFO;
@@ -140,8 +151,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestUpdatePassword(int serverSocketID){
-        qDebug()<<"--requestUpdatePassword(...)";
+    bool requestUpdatePassword(int serverSocketID)
+    {
+        qDebug() << "--requestUpdatePassword(...)";
 
         UpdatePasswordPacket packet(sessionEncryptionKey);
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST;
@@ -150,9 +162,10 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool updatePassword(int serverSocketID, const QString &captcha, const QString &userID, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &email, const QString &smsCaptcha){
-        qDebug()<<"--updatePassword(...)";
-        
+    bool updatePassword(int serverSocketID, const QString &captcha, const QString &userID, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &email, const QString &smsCaptcha)
+    {
+        qDebug() << "--updatePassword(...)";
+
         UpdatePasswordPacket packet(sessionEncryptionKey);
         packet.InfoType = UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT;
         packet.AuthInfo.captcha = captcha;
@@ -167,17 +180,18 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestLogin(int serverSocketID, const QString &clientVersion = APP_VERSION){
-        qDebug()<<"--requestLogin(...)";
-        
+    bool requestLogin(int serverSocketID, const QString &clientVersion = APP_VERSION)
+    {
+        qDebug() << "--requestLogin(...)";
+
         m_myUserID = myself->getUserID();
         sessionEncryptionKey = cryptography->SHA1(myself->getPassword().toUtf8());
         Q_ASSERT_X(!m_myUserID.isEmpty(), "requestLogin", "Invalid User ID!");
-        if(m_myUserID.isEmpty()){
-            qCritical()<<"Invalid User ID!";
+        if(m_myUserID.isEmpty()) {
+            qCritical() << "Invalid User ID!";
             return false;
         }
-        qWarning()<<"My User ID:"<<m_myUserID;
+        qWarning() << "My User ID:" << m_myUserID;
 
 
         LoginPacket packet(sessionEncryptionKey);
@@ -188,8 +202,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool changeMyOnlineState(int serverSocketID, quint8 onlineStateCode){
-        qDebug()<<"--changeMyOnlineState(...)";
+    bool changeMyOnlineState(int serverSocketID, quint8 onlineStateCode)
+    {
+        qDebug() << "--changeMyOnlineState(...)";
 
         OnlineStateChangedPacket packet(sessionEncryptionKey);
         packet.stateCode = onlineStateCode;
@@ -198,13 +213,15 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool logout(int serverSocketID){
-        qDebug()<<"--logout(...)";
+    bool logout(int serverSocketID)
+    {
+        qDebug() << "--logout(...)";
         return changeMyOnlineState(serverSocketID, IM::ONLINESTATE_OFFLINE);
     }
 
-    bool requestInterestGroupsList(int serverSocketID){
-        qDebug()<<"------------------requestInterestGroupsList(...)";
+    bool requestInterestGroupsList(int serverSocketID)
+    {
+        qDebug() << "------------------requestInterestGroupsList(...)";
 
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUPS_LIST;
@@ -213,7 +230,8 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestInterestGroupInfo(int serverSocketID, quint32 groupID){
+    bool requestInterestGroupInfo(int serverSocketID, quint32 groupID)
+    {
 
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_INFO;
@@ -223,8 +241,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestCreateInterestGroup(int serverSocketID, const QString &groupName, quint8 groupType){
-        qDebug()<<"----requestCreateInterestGroup(...)";
+    bool requestCreateInterestGroup(int serverSocketID, const QString &groupName, quint8 groupType)
+    {
+        qDebug() << "----requestCreateInterestGroup(...)";
 
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_CREATION;
@@ -235,8 +254,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestDisbandInterestGroup(int serverSocketID, quint32 groupID){
-        qDebug()<<"----requestDisbandInterestGroup(...)";
+    bool requestDisbandInterestGroup(int serverSocketID, quint32 groupID)
+    {
+        qDebug() << "----requestDisbandInterestGroup(...)";
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_DELETION;
         packet.GroupID = groupID;
@@ -245,16 +265,17 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool joinOrQuitInterestGroup(int serverSocketID, quint32 groupID, bool join, const QString &verificationMessage = ""){
-        qWarning()<<"--joinOrQuitInterestGroup(...)";
+    bool joinOrQuitInterestGroup(int serverSocketID, quint32 groupID, bool join, const QString &verificationMessage = "")
+    {
+        qWarning() << "--joinOrQuitInterestGroup(...)";
         InterestGroupsInfoPacket packet(sessionEncryptionKey);
         packet.GroupID = groupID;
 
-        if(join){
+        if(join) {
             packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_APPLICATION;
             packet.MemberApplicationInfo.userID = m_myUserID;
             packet.MemberApplicationInfo.message = verificationMessage;
-        }else{
+        } else {
             packet.InfoType = InterestGroupsInfoPacket::PIT_GROUP_MEMBER_DELETION;
             packet.MemberDeletionInfo.userID = m_myUserID;
         }
@@ -263,7 +284,8 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestPersonalContactGroupsInfo(int serverSocketID){
+    bool requestPersonalContactGroupsInfo(int serverSocketID)
+    {
         //qWarning()<<"--requestPersonalContactGroupsInfo(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUPS_LIST;
@@ -272,24 +294,27 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestContactInfo(int serverSocketID, const QString &contactID, bool summaryInfo = true){
-        qDebug()<<"--requestContactInfo(...)";
+    bool requestContactInfo(int serverSocketID, const QString &contactID, bool summaryInfo = true)
+    {
+        qDebug() << "--requestContactInfo(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_CONTACT_INFO;
         packet.ContactID = contactID;
-        packet.info.isSummaryInfo = quint8(summaryInfo?1:0);
+        packet.info.isSummaryInfo = quint8(summaryInfo ? 1 : 0);
 
         QByteArray ba = packet.toByteArray();
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestPersonalInfo(int serverSocketID){
-        qDebug()<<"--requestPersonalInfo(...)";
+    bool requestPersonalInfo(int serverSocketID)
+    {
+        qDebug() << "--requestPersonalInfo(...)";
         return requestContactInfo(serverSocketID, m_myUserID);
     }
 
-    bool requestFriending(int serverSocketID, const QString &contactID, const QString &verificationMessage = "", quint32 groupID = ContactGroupBase::Group_Friends_ID){
-        qWarning()<<"--requestFriending(...)";
+    bool requestFriending(int serverSocketID, const QString &contactID, const QString &verificationMessage = "", quint32 groupID = ContactGroupBase::Group_Friends_ID)
+    {
+        qWarning() << "--requestFriending(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_FRIENDING_REQUEST;
         packet.ContactID = contactID;
@@ -300,8 +325,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool responseFriendingRequestFromUser(int serverSocketID, const QString &userID, quint8 errorCode, const QString &extraMessage = ""){
-        qDebug()<<"--responseFriendingRequestFromUser(...)";
+    bool responseFriendingRequestFromUser(int serverSocketID, const QString &userID, quint8 errorCode, const QString &extraMessage = "")
+    {
+        qDebug() << "--responseFriendingRequestFromUser(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_FRIENDING_RESULT;
         packet.ContactID = userID;
@@ -312,8 +338,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool deleteContact(int serverSocketID, const QString &contactID, bool deleteMeFromOpposition = false, bool blockForever = false){
-        qDebug()<<"--deleteContact(...)";
+    bool deleteContact(int serverSocketID, const QString &contactID, bool deleteMeFromOpposition = false, bool blockForever = false)
+    {
+        qDebug() << "--deleteContact(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_CONTACT_DELETION;
         packet.ContactID = contactID;
@@ -325,8 +352,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool moveContactToGroup(int serverSocketID, const QString &contactID, quint32 oldGroupID, quint32 newGroupID){
-        qDebug()<<"--moveContactToGroup(...)";
+    bool moveContactToGroup(int serverSocketID, const QString &contactID, quint32 oldGroupID, quint32 newGroupID)
+    {
+        qDebug() << "--moveContactToGroup(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_GROUP_CHANGE;
         packet.ContactID = contactID;
@@ -337,8 +365,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool updateContactRemarkInfo(int serverSocketID, quint32 contactID, const QString &remarkName, const QString &extraRemarkInfo){
-        qDebug()<<"--updateContactRemarkInfo(...)";
+    bool updateContactRemarkInfo(int serverSocketID, quint32 contactID, const QString &remarkName, const QString &extraRemarkInfo)
+    {
+        qDebug() << "--updateContactRemarkInfo(...)";
         ContactInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactInfoPacket::PIT_CONTACT_REMARK;
         packet.ContactID = contactID;
@@ -348,8 +377,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool createContactGroup(int serverSocketID, quint32 parentGroupID, const QString &groupName){
-        qDebug()<<"--createContactGroup(...)";
+    bool createContactGroup(int serverSocketID, quint32 parentGroupID, const QString &groupName)
+    {
+        qDebug() << "--createContactGroup(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_CREATION;
         packet.GroupCreationInfo.name = groupName;
@@ -359,8 +389,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool deleteContactGroup(int serverSocketID, quint32 groupID){
-        qDebug()<<"--deleteContactGroup(...)";
+    bool deleteContactGroup(int serverSocketID, quint32 groupID)
+    {
+        qDebug() << "--deleteContactGroup(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_DELETION;
         packet.GroupDeletionInfo.groupID = groupID;
@@ -369,8 +400,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool renameContactGroup(int serverSocketID, quint32 groupID, const QString &newGroupName){
-        qDebug()<<"--renameContactGroup(...)";
+    bool renameContactGroup(int serverSocketID, quint32 groupID, const QString &newGroupName)
+    {
+        qDebug() << "--renameContactGroup(...)";
         ContactGroupsInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = ContactGroupsInfoPacket::PIT_GROUP_RENAMING;
         packet.GroupRenamingInfo.groupID = groupID;
@@ -383,8 +415,9 @@ public slots:
     bool searchContact(int serverSocketID, const QString &keyword, quint8 searchOnlineUsersOnly,
                        quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
                        quint8 gender, quint8 age, bool matchExactly, int startIndex
-                       ){
-        qDebug()<<"--searchContact(...)";
+                      )
+    {
+        qDebug() << "--searchContact(...)";
         SearchInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = SearchInfoPacket::PIT_SEARCH_CONTACT_CONDITIONS;
         packet.SearchContactConditions.keyword = keyword;
@@ -401,8 +434,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool searchInterestGroup(int serverSocketID, const QString &keyword, int startIndex){
-        qDebug()<<"--searchInterestGroup(...)";
+    bool searchInterestGroup(int serverSocketID, const QString &keyword, int startIndex)
+    {
+        qDebug() << "--searchInterestGroup(...)";
         SearchInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = SearchInfoPacket::PIT_SEARCH_INTEREST_GROUP_CONDITIONS;
         packet.SearchInterestGroupConditions.keyword = keyword;
@@ -412,8 +446,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool sendChatMessageToContact(int peerSocketID, const QString &contactID, const QString &message, const QStringList &imageNameList){
-        qDebug()<<"--sendChatMessageToContact(...)";
+    bool sendChatMessageToContact(int peerSocketID, const QString &contactID, const QString &message, const QStringList &imageNameList)
+    {
+        qDebug() << "--sendChatMessageToContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE;
         packet.ContactChatMessage.contactID = contactID;
@@ -424,8 +459,9 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool sendInterestGroupChatMessageToServer(int serverSocketID, quint32 interestGroupID ,const QString &message, const QStringList &imageNameList){
-        qDebug()<<"--sendInterestGroupChatMessageToServer(...)";
+    bool sendInterestGroupChatMessageToServer(int serverSocketID, quint32 interestGroupID , const QString &message, const QStringList &imageNameList)
+    {
+        qDebug() << "--sendInterestGroupChatMessageToServer(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_GROUP_CHAT_MESSAGE;
         packet.GroupChatMessage.groupID = interestGroupID;
@@ -436,8 +472,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool sendImageToContact(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image){
-        qDebug()<<"--sendImageToContact(...)";
+    bool sendImageToContact(int peerSocketID, const QString &contactID, const QString &imageName, const QByteArray &image)
+    {
+        qDebug() << "--sendImageToContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 0;
@@ -449,8 +486,9 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool requestDownloadImageFromContact(int peerSocketID, const QString &contactID, const QString &imageName){
-        qDebug()<<"--requestImageFromContact(...)";
+    bool requestDownloadImageFromContact(int peerSocketID, const QString &contactID, const QString &imageName)
+    {
+        qDebug() << "--requestImageFromContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_CHAT_IMAGE;
         packet.ChatImage.isRequest = 1;
@@ -461,8 +499,9 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool requestSessionEncryptionKeyWithContact(int serverSocketID, quint32 contactID){
-        qDebug()<<"--requestSessionEncryptionKeyWithContact(...)";
+    bool requestSessionEncryptionKeyWithContact(int serverSocketID, quint32 contactID)
+    {
+        qDebug() << "--requestSessionEncryptionKeyWithContact(...)";
         ChatMessagePacket packet(sessionEncryptionKey);
         packet.InfoType = ChatMessagePacket::PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT;
         packet.SessionEncryptionKeyWithContact.contactID = contactID;
@@ -471,8 +510,9 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool requestCaptcha(int serverSocketID){
-        qDebug()<<"--requestCaptcha(...)";
+    bool requestCaptcha(int serverSocketID)
+    {
+        qDebug() << "--requestCaptcha(...)";
 
         CaptchaInfoPacket packet(sessionEncryptionKey);
         packet.InfoType = CaptchaInfoPacket::CAPTCHA_REQUEST;
@@ -503,20 +543,23 @@ public slots:
 
 
 
-    bool requestSendFileToContact(int peerSocketID, const QString &contactID, const QStringList &filePathList){
+    bool requestSendFileToContact(int peerSocketID, const QString &contactID, const QStringList &filePathList)
+    {
         //TODO:
         return true;
     }
 
-    bool sendChatMessageToContacts(const QStringList &contacts, const QString &message, const QStringList &imagePathList){
+    bool sendChatMessageToContacts(const QStringList &contacts, const QString &message, const QStringList &imagePathList)
+    {
         //TODO:
         return true;
     }
 
 
-    
+
     //FILE TX
-    bool requestFileServerInfo(SOCKETID serverSocketID){
+    bool requestFileServerInfo(SOCKETID serverSocketID)
+    {
         FileTransferPacket packet(sessionEncryptionKey);
         packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
         //packet.FileServerInfo.address = "";
@@ -536,7 +579,8 @@ private slots:
 
     ///////////////////////////////////////////////
     //quint16 login(const QString &serverAddress, quint16 serverPort){
-    bool login(int serverSocketID){
+    bool login(int serverSocketID)
+    {
         //qWarning()<<"--login() "<<m_serverAddress.toString()<<":"<<m_serverUDPListeningPort;
 
         //TODO:Device Info
@@ -546,7 +590,7 @@ private slots:
         sessionEncryptionKey = myself->encryptedPassword();
         QByteArray encryptedPassword;
         cryptography->teaCrypto(&encryptedPassword, QByteArray::fromBase64(myself->getPassword().toUtf8()), sessionEncryptionKey, true);
-        
+
         LoginPacket packet(sessionEncryptionKey);
         packet.InfoType = LoginPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT;
         packet.AuthInfo.password = encryptedPassword;

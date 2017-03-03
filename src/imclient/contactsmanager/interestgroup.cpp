@@ -7,25 +7,28 @@
 
 #include "interestgroup.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 InterestGroup::InterestGroup(quint32 groupID, const QString &groupName, QObject *parent)
-    :InterestGroupBase(groupID, groupName, parent)
+    : InterestGroupBase(groupID, groupName, parent)
 {
 
 
-    
+
 
 }
 
-InterestGroup::~InterestGroup() {
+InterestGroup::~InterestGroup()
+{
     // TODO Auto-generated destructor stub
 }
 
-QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) const{
-    
+QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) const
+{
+
     QString columnName = "";
-    switch(propertyID){
+    switch(propertyID) {
     case IM::PIG_GroupID:
         columnName = "ID";
         break;
@@ -47,7 +50,7 @@ QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) cons
     case IM::PIG_GroupInfoVersion:
         columnName = "GroupInfoVersion";
         break;
-        
+
     case IM::PIG_MemberListInfoVersion:
         columnName = "MemberListVersion";
         break;
@@ -67,7 +70,7 @@ QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) cons
         columnName = "Privacy";
         break;
 
-        
+
     default:
         columnName = "";
 
@@ -82,7 +85,8 @@ QString InterestGroup::databaseColumnName(IM::PropertyIDOfGroup propertyID) cons
 
 }
 
-void InterestGroup::appandUnreadMessage(Contact *contact, const QString &message, const QString &time){
+void InterestGroup::appandUnreadMessage(Contact *contact, const QString &message, const QString &time)
+{
     Q_ASSERT(contact);
 
     GroupChatMessage chatMessage;
@@ -92,14 +96,16 @@ void InterestGroup::appandUnreadMessage(Contact *contact, const QString &message
     unreadMessages.append(chatMessage);
 }
 
-QList<InterestGroup::GroupChatMessage> InterestGroup::takeUnreadMessages(){
+QList<InterestGroup::GroupChatMessage> InterestGroup::takeUnreadMessages()
+{
 
     QList<GroupChatMessage> messages = unreadMessages;
     unreadMessages.clear();
     return messages;
 }
 
-int InterestGroup::unreadMessagesCount(){
+int InterestGroup::unreadMessagesCount()
+{
     return unreadMessages.size();
 }
 

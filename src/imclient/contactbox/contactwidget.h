@@ -7,7 +7,8 @@
 #include "../contactsmanager/contact.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 

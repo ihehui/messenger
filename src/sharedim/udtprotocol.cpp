@@ -5,7 +5,8 @@
 #include "udtprotocol.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 UDTProtocol::UDTProtocol(bool stream, const SocketOptions *options, QObject *parent) :
@@ -29,21 +30,24 @@ UDTProtocol::UDTProtocol(bool stream, const SocketOptions *options, QObject *par
 
 //}
 
-void UDTProtocol::streamDataReceived(UDTSOCKET socket, QByteArray *data){
-    qDebug()<<"--UDTProtocol::streamDataReceived(...) "<<"socket:"<<socket;
+void UDTProtocol::streamDataReceived(UDTSOCKET socket, QByteArray *data)
+{
+    qDebug() << "--UDTProtocol::streamDataReceived(...) " << "socket:" << socket;
 
     convertDataToPacket(socket, data);
 
 }
 
-void UDTProtocol::messageDataReceived(UDTSOCKET socket, QByteArray *data){
-    qDebug()<<"--UDTProtocol::messageDataReceived(...) "<<"socket:"<<socket;
+void UDTProtocol::messageDataReceived(UDTSOCKET socket, QByteArray *data)
+{
+    qDebug() << "--UDTProtocol::messageDataReceived(...) " << "socket:" << socket;
 
     convertDataToPacket(socket, data);
 
 }
 
-inline void UDTProtocol::convertDataToPacket(UDTSOCKET socket, QByteArray *data){
+inline void UDTProtocol::convertDataToPacket(UDTSOCKET socket, QByteArray *data)
+{
 
     QString ip = "";
     quint16 port = 0;
@@ -66,7 +70,7 @@ inline void UDTProtocol::convertDataToPacket(UDTSOCKET socket, QByteArray *data)
 //    }
 
     PacketBase packet;
-    if(packet.fromByteArray(data)){
+    if(packet.fromByteArray(data)) {
         packet.setSocketID(socket);
         packet.setPeerHostAddress(QHostAddress(ip));
         packet.setPeerHostPort(port);

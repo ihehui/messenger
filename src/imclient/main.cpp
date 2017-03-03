@@ -15,7 +15,8 @@
 using namespace std;
 using namespace HEHUI;
 
-void showSplashMessage(QSplashScreen *s, const QString &str){
+void showSplashMessage(QSplashScreen *s, const QString &str)
+{
     s->showMessage(str, Qt::AlignRight | Qt::AlignBottom, Qt::darkGreen);
 }
 
@@ -26,11 +27,11 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    cout<<qPrintable(QString(APP_NAME) + " Build " + QString(APP_VERSION))<<endl<<endl;
+    cout << qPrintable(QString(APP_NAME) + " Build " + QString(APP_VERSION)) << endl << endl;
 
 
-    for(int i = 0; i < argc; i++){
-        if(QString(argv[i]).toLower() == "-log"){
+    for(int i = 0; i < argc; i++) {
+        if(QString(argv[i]).toLower() == "-log") {
             qInstallMessageHandler(logDebug);
             qAddPostRoutine(closeDebugLog);
         }
@@ -38,16 +39,16 @@ int main(int argc, char *argv[])
 
 
     QDate date = QDate::currentDate();
-    if(date.year() != 2014){
+    if(date.year() != 2014) {
         QMessageBox::critical(0, QObject::tr("Error"), QObject::tr("Application has expired!"));
-        qDebug()<<"Application has expired!";
+        qDebug() << "Application has expired!";
         return 0;
     }
 
     a.addLibraryPath(QCoreApplication::applicationDirPath());
     a.addLibraryPath(QCoreApplication::applicationDirPath() + QDir::separator () + QString(PLUGINS_MAIN_DIR));
     a.addLibraryPath(QCoreApplication::applicationDirPath() + QDir::separator () + QString(MYLIBS_DIR));
-    qDebug()<<"----main(int argc, char *argv[])~~Library Paths"<<a.libraryPaths ();
+    qDebug() << "----main(int argc, char *argv[])~~Library Paths" << a.libraryPaths ();
 
 
     //创建Splash Screen
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
     //showSplashMessage(splash, QObject::tr("Init Application Info"));
     a.setApplicationName(APP_NAME);
     a.setApplicationVersion(APP_VERSION);
-    a.setWindowIcon(QIcon(QString(RESOURCE_PATH)+QString(APP_ICON_PATH)));
+    a.setWindowIcon(QIcon(QString(RESOURCE_PATH) + QString(APP_ICON_PATH)));
     a.setOrganizationName(APP_ORG);
     a.setOrganizationDomain(APP_ORG_DOMAIN);
     //showSplashMessage(splash, QString(APP_NAME) + " " + QString(APP_VERSION));

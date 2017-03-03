@@ -12,12 +12,13 @@
 #include "HHSharedGUI/hsettingsbase.h"
 
 
- //#include "mysharedlib_global.h"
-	//MYSHAREDLIB_API
+//#include "mysharedlib_global.h"
+//MYSHAREDLIB_API
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class  Settings : public SettingsBase, public Singleton<Settings>
 {
@@ -25,7 +26,7 @@ class  Settings : public SettingsBase, public Singleton<Settings>
     friend class Singleton<Settings>;
 
 public:
-    Settings(const QString fileBaseName = APP_NAME, const QString fileDirPath = QCoreApplication::applicationDirPath(), QObject* = QApplication::instance() );
+    Settings(const QString fileBaseName = APP_NAME, const QString fileDirPath = QCoreApplication::applicationDirPath(), QObject * = QApplication::instance() );
     ~Settings();
 
 

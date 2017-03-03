@@ -43,10 +43,11 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 const QString URLScheme_Contact = "contact"; //contact://contact_id
-const QString URLScheme_Image= "image"; //image://image_name
+const QString URLScheme_Image = "image"; //image://image_name
 
 const QString ImagePath_Normal = "qrc:/chatmessagewindow/image.png";
 const QString ImagePath_Downloading = "qrc:/chatmessagewindow/imagedownloading.gif";
@@ -54,7 +55,7 @@ const QString ImagePath_DownloadingFailed = "qrc:/chatmessagewindow/imagedownloa
 
 
 MessageView::MessageView(bool isGroupChat, QWidget *parent)
-    :QWidget(parent), m_quickView(new QQuickView)
+    : QWidget(parent), m_quickView(new QQuickView)
 {
 
 
@@ -62,7 +63,7 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
     connect(m_quickView, &QQuickView::statusChanged, this, &MessageView::quickViewStatusChanged);
     connect(m_quickView, &QQuickWindow::sceneGraphError, this, &MessageView::sceneGraphError);
     QString qmlFileName = "qrc:/resources/qml/chat.qml";
-    if(isGroupChat){
+    if(isGroupChat) {
         qmlFileName = "qrc:/resources/qml/groupchat.qml";
     }
     m_quickView->setSource(QUrl(qmlFileName));
@@ -81,7 +82,7 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
     messagesListViewer = 0;
     QQuickItem *rootItem = m_quickView->rootObject();
     messagesListViewer = rootItem->findChild<QObject *>("chatMessagesList");
-    if(messagesListViewer){
+    if(messagesListViewer) {
         //connect(this, SIGNAL(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)), messagesListViewer, SLOT(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)));
 
         connect(messagesListViewer, SIGNAL(linkActivated(const QString &)), this, SLOT(linkClicked(const QString &)));
@@ -107,8 +108,9 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 //    return QSize(540, 300);
 //}
 
-void MessageView::appendChatMessage(const QString &userID, const QString &displayName, const QString &headICON, const QString &message, uint timestamp){
-    qDebug()<<"----MessageView::appendChatMessage(...) contactID:"<<userID<<" Time:"<<timestamp<<" Msg:"<<message;;
+void MessageView::appendChatMessage(const QString &userID, const QString &displayName, const QString &headICON, const QString &message, uint timestamp)
+{
+    qDebug() << "----MessageView::appendChatMessage(...) contactID:" << userID << " Time:" << timestamp << " Msg:" << message;;
 
 //    QString timeString = datetime;
 //    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
@@ -121,28 +123,31 @@ void MessageView::appendChatMessage(const QString &userID, const QString &displa
 
 
 //    emit appendMessage(userID, displayName, headICON, message, timestamp);
-    if(messagesListViewer){
+    if(messagesListViewer) {
         QMetaObject::invokeMethod(messagesListViewer, "appendMessage",
-                                 Q_ARG(QString, userID),
-                                 Q_ARG(QString, displayName),
-                                 Q_ARG(QString, headICON),
-                                 Q_ARG(QString, message),
-                                 Q_ARG(uint, timestamp)
+                                  Q_ARG(QString, userID),
+                                  Q_ARG(QString, displayName),
+                                  Q_ARG(QString, headICON),
+                                  Q_ARG(QString, message),
+                                  Q_ARG(uint, timestamp)
                                  );
     }
 
 }
 
-void MessageView::appendHTML(const QString &htmlTag){
-    qDebug()<<"----MessageView::appendHTML(...)  htmlTag:"<<htmlTag;;
+void MessageView::appendHTML(const QString &htmlTag)
+{
+    qDebug() << "----MessageView::appendHTML(...)  htmlTag:" << htmlTag;;
 
 }
 
-void MessageView::setHtml(const QString &html){
+void MessageView::setHtml(const QString &html)
+{
 
 }
 
-void MessageView::updateImage(const QString &imageName, ImageDownloadStatus downloadStatus){
+void MessageView::updateImage(const QString &imageName, ImageDownloadStatus downloadStatus)
+{
 
 //    QWebElement doc = m_mainWebFrame->documentElement();
 //    QWebElementCollection elements = doc.findAll("img");
@@ -183,7 +188,8 @@ void MessageView::updateImage(const QString &imageName, ImageDownloadStatus down
 }
 
 
-void MessageView::scrollWebFrame(const QSize & contentsSize){
+void MessageView::scrollWebFrame(const QSize &contentsSize)
+{
 
 
 //    int frameHeight = m_mainWebFrame->geometry().size().height();
@@ -206,36 +212,37 @@ void MessageView::scrollWebFrame(const QSize & contentsSize){
 
 }
 
-void MessageView::linkClicked(const QString &urlString){
+void MessageView::linkClicked(const QString &urlString)
+{
 
     QUrl url(urlString);
     QString scheme = url.scheme();
 
-    if(scheme == URLScheme_Image){
+    if(scheme == URLScheme_Image) {
         QString userID = url.userInfo();
         QString imageName = url.host();
 
 
         QString localCacheImage = imageCachePath + "/" + imageName;
-        if(QFile::exists(localCacheImage)){
+        if(QFile::exists(localCacheImage)) {
             //TODO:Show image
             QStringList images;
             images.append(localCacheImage);
             ImageViewer::instance()->show();
             ImageViewer::instance()->setImages(images);
-        }else{
+        } else {
             //Download image
             updateImage(imageName, ImageDownloading);
             emit signalRequestDownloadImage(userID, imageName);
         }
 
 
-    }else if(scheme == URLScheme_Contact){
+    } else if(scheme == URLScheme_Contact) {
         //TODO
 
     }
 
-    qDebug()<<"URL scheme:"<<scheme<<" host:"<<url.host()<<" userInfo:"<<url.userInfo();
+    qDebug() << "URL scheme:" << scheme << " host:" << url.host() << " userInfo:" << url.userInfo();
 
 }
 
@@ -255,18 +262,21 @@ void MessageView::sceneGraphError(QQuickWindow::SceneGraphError, const QString &
 }
 
 
-QString MessageView::simpleTextToRichTextMessage(const QString &simpleTextMessage){
+QString MessageView::simpleTextToRichTextMessage(const QString &simpleTextMessage)
+{
 
     QString msg = simpleTextMessage;
-    if(msg.trimmed().isEmpty()){
+    if(msg.trimmed().isEmpty()) {
         msg = "<p></p>";
         return msg;
     }
 
     int separateIndex = msg.indexOf(QChar('|'));
-    if(separateIndex == -1){return "<p></p>";}
+    if(separateIndex == -1) {
+        return "<p></p>";
+    }
     QString styleTag = msg.left(separateIndex);
-    msg.remove(0, separateIndex+1);
+    msg.remove(0, separateIndex + 1);
 
 //    QStringList list = msg.split(QChar('|'));
 //    if(list.size() != 2){return "<p></p>";}
@@ -281,9 +291,9 @@ QString MessageView::simpleTextToRichTextMessage(const QString &simpleTextMessag
 
     QString divStyle = simpleStyleTagToStyleString(styleTag);
 
-    if(divStyle.trimmed().isEmpty()){
+    if(divStyle.trimmed().isEmpty()) {
         msg = QString("<div>") + msg;
-    }else{
+    } else {
         msg = QString("<div style=\"%1\">").arg(divStyle) + msg;
     }
     msg += QString("</div>");
@@ -292,17 +302,20 @@ QString MessageView::simpleTextToRichTextMessage(const QString &simpleTextMessag
 
 }
 
-QString MessageView::contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage){
+QString MessageView::contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage)
+{
 
 
     QString msg = simpleTextMessage;
-    if(msg.trimmed().isEmpty()){
+    if(msg.trimmed().isEmpty()) {
         return "";
     }
 
     int separateIndex = msg.indexOf(QChar('|'));
-    if(separateIndex == -1){return "<p></p>";}
-    msg.remove(0, separateIndex+1);
+    if(separateIndex == -1) {
+        return "<p></p>";
+    }
+    msg.remove(0, separateIndex + 1);
 
     msg.replace("\\r\\n", " ");
     msg.replace("\\n", " ");
@@ -324,42 +337,45 @@ QString MessageView::contactsSimpleTextToPlainTipTextMessage(const QString &simp
 
 }
 
-QString MessageView::simpleStyleTagToStyleString(const QString &tagsString){
+QString MessageView::simpleStyleTagToStyleString(const QString &tagsString)
+{
 
     //tagsString FORMAT: font-family;font-size;font-weight:bold;font-style:italic;text-decoration:underline;color;
 
     QStringList styleList = tagsString.split(";");
-    if(styleList.size() != 6){return "";}
+    if(styleList.size() != 6) {
+        return "";
+    }
 
     QString styleInfo = "";
 
     QString fontFamily = styleList.at(0);
-    if(!fontFamily.isEmpty()){
+    if(!fontFamily.isEmpty()) {
         styleInfo = QString("font-family:'%1';").arg(fontFamily);
     }
 
     QString fontSize = styleList.at(1);
-    if(!fontSize.isEmpty()){
+    if(!fontSize.isEmpty()) {
         styleInfo += QString("font-size:%1pt;").arg(fontSize);
     }
 
     QString fontBold = styleList.at(2);
-    if(!fontBold.isEmpty()){
+    if(!fontBold.isEmpty()) {
         styleInfo += QString("font-weight:bold;");
     }
 
     QString fontItalic = styleList.at(3);
-    if(!fontItalic.isEmpty()){
+    if(!fontItalic.isEmpty()) {
         styleInfo += QString("font-style:italic;");
     }
 
     QString fontUnderline = styleList.at(4);
-    if(!fontUnderline.isEmpty()){
+    if(!fontUnderline.isEmpty()) {
         styleInfo += QString("text-decoration:underline;");
     }
 
     QString fontColorName = styleList.at(5);
-    if(!fontColorName.isEmpty()){
+    if(!fontColorName.isEmpty()) {
         styleInfo += QString("color:%1;").arg(fontColorName);
     }
 

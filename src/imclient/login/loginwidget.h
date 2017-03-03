@@ -17,10 +17,12 @@
 //#include "HHSharedGUI/hdatabaseconnecter.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-class LoginWidget: public QWidget {
+class LoginWidget: public QWidget
+{
     Q_OBJECT
 
 public:
@@ -92,7 +94,7 @@ private slots:
     void on_cancelToolButton_clicked();
 
     void on_comboBoxNetworkType_currentIndexChanged(int index);
-    void on_comboBoxProtocol_currentIndexChanged(const QString & text);
+    void on_comboBoxProtocol_currentIndexChanged(const QString &text);
     void on_comboBoxServerIP_currentIndexChanged(int index);
 
     void on_toolButtonServersManager_clicked();

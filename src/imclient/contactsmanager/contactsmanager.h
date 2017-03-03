@@ -29,9 +29,11 @@
 #include "HHSharedGUI/ItemBox"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ContactsManager : public QObject, public Singleton<ContactsManager>{
+class ContactsManager : public QObject, public Singleton<ContactsManager>
+{
     Q_OBJECT
     friend class Singleton<ContactsManager>;
 
@@ -49,12 +51,12 @@ public:
     bool isFriendContact(const QString &contactID);
     bool isStranger(const QString &contactID);
     bool hasUserInfo(const QString &userID);
-    Contact * getUser(const QString &contactID);
-    QHash<QString/*Contact ID*/, Contact*> getAllUsers();
+    Contact *getUser(const QString &contactID);
+    QHash<QString/*Contact ID*/, Contact *> getAllUsers();
 
 
     bool loadInterestGroups();
-    InterestGroup * getInterestGroup(quint32 groupID);
+    InterestGroup *getInterestGroup(quint32 groupID);
     bool addNewInterestGroupToDatabase(InterestGroup *interestGroup);
     bool removeInterestGroupFromLocalDB(quint32 groupID);
     bool saveInterestGroupInfoToDatabase(InterestGroup *interestGroup);
@@ -71,7 +73,7 @@ public:
     bool saveInterestGroupChatMessageToDatabase(const QString &senderID, quint32 interestGroupID, const QString &message, const QString &time = "");
 
 
-    Contact * createNewContact(const QString &contactID, int groupID = ContactGroupBase::Group_Strangers_ID, const QString &nickname = "", const QString &face = "");
+    Contact *createNewContact(const QString &contactID, int groupID = ContactGroupBase::Group_Strangers_ID, const QString &nickname = "", const QString &face = "");
     int onlineContactGroupMembersCount(int contactGroupID);
 
 public slots:
@@ -128,7 +130,7 @@ public slots:
     bool slotAddNewContactToDatabase(Contact *contact);
     bool slotdeleteContactFromDatabase(Contact *contact);
 
-    void slotLoadContactGroupToUI(ItemBoxWidget *expandListView, int groupID, const QString groupName, QList<Contact*> contactList);
+    void slotLoadContactGroupToUI(ItemBoxWidget *expandListView, int groupID, const QString groupName, QList<Contact *> contactList);
 
 private slots:
     //void slotSetupContacts(bool loadFromFile, const QString &string);
@@ -141,9 +143,9 @@ private slots:
 
 
 private:
-    QSqlQuery queryDatabase(const QString & queryString, bool localConfigDatabase) ;
+    QSqlQuery queryDatabase(const QString &queryString, bool localConfigDatabase) ;
 
-    QSqlQuery queryDatabase(const QString & queryString, const QString &connectionName, const QString &driver,
+    QSqlQuery queryDatabase(const QString &queryString, const QString &connectionName, const QString &driver,
                             const QString &host, int port, const QString &user, const QString &passwd,
                             const QString &databaseName, HEHUI::DatabaseType databaseType) ;
 
@@ -154,9 +156,9 @@ private:
     QString userPrivateDataFilePath;
     QSqlDatabase localUserDataDB;
 
-    QHash<QString/*Contact ID*/, Contact*> contactHash;
+    QHash<QString/*Contact ID*/, Contact *> contactHash;
 
-    QHash<quint32/*Grup ID*/, InterestGroup*> interestGroupsHash;
+    QHash<quint32/*Grup ID*/, InterestGroup *> interestGroupsHash;
 
     IMUser *m_myself;
 

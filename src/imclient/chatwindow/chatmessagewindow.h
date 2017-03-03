@@ -26,13 +26,15 @@ class QTextBrowser;
 //class MessageEditor;
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ChatMessageWindow: public QWidget {
+class ChatMessageWindow: public QWidget
+{
     Q_OBJECT
 
 public:
-    enum ChatMessageWindowType{CMWT_Unknown, CMWT_Contact, CMWT_InterestGroup, CMWT_TempGroup};
+    enum ChatMessageWindowType {CMWT_Unknown, CMWT_Contact, CMWT_InterestGroup, CMWT_TempGroup};
 //    enum ImageDownloadStatus{ImageDownloading, ImageDownloaded, ImageDownloadingFailed};
 
     ChatMessageWindow(QWidget *parent = 0);
@@ -46,13 +48,13 @@ public:
     MessageView *messageBrowser();
 
     void setContact(Contact *c);
-    Contact * getContact();
+    Contact *getContact();
 
     //    void setContactGroup(ContactGroup *group);
     //    ContactGroup * getContactGroup();
 
     void setInterestGroup(InterestGroup *group);
-    InterestGroup * getInterestGroup();
+    InterestGroup *getInterestGroup();
 
     bool isDownloadingImage(const QString &imageName);
     void processImageDownloadResult(const QString &imageName, bool downloaded);
@@ -63,7 +65,7 @@ public:
 //    QSize minimumSizeHint();
 
 protected:
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent *event);
     bool eventFilter(QObject *obj, QEvent *event);
 
 

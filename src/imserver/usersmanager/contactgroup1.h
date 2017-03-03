@@ -13,9 +13,11 @@
 
 #include "../../sharedim/contactgroupbase.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ContactGroup :public ContactGroupBase{
+class ContactGroup : public ContactGroupBase
+{
     Q_OBJECT
 public:
     ContactGroup(quint32 groupID, const QString &groupName, QObject *parent = 0);

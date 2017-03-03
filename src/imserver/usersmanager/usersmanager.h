@@ -43,7 +43,8 @@
 #include "HHSharedCore/hsingleton.h"
 #include "HHSharedCore/hdatabaseutility.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class UsersManager//: public QObject//, public Singleton<UsersManager>
 {
@@ -62,34 +63,34 @@ public:
     static void setPasswordUpdateAuthMode(quint8 mode);
 
 
-    UserInfo* getUserInfo(const QString &imUserID);
-    UserInfo* getCachedUserInfo(const QString &imUserID);
-    UserInfo* getOnlineUserInfo(const QString &imUserID);
-    UserInfo* getOfflineUserInfo(const QString &imUserID);
-    QList<UserInfo*> onlineUsers();
-    void userOnline(UserInfo* userInfo);
-    void userOffline(UserInfo* userInfo);
+    UserInfo *getUserInfo(const QString &imUserID);
+    UserInfo *getCachedUserInfo(const QString &imUserID);
+    UserInfo *getOnlineUserInfo(const QString &imUserID);
+    UserInfo *getOfflineUserInfo(const QString &imUserID);
+    QList<UserInfo *> onlineUsers();
+    void userOnline(UserInfo *userInfo);
+    void userOffline(UserInfo *userInfo);
 
 
     bool canUserLogin(const QString &userID, const QString &clientVersion, IM::ErrorType *errorType);
     void getUserLoginServer(const QString &userID, QHostAddress *serverAddress, quint16 *serverPort);
 //    UserInfo* logUserIn(const QString &userID, const QByteArray &encryptedPassword, IM::OnlineState loginState, IM::ErrorType *errorType);
-    
+
     bool registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID);
     void updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
 
     QString searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
     QString searchContact(const QString &keyword, quint8 searchOnlineUsersOnly,
-                       quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
-                       quint8 gender, quint8 age, bool matchExactly, int startIndex
-                       );
+                          quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
+                          quint8 gender, quint8 age, bool matchExactly, int startIndex
+                         );
 
     bool saveCachedChatMessageFromIMUser(const QString &senderID, const QString &receiverID, const QString &message);
-    QStringList cachedChatMessagesForIMUser(UserInfo* userInfo);
+    QStringList cachedChatMessagesForIMUser(UserInfo *userInfo);
 
-    bool saveUserLastLoginInfo(UserInfo* userInfo, const QString &userHostAddress, quint16 userHostPort, const QString &deviceInfo);
-    bool saveUserLastLogoutInfo(UserInfo* userInfo);
-    
+    bool saveUserLastLoginInfo(UserInfo *userInfo, const QString &userHostAddress, quint16 userHostPort, const QString &deviceInfo);
+    bool saveUserLastLogoutInfo(UserInfo *userInfo);
+
     bool addNewContactForUserInDB(const QString &userID, const QString &contactID, quint32 contactGroupID);
     bool deleteContactForUserFromDB(const QString &userID, const QString &contactID, bool deleteMeFromOpposition = false, bool addToBlacklist = false);
     bool moveContactForUserInDB(UserInfo *userInfo, const QString &contactID, quint32 newGroupID);
@@ -105,17 +106,17 @@ public:
     bool getFriendshipApplyRequest(const QString &receiverID, QList<QStringList> *sentApplicationList, QList<QStringList> *receivedApplicationList);
 
 
-    QString getInterestGroupsListForUser(UserInfo* userInfo);
-    QString getInterestGroupInfoStringForUser(UserInfo* userInfo, quint32 groupID);
-    QString getInterestGroupMembersInfoStringForUser(UserInfo* userInfo, InterestGroup *group);
-    
+    QString getInterestGroupsListForUser(UserInfo *userInfo);
+    QString getInterestGroupInfoStringForUser(UserInfo *userInfo, quint32 groupID);
+    QString getInterestGroupMembersInfoStringForUser(UserInfo *userInfo, InterestGroup *group);
 
-    
-    
-/////////////////////////// Group Manager ////////////////////////////////////////    
-    InterestGroup* getInterestGroup(quint32 groupID);
-    quint32 createNewInterestGroup(UserInfo* creatorInfo, const QString &groupName, quint8 type);
-    bool disbandInterestGroup(UserInfo* creatorInfo, quint32 groupID);
+
+
+
+/////////////////////////// Group Manager ////////////////////////////////////////
+    InterestGroup *getInterestGroup(quint32 groupID);
+    quint32 createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName, quint8 type);
+    bool disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID);
     bool memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGroup *group, bool join);
 
     QList<UserInfo *> getAllOnlineInterestGroupMembers(quint32 groupID);
@@ -127,44 +128,44 @@ public:
     bool getMembershipApplyRequest(quint32 groupID, QList<QStringList> *receivedApplicationList);
 
     bool saveCachedInterestGroupChatMessageFromIMUser(const QString &senderID, quint32 interestGroupID, const QString &message);
-    QStringList getCachedInterestGroupChatMessagesForUserFromDB(UserInfo* userInfo);
+    QStringList getCachedInterestGroupChatMessagesForUserFromDB(UserInfo *userInfo);
 
-    bool getUserAllContactsInfoFromDatabase(UserInfo* info, QString *infoString);
-    bool getUserAllContactsInfoVersionFromDatabase(UserInfo* info, QString *infoString);
-    IM::ErrorType createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID = 0);
-    bool updateContactGroupNameInDB(UserInfo* info, quint32 groupID, const QString &newGroupName);
+    bool getUserAllContactsInfoFromDatabase(UserInfo *info, QString *infoString);
+    bool getUserAllContactsInfoVersionFromDatabase(UserInfo *info, QString *infoString);
+    IM::ErrorType createOrDeleteContactGroupInDB(UserInfo *info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID = 0);
+    bool updateContactGroupNameInDB(UserInfo *info, quint32 groupID, const QString &newGroupName);
 
 
-/////////////////////////// ---Group Manager--- ////////////////////////////////////////    
-    
+/////////////////////////// ---Group Manager--- ////////////////////////////////////////
+
 
 protected:
 
-    UserInfo * queryUserInfo(const QString &imUserID);
+    UserInfo *queryUserInfo(const QString &imUserID);
     bool queryUserInfo(UserInfo *info);
 
     bool getUserLastLoginInfo(UserInfo *userInfo);
 
-    
-/////////////////////////// Group Manager ////////////////////////////////////////    
-  
-    InterestGroup * queryInterestGroup(quint32 groupID);
+
+/////////////////////////// Group Manager ////////////////////////////////////////
+
+    InterestGroup *queryInterestGroup(quint32 groupID);
     bool queryInterestGroup(InterestGroup *info);
-    bool getUserInterestGroupsFromDB(UserInfo* info);
+    bool getUserInterestGroupsFromDB(UserInfo *info);
 
 
-    bool getUserAllContactGroupsInfoFromDatabase(UserInfo* info);
+    bool getUserAllContactGroupsInfoFromDatabase(UserInfo *info);
 
 
-/////////////////////////// ---Group Manager--- ////////////////////////////////////////    
-     
-     
+/////////////////////////// ---Group Manager--- ////////////////////////////////////////
+
+
     bool openDatabase(bool reopen = false);
-    
 
-    QSqlQuery queryDatabase(const QString & queryString, bool localConfigDatabase);
 
-    QSqlQuery queryDatabase(const QString & queryString,
+    QSqlQuery queryDatabase(const QString &queryString, bool localConfigDatabase);
+
+    QSqlQuery queryDatabase(const QString &queryString,
                             const QString &connectionName, const QString &driver,
                             const QString &host, int port, const QString &user,
                             const QString &passwd, const QString &databaseName,
@@ -182,7 +183,7 @@ public slots:
 
 
 private slots:
-    
+
     void slotCheckOnlineUsers();
 
 
@@ -197,19 +198,19 @@ private:
 
 
     static QMutex *onlineUserMutex;
-    static QHash<QString/*User ID*/, UserInfo*> *onlineUserInfoHash;
+    static QHash<QString/*User ID*/, UserInfo *> *onlineUserInfoHash;
     static QMutex *offlineUserMutex;
-    static QHash<QString/*User ID*/, UserInfo*> *offlineUserInfoHash;
+    static QHash<QString/*User ID*/, UserInfo *> *offlineUserInfoHash;
 
     //ServerNetworkManager *serverNetworkManager;
-    
+
 //    QSqlQuery *query;
-    
+
     QSqlDatabase db;
-    
-    
+
+
     static QMutex *groupMutex;
-    static QHash<quint32/*Group ID*/, InterestGroup*> *m_interestGroupHash;
+    static QHash<quint32/*Group ID*/, InterestGroup *> *m_interestGroupHash;
 
 
 

@@ -53,8 +53,8 @@ class QToolButton;
 QT_END_NAMESPACE
 
 #ifndef QT_NO_PRINTER
-#include <QPrinter>
-#include <QPrintDialog>
+    #include <QPrinter>
+    #include <QPrintDialog>
 #endif
 
 #include "imageviewercontroler.h"

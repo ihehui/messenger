@@ -7,7 +7,8 @@
 #include "sharedimlib.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class SHAREDIMLIB_API UDTProtocol : public UDTProtocolBase
@@ -33,7 +34,7 @@ private:
     inline void convertDataToPacket(UDTSOCKET socket, QByteArray *data);
 
 
-    
+
 };
 
 } //namespace HEHUI

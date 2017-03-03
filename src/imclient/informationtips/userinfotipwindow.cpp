@@ -5,7 +5,8 @@
 #include <QDebug>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 UserInfoTipWindow::UserInfoTipWindow(QWidget *parent, Qt::WindowFlags fl)
@@ -47,14 +48,15 @@ UserInfoTipWindow::~UserInfoTipWindow()
 
 //}
 
-void UserInfoTipWindow::showUserInfoTip(Contact *contact, const QPoint &global_pos){
-    qDebug()<<"--UserInfoTipWindow::showUserInfoTip(...)";
+void UserInfoTipWindow::showUserInfoTip(Contact *contact, const QPoint &global_pos)
+{
+    qDebug() << "--UserInfoTipWindow::showUserInfoTip(...)";
 
 
-    if(!contact){
+    if(!contact) {
         return;
     }
-    if(this->m_contact == contact){
+    if(this->m_contact == contact) {
         return;
     }
 
@@ -66,14 +68,14 @@ void UserInfoTipWindow::showUserInfoTip(Contact *contact, const QPoint &global_p
     ui.labelUserIDInfo->setText(contact->getNickName() + "("  + contact->getUserID() + ")");
     ui.labelDescription->setText(contact->getdescription());
 
-    if( (contact->getOnlineState() != IM::ONLINESTATE_INVISIBLE) && (contact->getOnlineState() != IM::ONLINESTATE_OFFLINE)){
+    if( (contact->getOnlineState() != IM::ONLINESTATE_INVISIBLE) && (contact->getOnlineState() != IM::ONLINESTATE_OFFLINE)) {
         QString info = QString("IP: %1").arg(contact->getLastLoginExternalHostAddress());
         ui.labelExtraInfo->setText(info);
     }
 
-    if(contact->getBusinessEmailAddress().trimmed().isEmpty()){
+    if(contact->getBusinessEmailAddress().trimmed().isEmpty()) {
         ui.toolButtonEmail->setEnabled(false);
-    }else{
+    } else {
         ui.toolButtonEmail->setEnabled(true);
     }
 
@@ -87,8 +89,9 @@ void UserInfoTipWindow::showUserInfoTip(Contact *contact, const QPoint &global_p
 
 }
 
-void UserInfoTipWindow::hideUserInfoTip(){
-    qDebug()<<"--UserInfoTipWindow::hideUserInfoTip()";
+void UserInfoTipWindow::hideUserInfoTip()
+{
+    qDebug() << "--UserInfoTipWindow::hideUserInfoTip()";
 
     timer->stop();
 
@@ -102,7 +105,8 @@ void UserInfoTipWindow::hideUserInfoTip(){
 
 }
 
-void UserInfoTipWindow::sendEmail(){
+void UserInfoTipWindow::sendEmail()
+{
     QString email = m_contact->getBusinessEmailAddress();
 
     QDesktopServices::openUrl(QUrl(QString("mailto:%1").arg(email)));

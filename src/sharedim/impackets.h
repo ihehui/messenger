@@ -5,7 +5,8 @@
 
 #include "sharedimlib.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -97,13 +98,13 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum AnnouncementTarget{
+    enum AnnouncementTarget {
         ANNOUNCEMENT_TARGET_EVERYONE = 0,
         ANNOUNCEMENT_TARGET_SPECIFIC = 1,
         ANNOUNCEMENT_TARGET_ALL = 255
     };
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         ANNOUNCEMENT_UNKNOWN = 0,
         ANNOUNCEMENT_QUERY,
         ANNOUNCEMENT_CREATE,
@@ -115,7 +116,7 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct QueryInfoStruct{
+    struct QueryInfoStruct {
         QString announcementID;
         QString keyword;
         QString validity;
@@ -126,7 +127,7 @@ public:
         QString endTime;
     } QueryInfo;
 
-    struct CreateInfoStruct{
+    struct CreateInfoStruct {
         unsigned int localTempID;
         QString adminID;
         quint8 type;
@@ -137,7 +138,7 @@ public:
         QString targets;
     } CreateInfo;
 
-    struct UpdateInfoStruct{
+    struct UpdateInfoStruct {
         QString adminName;
         unsigned int announcementID;
         quint8 targetType;
@@ -146,7 +147,7 @@ public:
         QString deletedTargets;
     } UpdateInfo;
 
-    struct ReplyInfoStruct{
+    struct ReplyInfoStruct {
         unsigned int announcementID;
         QString sender;
         QString receiver;
@@ -154,11 +155,11 @@ public:
         QString replyMessage;
     } ReplyInfo;
 
-    struct QueryTargetsInfoStruct{
+    struct QueryTargetsInfoStruct {
         unsigned int announcementID;
     } QueryTargetsInfo;
 
-    struct AnnouncementInfoStruct{
+    struct AnnouncementInfoStruct {
         unsigned int announcementID;
         QString content;
     } AnnouncementInfo;
@@ -182,7 +183,7 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum RgeistrationMode{
+    enum RgeistrationMode {
         REG_MODE_USER_CREATE_ALL,
         REG_MODE_SERVER_CREATE_ALL,
         REG_MODE_SERVER_CREATE_ID,
@@ -190,8 +191,8 @@ public:
         REG_MODE_SERVER_HTTP,
         REG_MODE_CLOSED
     };
-    enum ActivtionMode{ACT_MODE_AUTO, ACT_MODE_MANUAL, ACT_MODE_EMAIL};
-    enum PacketInfoType{
+    enum ActivtionMode {ACT_MODE_AUTO, ACT_MODE_MANUAL, ACT_MODE_EMAIL};
+    enum PacketInfoType {
         REGISTRATION_UNKNOWN = 0,
         REGISTRATION_SERVER_INFO,
         REGISTRATION_INFO,
@@ -200,7 +201,7 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct ServerInfoStruct{
+    struct ServerInfoStruct {
         quint8 requestServerInfo;
         QString version;
         quint8 regMode;
@@ -208,7 +209,7 @@ public:
         QString address;
     } ServerInfo;
 
-    struct RgeistrationInfoStruct{
+    struct RgeistrationInfoStruct {
         QString userID;
         QString password;
         QString email;
@@ -217,7 +218,7 @@ public:
         QString securityAnswer;
     } RgeistrationInfo;
 
-    struct RgeistrationResultStruct{
+    struct RgeistrationResultStruct {
         quint32 sysID;
         QString userID;
         QString password;
@@ -244,14 +245,14 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum AuthMode{
+    enum AuthMode {
         AUTH_OLD_PWD_ONLY = 0,
         AUTH_SECURITY_QUESTION,
         AUTH_EMAIL,
         AUTH_SMS,
         AUTH_HTTP
     };
-    enum PacketInfoType{
+    enum PacketInfoType {
         INFO_TYPE_UNKNOWN = 0,
         INFO_TYPE_INIT_REQUEST,
 
@@ -266,7 +267,7 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct AuthInfoStruct{
+    struct AuthInfoStruct {
         quint8 authMode;
         QByteArray captchaImage;
         QString captcha;
@@ -305,7 +306,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         INFO_TYPE_UNKNOWN = 0,
 
         INFO_TYPE_LOGIN_SERVER_INFO,
@@ -318,19 +319,19 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct LoginServerInfoStruct{
+    struct LoginServerInfoStruct {
         QString version;
         QString serverAddress;
         quint16 serverPort;
     } LoginServerInfo;
 
-    struct AuthInfoStruct{
+    struct AuthInfoStruct {
         QByteArray password;
         quint8 stateAfterLoggedin;
         QString deviceInfo;
     } AuthInfo;
 
-    struct AuthResultStruct{
+    struct AuthResultStruct {
         quint8 loggedin;
         quint8 errorType;
 
@@ -343,7 +344,7 @@ public:
         uint serverTime;
     } AuthResultInfo;
 
-    struct PreviousLoginInfoStruct{
+    struct PreviousLoginInfoStruct {
         QString loginIP;
         uint loginTime;
         uint logoutTime;
@@ -415,7 +416,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         PIT_GROUPS_LIST,
@@ -429,30 +430,30 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct GroupsListStruct{
+    struct GroupsListStruct {
         QString groupsInfo;
         quint32 version;
         QString contactInfoVersionList;
     } GroupsList;
 
-    struct GroupParentInfoStruct{
+    struct GroupParentInfoStruct {
         quint32 groupID;
         quint32 parentID;
     } GroupParentInfo;
 
-    struct GroupCreationInfoStruct{
+    struct GroupCreationInfoStruct {
         QString  name;
         quint32 parentID;
         quint32 groupID;
         quint8 errorCode;
     } GroupCreationInfo;
 
-    struct GroupDeletionInfoStruct{
+    struct GroupDeletionInfoStruct {
         quint32 groupID;
         quint8 errorCode;
     } GroupDeletionInfo;
 
-    struct GroupRenamingInfoStruct{
+    struct GroupRenamingInfoStruct {
         quint32 groupID;
         QString  newName;
     } GroupRenamingInfo;
@@ -477,7 +478,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         PIT_GROUPS_LIST,
@@ -496,12 +497,12 @@ public:
     quint32 JobID;
     quint32 GroupID;
 
-    struct GroupsListStruct{
+    struct GroupsListStruct {
         QString groups;
         quint32 version;
     } GroupsList;
 
-    struct GroupInfoStruct{
+    struct GroupInfoStruct {
 //        quint32 id;
         QString infoString;
 //        QString name;
@@ -513,22 +514,22 @@ public:
 //        QString admins;
     } GroupInfo;
 
-    struct GroupAnnouncementInfoStruct{
+    struct GroupAnnouncementInfoStruct {
         QString content;
         QString admin;
     } GroupAnnouncementInfo;
 
-    struct GroupCreationInfoStruct{
+    struct GroupCreationInfoStruct {
         QString  name;
         quint8 type;
     } GroupCreationInfo;
 
-    struct GroupDeletionInfoStruct{
+    struct GroupDeletionInfoStruct {
         quint8 deleted;
     } GroupDeletionInfo;
 
 
-    struct MemberApplicationInfoStruct{
+    struct MemberApplicationInfoStruct {
         QString userID;
         QString message;
 
@@ -536,13 +537,13 @@ public:
         QString admin;
     } MemberApplicationInfo;
 
-    struct MemberDeletionInfoStruct{
+    struct MemberDeletionInfoStruct {
         QString userID;
         quint8 blockForever;
         QString admin;
     } MemberDeletionInfo;
 
-    struct MemberPromotionInfoStruct{
+    struct MemberPromotionInfoStruct {
         QString userID;
         quint8 promoted;
     } MemberPromotionInfo;
@@ -567,7 +568,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         PIT_CONTACT_INFO,
@@ -584,17 +585,17 @@ public:
     QString ContactID;
 
 
-    struct ContactInfoStruct{
+    struct ContactInfoStruct {
         quint8 isSummaryInfo;
         QString infoString;
     } info;
 
-    struct ContactChangeGroupStruct{
+    struct ContactChangeGroupStruct {
         quint32 oldGroupID;
         quint32 newGroupID;
     } ContactChangeGroup;
 
-    struct ContactGroupCreationOrDeletionStruct{
+    struct ContactGroupCreationOrDeletionStruct {
         quint32 groupID;
         QString groupName;
         quint8 errorCode;
@@ -602,25 +603,25 @@ public:
     } ContactGroupCreationOrDeletion;
 
 
-    struct ContactFriendingRequestStruct{
+    struct ContactFriendingRequestStruct {
         QString nickName;
         QString userFace;
         QString message;
         quint32 groupID;
     } ContactFriendingRequest;
 
-    struct ContactFriendingResultStruct{
+    struct ContactFriendingResultStruct {
         quint8 errorCode;
         QString message;
     } ContactFriendingResult;
 
-    struct ContactDeletionInfoStruct{
+    struct ContactDeletionInfoStruct {
         quint8 deleteMeFromOpposition;
         quint8 blockForever;
         quint8 errorCode;
     } ContactDeletionInfo;
 
-    struct ContactRemarkInfoStruct{
+    struct ContactRemarkInfoStruct {
         QString  newRemarkName;
     } ContactRemarkInfo;
 
@@ -644,7 +645,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         PIT_SEARCH_CONTACT_CONDITIONS,
@@ -657,7 +658,7 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct SearchContactConditionsStruct{
+    struct SearchContactConditionsStruct {
         QString keyword;
         quint8 isOnline;
         quint8 hasWebcam;
@@ -671,16 +672,16 @@ public:
 
     } SearchContactConditions;
 
-    struct SearchContactResultStruct{
+    struct SearchContactResultStruct {
         QString result;
     } SearchContactResult;
 
-    struct SearchInterestGroupConditionsStruct{
+    struct SearchInterestGroupConditionsStruct {
         QString keyword;
         int startIndex;
     } SearchInterestGroupConditions;
 
-    struct SearchInterestGroupResultStruct{
+    struct SearchInterestGroupResultStruct {
         QString result;
     } SearchInterestGroupResult;
 
@@ -705,7 +706,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         PIT_CONTACT_CHAT_MESSAGE,
@@ -724,23 +725,23 @@ public:
     PacketInfoType InfoType;
     quint32 JobID;
 
-    struct ContactChatMessageStruct{
+    struct ContactChatMessageStruct {
         QString contactID;
         QString message;
         QString imageNames;
     } ContactChatMessage;
 
-    struct ContactChatMessageCachedOnServerStruct{
+    struct ContactChatMessageCachedOnServerStruct {
         QString messages;
     } ContactChatMessagesCachedOnServer;
 
-    struct ContactChatHistoryMessagesStruct{
+    struct ContactChatHistoryMessagesStruct {
         QString contactID;
         QString messages;
         uint startime;
     } ContactChatHistoryMessages;
 
-    struct GroupChatMessageStruct{
+    struct GroupChatMessageStruct {
         quint32 groupID;
         QString memberID;
         uint time;
@@ -748,24 +749,24 @@ public:
         QString imageNames;
     } GroupChatMessage;
 
-    struct GroupChatMessagesCachedOnServerStruct{
+    struct GroupChatMessagesCachedOnServerStruct {
         QString messages;
     } GroupChatMessagesCachedOnServer;
 
-    struct GroupChatHistoryMessagesStruct{
+    struct GroupChatHistoryMessagesStruct {
         quint32 groupID;
         QString messages;
         uint startime;
     } GroupChatHistoryMessages;
 
-    struct ChatImagesStruct{
+    struct ChatImagesStruct {
         quint8 isRequest;
         QString contactID;
         QString name;
         QByteArray image;
     } ChatImage;
 
-    struct SessionEncryptionKeyWithContactStruct{
+    struct SessionEncryptionKeyWithContactStruct {
         QString contactID;
         QByteArray key;
     } SessionEncryptionKeyWithContact;
@@ -791,7 +792,7 @@ private:
 
 public:
 
-    enum PacketInfoType{
+    enum PacketInfoType {
         PIT_UNKNOWN = 0,
 
         CAPTCHA_REQUEST,
@@ -828,7 +829,7 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum PacketInfoType{
+    enum PacketInfoType {
         FT_UNKNOWN = 0,
 
         FT_FILE_SERVER_INFO,
@@ -859,46 +860,46 @@ public:
     PacketInfoType InfoType;
     QString ContactID;
 
-    struct FileServerInfoStruct{
+    struct FileServerInfoStruct {
         QString address;
         quint16 port;
     } FileServerInfo;
 
-    struct FileSystemInfoRequestStruct{
+    struct FileSystemInfoRequestStruct {
         QString parentDirPath;
     } FileSystemInfoRequest;
-    struct FileSystemInfoResponseStruct{
+    struct FileSystemInfoResponseStruct {
         QString baseDirPath;
         QByteArray fileSystemInfoData;
     } FileSystemInfoResponse;
 
-    struct FileDeletingRequestStruct{
+    struct FileDeletingRequestStruct {
         QString baseDirPath;
         QStringList files;
     } FileDeletingRequest;
-    struct FileDeletingResponseStruct{
+    struct FileDeletingResponseStruct {
         QString baseDirPath;
         QStringList failedFiles;
     } FileDeletingResponse;
 
-    struct FileRenamingRequestStruct{
+    struct FileRenamingRequestStruct {
         QString baseDirPath;
         QString oldFileName;
         QString newFileName;
     } FileRenamingRequest;
-    struct FileRenamingResponseStruct{
+    struct FileRenamingResponseStruct {
         QString baseDirPath;
         QString oldFileName;
         quint8 renamed;
         QString message;
     } FileRenamingResponse;
 
-    struct FileDownloadingRequestStruct{
+    struct FileDownloadingRequestStruct {
         QString baseDir;
         QString fileName;
         QString dirToSaveFile;
     } FileDownloadingRequest;
-    struct FileDownloadingResponseStruct{
+    struct FileDownloadingResponseStruct {
         quint8 accepted;
         QString baseDir;
         QString fileName;
@@ -907,36 +908,36 @@ public:
         quint8 errorCode;
     } FileDownloadingResponse;
 
-    struct FileUploadingRequestStruct{
+    struct FileUploadingRequestStruct {
         QString fileName;
         QByteArray fileMD5Sum;
         quint64 size;
         QString fileSaveDir;
     } FileUploadingRequest;
-    struct FileUploadingResponseStruct{
+    struct FileUploadingResponseStruct {
         QByteArray fileMD5Sum;
         quint8 accepted;
         QString message;
     } FileUploadingResponse;
 
-    struct FileDataRequestStruct{
+    struct FileDataRequestStruct {
         QByteArray fileMD5;
         int startPieceIndex;
         int endPieceIndex;
     } FileDataRequest;
-    struct FileDataResponseStruct{
+    struct FileDataResponseStruct {
         QByteArray fileMD5;
         int pieceIndex;
         QByteArray data;
         QByteArray pieceMD5;
     } FileDataResponse;
 
-    struct FileTXStatusStruct{
+    struct FileTXStatusStruct {
         QByteArray fileMD5;
         quint8 status;
     } FileTXStatus;
 
-    struct FileTXErrorStruct{
+    struct FileTXErrorStruct {
         QString fileName;
         QByteArray fileMD5;
         quint8 errorCode;
@@ -1005,17 +1006,17 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum PacketInfoType{LOGIN_UNKNOWN = 0, LOGIN_REQUEST, LOGIN_RESULT};
+    enum PacketInfoType {LOGIN_UNKNOWN = 0, LOGIN_REQUEST, LOGIN_RESULT};
 
     PacketInfoType InfoType;
 
-    struct LoginInfoStruct{
+    struct LoginInfoStruct {
         QString adminID;
         QString password;
         QString computerName;
     } LoginInfo;
 
-    struct LoginResultStruct{
+    struct LoginResultStruct {
         quint8 loggedIn;
         QString message;
         quint8 readonly;

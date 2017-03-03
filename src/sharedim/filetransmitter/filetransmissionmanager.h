@@ -9,7 +9,8 @@
 
 //#include "HHSharedCore/hsingleton.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class FileTransmissionInfo;
 
@@ -106,11 +107,11 @@ private slots:
     bool updateFileTransmissionInfo(const QString &peerID, const QByteArray &fileMD5Sum, int pieceIndex, qint64 dataSize);
     bool updateFileTransmissionInfo(FileTransmissionInfo *info, int pieceIndex, qint64 dataSize);
 
-    FileTransmissionInfo* getFileTransmissionInfo(const QString &peerID, const QByteArray &md5);
+    FileTransmissionInfo *getFileTransmissionInfo(const QString &peerID, const QByteArray &md5);
 
 private:
 
-    enum FileTXStatus{
+    enum FileTXStatus {
         File_TX_Preparing,
         File_TX_Receiving,
         File_TX_Sending,
@@ -129,13 +130,13 @@ private:
     FileManager *m_fileManager;
 
 //    QHash<int/*File TX Request ID*/, int/*Socket ID*/> fileTXRequestHash;
-    QHash<int/*File TX Request ID*/, FileTransmissionInfo*> fileTXRequestHash;
+    QHash<int/*File TX Request ID*/, FileTransmissionInfo *> fileTXRequestHash;
 
 //    QMultiHash<int/*Socket ID*/, QByteArray/*File MD5*/> fileTXSocketHash;
 
-    QMultiHash<QByteArray/*File MD5*/, FileTransmissionInfo*> fileTXInfoHash;
+    QMultiHash<QByteArray/*File MD5*/, FileTransmissionInfo *> fileTXInfoHash;
 
-    QMultiHash<QString/*Peer ID*/, FileTransmissionInfo*> peerFileTXInfoHash;
+    QMultiHash<QString/*Peer ID*/, FileTransmissionInfo *> peerFileTXInfoHash;
 
 
 };

@@ -45,43 +45,43 @@
 
 //MySQL
 #ifndef REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME
-#define REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME	"SITOY_COMPUTERS_DB"
+    #define REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME	"SITOY_COMPUTERS_DB"
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_DRIVER
-#define REMOTE_SITOY_COMPUTERS_DB_DRIVER	"QMYSQL"
+    #define REMOTE_SITOY_COMPUTERS_DB_DRIVER	"QMYSQL"
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST
-#define REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST	"200.200.200.40"
+    #define REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST	"200.200.200.40"
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT
-#define REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT	3306
+    #define REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT	3306
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_USER_NAME
-#define REMOTE_SITOY_COMPUTERS_DB_USER_NAME	"hehui"
+    #define REMOTE_SITOY_COMPUTERS_DB_USER_NAME	"hehui"
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD
-#define REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD	"hehui"
+    #define REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD	"hehui"
 #endif
 
 #ifndef REMOTE_SITOY_COMPUTERS_DB_NAME
-#define REMOTE_SITOY_COMPUTERS_DB_NAME	"im"
+    #define REMOTE_SITOY_COMPUTERS_DB_NAME	"im"
 #endif
 
 #ifndef IM_SERVER_IPMC_ADDRESS
-#define IM_SERVER_IPMC_ADDRESS	"239.239.239.239"
+    #define IM_SERVER_IPMC_ADDRESS	"239.239.239.239"
 #endif
 
 #ifndef IM_SERVER_IPMC_LISTENING_PORT
-#define IM_SERVER_IPMC_LISTENING_PORT	54320
+    #define IM_SERVER_IPMC_LISTENING_PORT	54320
 #endif
 
 #ifndef IM_SERVER_RTP_LISTENING_PORT
-#define IM_SERVER_RTP_LISTENING_PORT	54321
+    #define IM_SERVER_RTP_LISTENING_PORT	54321
 #endif
 
 //#ifndef IM_SERVER_TCP_LISTENING_PORT
@@ -89,19 +89,19 @@
 //#endif
 
 #ifndef INVALID_SOCK_ID
-#define INVALID_SOCK_ID	-1
+    #define INVALID_SOCK_ID	-1
 #endif
 
 #ifndef CRYPTOGRAPHY_KEY
-#define CRYPTOGRAPHY_KEY "HEHUI"
+    #define CRYPTOGRAPHY_KEY "HEHUI"
 #endif
 
 //#ifndef HEARTBEAT_TIMER_INTERVAL
 //#define HEARTBEAT_TIMER_INTERVAL 600000
-//#endif 
+//#endif
 
 #ifndef MIN_THREAD_COUNT
-#define MIN_THREAD_COUNT 10
+    #define MIN_THREAD_COUNT 10
 #endif
 
 
@@ -113,45 +113,45 @@
 
 
 #ifndef MAX_AUTHENTICATION_REQUEST_TIMES
-#define MAX_AUTHENTICATION_REQUEST_TIMES 5
+    #define MAX_AUTHENTICATION_REQUEST_TIMES 5
 #endif
 
 #ifndef TIME_FOR_BAN_ON_AUTHENTICATION_REQUEST
-#define TIME_FOR_BAN_ON_AUTHENTICATION_REQUEST 7200000 //2 hours
+    #define TIME_FOR_BAN_ON_AUTHENTICATION_REQUEST 7200000 //2 hours
 #endif
 
 #ifndef MAX_CONTACT_NUMBER
-#define MAX_CONTACT_NUMBER	 512
+    #define MAX_CONTACT_NUMBER	 512
 #endif
 
 #ifndef GROUP_INFO_SEPARATOR
-#define GROUP_INFO_SEPARATOR	 "||"
+    #define GROUP_INFO_SEPARATOR	 "||"
 #endif
 
 #ifndef CONTACT_INFO_SEPARATOR
-#define CONTACT_INFO_SEPARATOR	 ","
+    #define CONTACT_INFO_SEPARATOR	 ","
 #endif
 #ifndef CONTACTS_INFO_ROW_SEPARATOR
-#define CONTACTS_INFO_ROW_SEPARATOR	 ";"
+    #define CONTACTS_INFO_ROW_SEPARATOR	 ";"
 #endif
 
 
 
 #ifndef SEPARTOR_GROUP
-#define SEPARTOR_GROUP 0X1D
+    #define SEPARTOR_GROUP 0X1D
 #endif
 
 #ifndef SEPARTOR_RECORD
-#define SEPARTOR_RECORD 0X1E
+    #define SEPARTOR_RECORD 0X1E
 #endif
 
 #ifndef SEPARTOR_UNIT
-#define SEPARTOR_UNIT 0X1F
+    #define SEPARTOR_UNIT 0X1F
 #endif
 
 
 #ifndef MAX_MESSAGE_SIZE
-#define MAX_MESSAGE_SIZE    470
+    #define MAX_MESSAGE_SIZE    470
 #endif
 
 //#ifndef IM_RUDP_KEEPALIVE_TIMER_INTERVAL
@@ -159,22 +159,24 @@
 //#endif
 
 #ifndef FILE_PIECES_IN_ONE_REQUEST
-#define FILE_PIECES_IN_ONE_REQUEST 20 //20 Pieces
+    #define FILE_PIECES_IN_ONE_REQUEST 20 //20 Pieces
 #endif
 
 
 #ifndef SEARCH_RESULT_PAGE_SIZE
-#define SEARCH_RESULT_PAGE_SIZE 10
+    #define SEARCH_RESULT_PAGE_SIZE 10
 #endif
 
 #ifndef HISTORY_MESSAGES_PAGE_SIZE
-#define HISTORY_MESSAGES_PAGE_SIZE 50
+    #define HISTORY_MESSAGES_PAGE_SIZE 50
 #endif
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-namespace IM {
+namespace IM
+{
 
 enum OnlineState {
     ONLINESTATE_ONLINE = 1,
@@ -230,7 +232,7 @@ enum Command {
 
 };
 
-enum FileTXStatus{
+enum FileTXStatus {
     File_TX_Preparing,
     File_TX_Receiving,
     File_TX_Sending,
@@ -243,7 +245,7 @@ enum FileTXStatus{
 
 enum ErrorType {
     ERROR_NoError = 0,
-    
+
     ERROR_SoftwareVersionExpired = 1,
     ERROR_IPBanned,
     ERROR_IDBanned,
@@ -254,28 +256,28 @@ enum ErrorType {
 
     ERROR_GROUP_ID_NotExist,
 
-    
+
     ERROR_Timeout,
     ERROR_ConnectionFailed,
     ERROR_KickedOut,
 
 
     ERROR_RequestDenied,
-    
+
     ERROR_AuthenticationNeeded,
     ERROR_AuthenticationFailed,
-    
+
     //registration
     ERROR_IDEXISTED,
     ERROR_EMAILEXISTED,
-    
-    
+
+
     ERROR_ServerError,
-    
+
     ERROR_UnKnownError = 255
 };
 
-enum PropertyIDOfUser{
+enum PropertyIDOfUser {
     PI_SysID = 1,
     PI_UserID,
     PI_Password,
@@ -284,7 +286,7 @@ enum PropertyIDOfUser{
     PI_NickName,
     PI_Gender,
     PI_Face,
-    
+
     //    PI_PersonalContactGroupsInfoString,
     PI_PersonalContactGroupsInfoVersion,
     //    PI_InterestGroupsInfoString,
@@ -301,7 +303,7 @@ enum PropertyIDOfUser{
     PI_Role,
     PI_Description,
     PI_AccountState,
-    
+
     PI_Age,
     PI_HomeAddress,
     PI_HomePhoneNumber,
@@ -322,7 +324,7 @@ enum PropertyIDOfUser{
     PI_RegistrationTime,
     //    PI_LoginTimes,
 
-    
+
     //    PI_LastLoginTime,
     //    PI_LastLoginHostAddress,
     //    PI_LastLoginHostPort,
@@ -337,7 +339,7 @@ enum PropertyIDOfUser{
 
 };
 
-enum PropertyIDOfGroup{
+enum PropertyIDOfGroup {
     PIG_GroupID = 1,
 
     PIG_GroupTypeID,
@@ -345,7 +347,7 @@ enum PropertyIDOfGroup{
     PIG_GroupName,
     PIG_CreatorID,
     PIG_CreationTime,
-    
+
     PIG_GroupInfoVersion,
     PIG_MemberListInfoVersion,
     PIG_Description,
@@ -354,7 +356,7 @@ enum PropertyIDOfGroup{
     PIG_State,
     PIG_Privacy,
 
-    
+
     //For Table InterestGroupMembers
     PIG_MemberSysID,
     PIG_MemberRole

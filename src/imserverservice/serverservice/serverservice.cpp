@@ -40,11 +40,12 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ServerService::ServerService(int argc, char **argv, const QString &serviceName, const QString &description )
-    :Service(argc, argv, serviceName, description)
+    : Service(argc, argv, serviceName, description)
 {
 
 
@@ -57,16 +58,18 @@ ServerService::ServerService(int argc, char **argv, const QString &serviceName, 
 
 }
 
-ServerService::~ServerService(){
+ServerService::~ServerService()
+{
     //    mainServiceStarted = false;
-    if(m_server){
+    if(m_server) {
         delete m_server;
         m_server = 0;
     }
 
 }
 
-void ServerService::setServerTye(ServerType serverType){
+void ServerService::setServerTye(ServerType serverType)
+{
     m_server->setServerTye(serverType);
 }
 
@@ -94,7 +97,7 @@ void ServerService::start()
 void ServerService::stop()
 {
     m_server->stop();
-    
+
 }
 
 void ServerService::pause()
@@ -110,11 +113,11 @@ void ServerService::resume()
 void ServerService::processCommand(int code)
 {
 
-    qDebug()<<"----ServerService::processCommand(int code)";
-    qDebug()<<"code:"<<code;
+    qDebug() << "----ServerService::processCommand(int code)";
+    qDebug() << "code:" << code;
 
 
-    switch(code){
+    switch(code) {
     case 0:
 
         break;
@@ -125,7 +128,7 @@ void ServerService::processCommand(int code)
 
         break;
     default:
-        qWarning()<<QString("Unknown Command Code '%1'!").arg(code);
+        qWarning() << QString("Unknown Command Code '%1'!").arg(code);
         break;
 
     }

@@ -17,11 +17,12 @@
 //#include "HHSharedNetwork/hpacketstreamoperator.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ResourcesManager::ResourcesManager(QObject *parent)
-    :QObject(parent)
+    : QObject(parent)
 {
 
 
@@ -48,29 +49,30 @@ ResourcesManager::ResourcesManager(QObject *parent)
 
 }
 
-ResourcesManager::~ResourcesManager() {
+ResourcesManager::~ResourcesManager()
+{
 
-    qDebug()<<"ResourcesManager::~ResourcesManager()";
+    qDebug() << "ResourcesManager::~ResourcesManager()";
 
-    if(m_ipmcServer){
+    if(m_ipmcServer) {
         m_ipmcServer->close();
         delete m_ipmcServer;
         m_ipmcServer = 0;
     }
 
 
-    if(m_udpServer){
+    if(m_udpServer) {
         m_udpServer->close();
         delete m_udpServer;
         m_udpServer = 0;
     }
 
-    if(m_rtp){
+    if(m_rtp) {
         delete m_rtp;
         m_rtp = 0;
     }
 
-    if(m_fileManager){
+    if(m_fileManager) {
         m_fileManager->exit();
         delete m_fileManager;
         m_fileManager = 0;
@@ -78,38 +80,43 @@ ResourcesManager::~ResourcesManager() {
 
 }
 
-void ResourcesManager::setNetworkType(NetworkType type) {
+void ResourcesManager::setNetworkType(NetworkType type)
+{
     this->networkType = type;
 
 }
 
-ResourcesManager::NetworkType ResourcesManager::getNetworkType() const {
+ResourcesManager::NetworkType ResourcesManager::getNetworkType() const
+{
     return this->networkType;
 
 }
 
-void ResourcesManager::setCommunicationMode(CommunicationMode mode) {
+void ResourcesManager::setCommunicationMode(CommunicationMode mode)
+{
     this->communicationMode = mode;
 
 }
 
-ResourcesManager::CommunicationMode ResourcesManager::getCommunicationMode() const {
+ResourcesManager::CommunicationMode ResourcesManager::getCommunicationMode() const
+{
     return this->communicationMode;
 
 }
 
 
-UDPServer * ResourcesManager::startIPMCServer(const QHostAddress &ipmcGroupAddress, quint16 ipmcGroupPort, QString *errorMessage){
+UDPServer *ResourcesManager::startIPMCServer(const QHostAddress &ipmcGroupAddress, quint16 ipmcGroupPort, QString *errorMessage)
+{
 
 
-    if(!m_ipmcServer){
+    if(!m_ipmcServer) {
         m_ipmcServer = new UDPServer(this);
     }
 
     if (m_ipmcServer->startIPMulticastListening(ipmcGroupAddress, ipmcGroupPort)) {
         return m_ipmcServer;
-    }else{
-        if(errorMessage){
+    } else {
+        if(errorMessage) {
             *errorMessage = m_ipmcServer->errorString();
         }
 
@@ -123,26 +130,27 @@ UDPServer * ResourcesManager::startIPMCServer(const QHostAddress &ipmcGroupAddre
 
 }
 
-UDPServer * ResourcesManager::startUDPServer(const QHostAddress &address, quint16 startPort, bool tryOtherPort, QString *errorMessage){
+UDPServer *ResourcesManager::startUDPServer(const QHostAddress &address, quint16 startPort, bool tryOtherPort, QString *errorMessage)
+{
 
-    if(!m_udpServer){
+    if(!m_udpServer) {
         m_udpServer = new UDPServer(this);
     }
 
-    if((startPort != 0) && m_udpServer->localPort() == startPort){
+    if((startPort != 0) && m_udpServer->localPort() == startPort) {
         return m_udpServer;
     }
 
     if (m_udpServer->startSimpleListening(address, startPort)) {
         return m_udpServer;
-    }else{
-        if(tryOtherPort){
+    } else {
+        if(tryOtherPort) {
             if (m_udpServer->startSimpleListening(address, 0)) {
                 return m_udpServer;
             }
         }
 
-        if(errorMessage){
+        if(errorMessage) {
             *errorMessage = m_udpServer->errorString();
         }
         delete m_udpServer;
@@ -211,13 +219,15 @@ UDPServer * ResourcesManager::startUDPServer(const QHostAddress &address, quint1
 //}
 
 
-RTP * ResourcesManager::getRTP(){
+RTP *ResourcesManager::getRTP()
+{
     return m_rtp;
 }
 
-RTP * ResourcesManager::startRTP(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage){
+RTP *ResourcesManager::startRTP(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage)
+{
 
-    if(!m_rtp){
+    if(!m_rtp) {
         m_rtp = new RTP(this);
     }
 
@@ -226,9 +236,10 @@ RTP * ResourcesManager::startRTP(const QHostAddress &localAddress, quint16 local
 
 }
 
-FileManager * ResourcesManager::getFileManager(){
+FileManager *ResourcesManager::getFileManager()
+{
 
-    if(!m_fileManager){
+    if(!m_fileManager) {
         m_fileManager = new FileManager(this);
     }
     m_fileManager->start(QThread::LowestPriority);
@@ -237,8 +248,9 @@ FileManager * ResourcesManager::getFileManager(){
 
 }
 
-void ResourcesManager::stopFileManager(){
-    if(!m_fileManager){
+void ResourcesManager::stopFileManager()
+{
+    if(!m_fileManager) {
         return;
     }
 

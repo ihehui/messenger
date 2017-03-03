@@ -37,11 +37,11 @@
 
 #include <QtCore/QtGlobal>
 
- #if defined(SHAREDIMLIB_LIBRARY_EXPORT)
- #  define SHAREDIMLIB_API Q_DECL_EXPORT
- #else
- #  define SHAREDIMLIB_API Q_DECL_IMPORT
- #endif
+#if defined(SHAREDIMLIB_LIBRARY_EXPORT)
+    #define SHAREDIMLIB_API Q_DECL_EXPORT
+#else
+    #define SHAREDIMLIB_API Q_DECL_IMPORT
+#endif
 
 
 /*

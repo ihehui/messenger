@@ -17,18 +17,20 @@
 #include "settings.h"
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 
 ImageResource::ImageResource(QObject *parent)
-    :HEHUI::ImageResourceBase(parent)
+    : HEHUI::ImageResourceBase(parent)
 
 {
     // TODO Auto-generated constructor stub
 
 }
 
-ImageResource::~ImageResource() {
+ImageResource::~ImageResource()
+{
     // TODO Auto-generated destructor stub
 }
 
@@ -52,12 +54,13 @@ ImageResource::~ImageResource() {
 //}
 
 
-QIcon ImageResource::createIconForInterestGroup(bool normal){
+QIcon ImageResource::createIconForInterestGroup(bool normal)
+{
 
     static const QString iconPath = ":/resources/images/group.png";
     static const QIcon groupIcon(iconPath);
 
-    if(!normal){
+    if(!normal) {
         QIcon icon;
         QSize size = QImage(iconPath).size();
         QPixmap pixmap = groupIcon.pixmap(size, QIcon::Disabled);
@@ -68,42 +71,38 @@ QIcon ImageResource::createIconForInterestGroup(bool normal){
     return  groupIcon;
 }
 
-QIcon ImageResource::createIconForContact(const QString &iconFileNane, IM::OnlineState state){
+QIcon ImageResource::createIconForContact(const QString &iconFileNane, IM::OnlineState state)
+{
 
 
     QString normalIconPath = getIconFileFullPathForContact(iconFileNane);
 
     QString pngFilePath = "";
-    switch(state){
-    case IM::ONLINESTATE_ONLINE:
-    {
+    switch(state) {
+    case IM::ONLINESTATE_ONLINE: {
         return QIcon(normalIconPath);
     }
-        break;
-    case IM::ONLINESTATE_OFFLINE:
-    {
+    break;
+    case IM::ONLINESTATE_OFFLINE: {
         QIcon icon;
         QSize size = QImage(normalIconPath).size();
         QPixmap pixmap = QIcon(normalIconPath).pixmap(size, QIcon::Disabled);
         icon.addPixmap(pixmap);
         return icon;
     }
-        break;
-    case IM::ONLINESTATE_INVISIBLE:
-    {
+    break;
+    case IM::ONLINESTATE_INVISIBLE: {
         pngFilePath = QString(RESOURCE_PATH) + QString(PNG_FILE_PATH_INVISIBLE);
     }
-        break;
-    case IM::ONLINESTATE_BUSY:
-    {
+    break;
+    case IM::ONLINESTATE_BUSY: {
         pngFilePath = QString(RESOURCE_PATH) + QString(PNG_FILE_PATH_BUSY);
     }
-        break;
-    case IM::ONLINESTATE_AWAY:
-    {
+    break;
+    case IM::ONLINESTATE_AWAY: {
         pngFilePath = QString(RESOURCE_PATH) + QString(PNG_FILE_PATH_AWAY);
     }
-        break;
+    break;
     default:
         return QIcon(normalIconPath);
     }
@@ -125,16 +124,17 @@ QIcon ImageResource::createIconForContact(const QString &iconFileNane, IM::Onlin
 
 }
 
-QString ImageResource::getIconFileFullPathForContact(const QString &iconFileNane ){
+QString ImageResource::getIconFileFullPathForContact(const QString &iconFileNane )
+{
 
     QString fullIconPath;
-    if(iconFileNane.size() < 3){
+    if(iconFileNane.size() < 3) {
         fullIconPath = QString(USER_FACE_FILE_PATH_PREFIX) + "/" + iconFileNane + ".png";
-    }else{
+    } else {
         fullIconPath = Settings::instance()->getCustomFaceDir() + "/" + iconFileNane;
     }
 
-    if(!QFile::exists(fullIconPath)){
+    if(!QFile::exists(fullIconPath)) {
         fullIconPath = QString(USER_FACE_FILE_PATH_PREFIX) + "/" + USER_FACE_DEFAULT_INDEX + ".png";
     }
 
@@ -143,63 +143,61 @@ QString ImageResource::getIconFileFullPathForContact(const QString &iconFileNane
 }
 
 
-QString ImageResource::getIconFilePathForContact2(const QString &iconIndex, bool isOnline) {
+QString ImageResource::getIconFilePathForContact2(const QString &iconIndex, bool isOnline)
+{
     QString filePath;
     QString idx = iconIndex;
 
-    if(idx.isEmpty()){
+    if(idx.isEmpty()) {
         idx = QString(USER_FACE_DEFAULT_INDEX);
     }
 
-    if(isOnline){
+    if(isOnline) {
         filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + ".png";
-    }else{
-        filePath = QString(USER_FACE_FILE_PATH_PREFIX) +idx + "off.png";
+    } else {
+        filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + "off.png";
     }
 
     return filePath;
 
 }
 
-QString ImageResource::getIconFilePathForContact2(const QString &iconIndex, IM::OnlineState state){
+QString ImageResource::getIconFilePathForContact2(const QString &iconIndex, IM::OnlineState state)
+{
 
     QString filePath;
     QString idx = iconIndex;
 
-    if(idx.isEmpty()){
+    if(idx.isEmpty()) {
         idx = QString(USER_FACE_DEFAULT_INDEX);
     }
 
 
-    switch(state){
-    case IM::ONLINESTATE_ONLINE:
-    {
+    switch(state) {
+    case IM::ONLINESTATE_ONLINE: {
         filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + ".png";
     }
-        break;
+    break;
     case IM::ONLINESTATE_OFFLINE:
-    case IM::ONLINESTATE_INVISIBLE:
-    {
-        filePath = QString(USER_FACE_FILE_PATH_PREFIX) +idx + "off.png";
+    case IM::ONLINESTATE_INVISIBLE: {
+        filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + "off.png";
     }
-        break;
-        //    case IM::ONLINESTATE_INVISIBLE:
-        //    {
+    break;
+    //    case IM::ONLINESTATE_INVISIBLE:
+    //    {
 
-        //    }
-        //        break;
-    case IM::ONLINESTATE_BUSY:
-    {
-        filePath = QString(USER_FACE_FILE_PATH_PREFIX) +idx + "busy.png";
+    //    }
+    //        break;
+    case IM::ONLINESTATE_BUSY: {
+        filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + "busy.png";
     }
-        break;
-    case IM::ONLINESTATE_AWAY:
-    {
-        filePath = QString(USER_FACE_FILE_PATH_PREFIX) +idx + "away.png";
+    break;
+    case IM::ONLINESTATE_AWAY: {
+        filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + "away.png";
     }
-        break;
+    break;
     default:
-        filePath = QString(USER_FACE_FILE_PATH_PREFIX) +idx + "off.png";
+        filePath = QString(USER_FACE_FILE_PATH_PREFIX) + idx + "off.png";
     }
 
     return filePath;

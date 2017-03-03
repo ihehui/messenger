@@ -47,7 +47,8 @@
 #include "../packetmanager/imclientpacketsparser.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 
@@ -98,13 +99,13 @@ public slots:
 
 
 private slots:
-    void handleMousePress(QTreeWidgetItem* item);
-    void handleMouseDoubleClick(QTreeWidgetItem* item);
-    void handleCurrentItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
+    void handleMousePress(QTreeWidgetItem *item);
+    void handleMouseDoubleClick(QTreeWidgetItem *item);
+    void handleCurrentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 
 
-    void handleContextMenuEventOnContactGroup(QTreeWidgetItem* item, const QPoint &global_mouse_pos);
-    void handleContextMenuEventOnContact(QTreeWidgetItem* item, const QPoint &global_mouse_pos);
+    void handleContextMenuEventOnContactGroup(QTreeWidgetItem *item, const QPoint &global_mouse_pos);
+    void handleContextMenuEventOnContact(QTreeWidgetItem *item, const QPoint &global_mouse_pos);
 
 //    void handleTooltipEventOnContact(QTreeWidgetItem* item, const QPoint &global_item_topLeft_pos, const QPoint &global_mouse_pos);
 
@@ -118,12 +119,12 @@ private:
 
     UserInfoTipWindow *m_userInfoTipWindow;
 
-    QHash<Contact*, QTreeWidgetItem*> contactsHash;
-    QHash<ContactGroupBase*, QTreeWidgetItem*> contactGroupsHash;
+    QHash<Contact *, QTreeWidgetItem *> contactsHash;
+    QHash<ContactGroupBase *, QTreeWidgetItem *> contactGroupsHash;
 
     QTimer *flashTimer;
     int flashIndex;
-    QHash<Contact *, QTreeWidgetItem* /*ContactGroup Item*/> flashContactItems;
+    QHash<Contact *, QTreeWidgetItem * /*ContactGroup Item*/> flashContactItems;
 
 };
 

@@ -14,7 +14,8 @@
 
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 class Search : public QDialog
 {
@@ -23,29 +24,29 @@ class Search : public QDialog
 public:
 //    static Search * instance();
     ~Search();
-    
+
 //private:
     Search(QWidget *parent = 0);
-    
+
 signals:
     void signalSearchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly = true, bool searchWebcamUsersOnly = false, int startIndex = 0);
     void signalAddContact(const QString &userID, const QString &verificationMessage);
     void signalSearchInterestGroup(const QString &keyword, int startIndex = 0);
     void signalJoinInterestGroup(quint32 groupID, const QString &verificationMessage);
 
-    
+
 public slots:
     void slotSearchContactsResultPacketReceived(const QString &usersString);
     void slotSearchInterestGroupsResultPacketReceived(const QString &groupsString);
 
-    
+
 private slots:
-    
+
     void reset();
 
     void slotUserSelected(const QModelIndex &index);
     void slotAddUserAsAContact(const QModelIndex &index);
-    
+
     void slotGroupSelected(const QModelIndex &index);
     void slotJoinGroup(const QModelIndex &index);
 
@@ -56,7 +57,7 @@ private slots:
 
     void on_radioButtonUsersMatchWildcard_clicked();
     void on_radioButtonUsersMatchExactly_clicked();
-    
+
     void on_pushButtonUserDetails_clicked();
     void on_pushButtonAddAsContact_clicked();
 
@@ -68,7 +69,7 @@ private slots:
 
     void on_pushButtonGroupDetails_clicked();
     void on_pushButtonJoinGroup_clicked();
-    
+
     void on_toolButtonPreviousGroupsResultPage_clicked();
     void on_toolButtonNextGroupsResultPage_clicked();
 
@@ -78,30 +79,30 @@ private slots:
 
 private:
     Ui::SearchClass ui;
-    
+
 
     QString contactProperties;
     bool matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly;
 
     QString groupKeyword;
 
-    
+
     UserInfoModel *userInfoModel;
 
     InterestGroupInfoModel *groupInfoModel;
-    
+
 
     QTimer searchContactTimer;
     QTimer searchGroupTimer;
 
     int usersResultPageIndex;
     int groupsResultPageIndex;
-    
-    
-    
 
-    
-    
+
+
+
+
+
 };
 
 } //namespace HEHUI

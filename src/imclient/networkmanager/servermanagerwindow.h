@@ -43,7 +43,8 @@
 #include "../../sharedim/impackets.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class ServerManagerWindow : public QWidget
 {
@@ -60,16 +61,16 @@ protected:
 private:
     void updateModel();
     bool isIPAddressValid();
-    
+
 signals:
     void signalLookForServer(const QHostAddress &targetAddress, quint16 targetPort);
     //    void signalServersUpdated();
     void signalServerSelected(const QString &serverInfoString);
-    
+
 
 public slots:
     void serverFound(const ServerDiscoveryPacket &packet);
-    
+
 private slots:
     void slotRequestForLANServer(const QString &ip = IM_SERVER_IPMC_ADDRESS, quint16 port = quint16(IM_SERVER_IPMC_LISTENING_PORT));
     void slotTestServers();

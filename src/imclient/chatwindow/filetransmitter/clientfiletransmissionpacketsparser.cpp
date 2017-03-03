@@ -33,11 +33,12 @@
 #include <QNetworkInterface>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ClientFileTransmissionPacketsParser::ClientFileTransmissionPacketsParser(const QString &myID, QObject *parent)
-    :FileTransmissionPacketsParserBase(myID, parent)
+    : FileTransmissionPacketsParserBase(myID, parent)
 {
 
     m_socketConnectedToServer = INVALID_SOCK_ID;
@@ -45,7 +46,8 @@ ClientFileTransmissionPacketsParser::ClientFileTransmissionPacketsParser(const Q
 
 }
 
-ClientFileTransmissionPacketsParser::~ClientFileTransmissionPacketsParser() {
+ClientFileTransmissionPacketsParser::~ClientFileTransmissionPacketsParser()
+{
     // TODO Auto-generated destructor stub
 
 
@@ -53,7 +55,8 @@ ClientFileTransmissionPacketsParser::~ClientFileTransmissionPacketsParser() {
 
 }
 
-int ClientFileTransmissionPacketsParser::connectToServer(){
+int ClientFileTransmissionPacketsParser::connectToServer()
+{
     IMUser *myself = IMUser::instance();
     m_socketConnectedToServer = connectToPeer(QHostAddress(myself->getFileServerAddress()), myself->getFileServerPort());
     return m_socketConnectedToServer;

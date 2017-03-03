@@ -4,7 +4,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 TCPServer::TCPServer(QObject *parent) :
@@ -13,17 +14,20 @@ TCPServer::TCPServer(QObject *parent) :
 
 }
 
-TCPServer::~TCPServer(){
-    qDebug()<<"--TCPServer::~TCPServer()";
+TCPServer::~TCPServer()
+{
+    qDebug() << "--TCPServer::~TCPServer()";
 }
 
-quint16 TCPServer::getTCPServerListeningPort(){
+quint16 TCPServer::getTCPServerListeningPort()
+{
     quint16 port = 0;
     serverAddressInfo(0, &port);
     return port;
 }
 
-void TCPServer::processData(SOCKETID socketID, QByteArray *data){
+void TCPServer::processData(SOCKETID socketID, QByteArray *data)
+{
 
     QString address;
     quint16 port;
@@ -47,7 +51,7 @@ void TCPServer::processData(SOCKETID socketID, QByteArray *data){
 //    }
 
     PacketBase packet;
-    if(packet.fromByteArray(data)){
+    if(packet.fromByteArray(data)) {
         packet.setSocketID(socketID);
         packet.setPeerHostAddress(QHostAddress(address));
         packet.setPeerHostPort(port);

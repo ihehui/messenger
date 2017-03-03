@@ -16,23 +16,27 @@
 //#include "../../../shared/core/database/databaseutility.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-ServerUtilities::ServerUtilities() {
+ServerUtilities::ServerUtilities()
+{
     // TODO Auto-generated constructor stub
 
 }
 
-ServerUtilities::~ServerUtilities() {
+ServerUtilities::~ServerUtilities()
+{
     // TODO Auto-generated destructor stub
 }
 
-QByteArray ServerUtilities::generateSessionEncryptionKey(){
+QByteArray ServerUtilities::generateSessionEncryptionKey()
+{
     QByteArray tempKeyArray;
     qsrand(QDateTime::currentDateTime().time().msec());
-    for(int i=0; i<16; i++){
-        int k = qrand()%255;
-        if(k < 0){
+    for(int i = 0; i < 16; i++) {
+        int k = qrand() % 255;
+        if(k < 0) {
             k += 255;
         }
         tempKeyArray.append(k);
@@ -46,7 +50,8 @@ QByteArray ServerUtilities::generateSessionEncryptionKey(){
 
 
 
-QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, bool localConfigDatabase) {
+QSqlQuery ServerUtilities::queryDatabase(const QString &queryString, bool localConfigDatabase)
+{
 
     QSqlQuery query;
     DatabaseUtility du;
@@ -55,7 +60,7 @@ QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, bool local
     QString localDatabaseFilePath = settings.getLocalDatabaseFilePath();
 
 
-    if(localConfigDatabase){
+    if(localConfigDatabase) {
         query = du.queryDatabase(queryString,
                                  LOCAL_SERVER_DB_CONNECTION_NAME,
                                  LOCAL_SERVER_DB_DRIVER,
@@ -65,7 +70,7 @@ QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, bool local
                                  "",
                                  localDatabaseFilePath,
                                  HEHUI::SQLITE);
-    }else{
+    } else {
         query = du.queryDatabase(queryString,
                                  REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME,
                                  REMOTE_SITOY_COMPUTERS_DB_DRIVER,
@@ -83,9 +88,10 @@ QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, bool local
 }
 
 
-QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, const QString &connectionName, const QString &driver,
-                                         const QString &host, int port, const QString &user, const QString &passwd,
-                                         const QString &databaseName, HEHUI::DatabaseType databaseType) {
+QSqlQuery ServerUtilities::queryDatabase(const QString &queryString, const QString &connectionName, const QString &driver,
+        const QString &host, int port, const QString &user, const QString &passwd,
+        const QString &databaseName, HEHUI::DatabaseType databaseType)
+{
 
 
     QSqlQuery query;
@@ -124,25 +130,25 @@ QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, const QStr
 
 //    case IM::PI_PersonalContactGroupsInfoString:
 //        columnName = "PersonalContactGroupsInfo";
-//        break;  
+//        break;
 //    case IM::PI_PersonalContactGroupsInfoVersion:
 //        columnName = "PersonalContactGroupsInfoVersion";
-//        break;         
+//        break;
 //    case IM::PI_PersonalInterestGroupsInfoString:
 //        columnName = "PersonalInterestGroupsInfo";
-//        break;  
+//        break;
 //    case IM::PI_PersonalInterestGroupsInfoVersion:
 //        columnName = "PersonalInterestGroupsInfoVersion";
-//        break; 
+//        break;
 //    case IM::PI_SystemGroupsInfoString:
 //        columnName = "SystemGroupsInfo";
-//        break; 
+//        break;
 //    case IM::PI_SystemGroupsInfoVersion:
 //        columnName = "SystemGroupsInfoVersion";
-//        break; 
+//        break;
 //    case IM::PI_PersonalInfoVersion:
 //        columnName = "PersonalInfoVersion";
-//        break; 
+//        break;
 
 
 //    case IM::PI_HomeAddress:
@@ -208,14 +214,14 @@ QSqlQuery ServerUtilities::queryDatabase(const QString & queryString, const QStr
 //        break;
 //    case IM::PI_FriendshipApply:
 //        columnName = "FriendshipApply";
-//        break;    
+//        break;
 //    case IM::PI_ShortTalk:
 //        columnName = "ShortTalk";
-//        break;  
+//        break;
 
 //    case IM::PI_Role:
 //        columnName = "Role";
-//        break;         
+//        break;
 
 //    default:
 //        columnName = "";

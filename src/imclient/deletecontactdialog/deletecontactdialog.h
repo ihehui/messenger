@@ -5,13 +5,14 @@
 
 #include "../contactsmanager/contact.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class DeleteContactDialog : public QDialog
 {
     Q_OBJECT
-    
+
 public:
     explicit DeleteContactDialog(QWidget *parent = 0);
 
@@ -23,7 +24,7 @@ signals:
 
 public slots:
     void deleteContactResultReceivedFromServer(const QString &contactID, bool contactDeleted);
-    
+
 
 private slots:
     void on_toolButtonUserFace_clicked();

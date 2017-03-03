@@ -4,7 +4,8 @@
 #include "enetprotocol.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 ENETProtocol::ENETProtocol(QObject *parent) :
@@ -21,14 +22,16 @@ ENETProtocol::ENETProtocol(QObject *parent) :
 
 
 
-void ENETProtocol::processReceivedData(quint32 peerID, QByteArray data){
+void ENETProtocol::processReceivedData(quint32 peerID, QByteArray data)
+{
     //qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
 
     convertDataToPacket(peerID, &data);
 
 }
 
-inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data){
+inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data)
+{
 
     QString ip = "";
     quint16 port = 0;
@@ -51,7 +54,7 @@ inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data){
 //    }
 
     PacketBase packet;
-    if(packet.fromByteArray(data)){
+    if(packet.fromByteArray(data)) {
         packet.setSocketID(peerID);
         packet.setPeerHostAddress(QHostAddress(ip));
         packet.setPeerHostPort(port);

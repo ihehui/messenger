@@ -6,29 +6,30 @@
 #include "../imageresource.h"
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 AddContactDialog::AddContactDialog(Contact *user, bool requestToAddNewContact, QWidget *parent) :
     QDialog(parent), m_contact(user)
 {
 
     initUI();
-    
+
     m_requestToAddContact = true;
-            
-    if(requestToAddNewContact){
+
+    if(requestToAddNewContact) {
         ui.groupBoxUserInfo->setTitle(tr("The following user will be added."));
         ui.pushButtonReject->setText(tr("&Cancel"));
-        if(m_contact->getFriendshipApply() == Contact::FA_AUTO_ACCEPT){
+        if(m_contact->getFriendshipApply() == Contact::FA_AUTO_ACCEPT) {
             ui.groupBoxSettings->show();
-        }else{
+        } else {
             ui.groupBoxMessage->setTitle(tr("Your Request"));
             ui.groupBoxMessage->show();
             ui.lineEditMessage->setReadOnly(false);
             ui.lineEditMessage->setFocus();
         }
-    
-    }else{
+
+    } else {
         ui.groupBoxUserInfo->setTitle(tr("The following user has been added you as a contact."));
         ui.pushButtonReject->setEnabled(false);
         ui.pushButtonReject->hide();
@@ -40,20 +41,20 @@ AddContactDialog::AddContactDialog(Contact *user, bool requestToAddNewContact, Q
         ui.lineEditRename->setFocus();
     }
 
-    
+
 }
 
 AddContactDialog::AddContactDialog(Contact *user, const QString &requestMessage, QWidget *parent)
-    :QDialog(parent), m_contact(user)
+    : QDialog(parent), m_contact(user)
 {
-    
+
     initUI();
-    
+
     m_requestToAddContact = false;
-    
+
     ui.groupBoxUserInfo->setTitle(tr("The following user requested to add you as a contact."));
 
-    if(!requestMessage.isEmpty()){
+    if(!requestMessage.isEmpty()) {
         ui.groupBoxMessage->setTitle(tr("Request Message"));
         ui.groupBoxMessage->show();
         ui.lineEditMessage->setText(requestMessage);
@@ -73,7 +74,8 @@ AddContactDialog::AddContactDialog(Contact *user, const QString &requestMessage,
 
 }
 
-void AddContactDialog::closeEvent(QCloseEvent *event){
+void AddContactDialog::closeEvent(QCloseEvent *event)
+{
 
     ui.lineEditMessage->clear();
 
@@ -93,11 +95,13 @@ void AddContactDialog::changeEvent(QEvent *e)
 }
 
 
-QString AddContactDialog::getMessage() const{
+QString AddContactDialog::getMessage() const
+{
     return ui.lineEditMessage->text();
 }
 
-QString AddContactDialog::getNewName() const{
+QString AddContactDialog::getNewName() const
+{
     return ui.lineEditRename->text();
 }
 
@@ -109,23 +113,26 @@ QString AddContactDialog::getNewName() const{
 //    return groupName;
 //}
 
-quint32 AddContactDialog::getGroupID(){
+quint32 AddContactDialog::getGroupID()
+{
     return ui.comboBoxGroup->itemData(ui.comboBoxGroup->currentIndex()).toUInt();
 }
 
-bool AddContactDialog::requestRejected(){
+bool AddContactDialog::requestRejected()
+{
     return m_rejectRequest;
 }
 
-void AddContactDialog::on_pushButtonAddAsAContact_clicked(){
+void AddContactDialog::on_pushButtonAddAsAContact_clicked()
+{
     m_rejectRequest = false;
 
     accept();
     return;
 
-    if(ui.groupBoxSettings->isVisible() || m_requestToAddContact){
+    if(ui.groupBoxSettings->isVisible() || m_requestToAddContact) {
         accept();
-    }else{
+    } else {
         ui.groupBoxMessage->hide();
         ui.groupBoxSettings->show();
         ui.pushButtonReject->setEnabled(false);
@@ -134,13 +141,14 @@ void AddContactDialog::on_pushButtonAddAsAContact_clicked(){
 
 }
 
-void AddContactDialog::on_pushButtonReject_clicked(){
+void AddContactDialog::on_pushButtonReject_clicked()
+{
     m_rejectRequest = true;
 
 
-    if(m_requestToAddContact || (!ui.lineEditMessage->isReadOnly()) ){
+    if(m_requestToAddContact || (!ui.lineEditMessage->isReadOnly()) ) {
         accept();
-    }else{
+    } else {
         ui.groupBoxMessage->setTitle(tr("Reply Message"));
         ui.groupBoxMessage->show();
         ui.lineEditMessage->setReadOnly(false);
@@ -154,7 +162,8 @@ void AddContactDialog::on_pushButtonReject_clicked(){
 
 }
 
-inline void AddContactDialog::initUI(){
+inline void AddContactDialog::initUI()
+{
 
 
     ui.setupUi(this);
@@ -187,7 +196,8 @@ inline void AddContactDialog::initUI(){
 
 }
 
-inline void AddContactDialog::initContactGroupCombox(){
+inline void AddContactDialog::initContactGroupCombox()
+{
 
     ui.comboBoxGroup->clear();
 

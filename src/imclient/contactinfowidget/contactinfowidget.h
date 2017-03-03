@@ -9,7 +9,8 @@
 
 #include "HHSharedGUI/hwidgetbase.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class ContactInfoWidget : public WidgetBase
 {
@@ -20,9 +21,12 @@ public:
     ~ContactInfoWidget();
 
 
-    QSystemTrayIcon *SystemTrayIcon(){return 0;}
+    QSystemTrayIcon *SystemTrayIcon()
+    {
+        return 0;
+    }
 
-    static ContactInfoWidget * getContactInfoWidget(IMUserBase *user);
+    static ContactInfoWidget *getContactInfoWidget(IMUserBase *user);
 
 protected:
     void languageChange();
@@ -60,7 +64,7 @@ private:
 
     IMUserBase *m_user;
 
-    static QHash<QString, ContactInfoWidget*> m_openWindows;
+    static QHash<QString, ContactInfoWidget *> m_openWindows;
 
 
 

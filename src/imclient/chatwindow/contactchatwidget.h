@@ -9,7 +9,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ContactChatWidget : public QWidget
@@ -21,7 +22,7 @@ public:
     ~ContactChatWidget();
 
     void setContact(Contact *contact);
-    Contact * contact();
+    Contact *contact();
     QString displayName() const;
 
     bool isDownloadingImage(const QString &imageName);
@@ -32,7 +33,7 @@ public:
 //    QSize sizeHint();
 
 protected:
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent *event);
 
     void dragEnterEvent(QDragEnterEvent *event);
 //    void dragMoveEvent(QDragMoveEvent *event);

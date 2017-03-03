@@ -41,7 +41,8 @@
 #include "../../sharedim/constants_global_shared.h"
 #include "../../sharedim/impackets.h"
 
-namespace HEHUI{
+namespace HEHUI
+{
 
 class ApplyForRegistrationWidget : public QWidget
 {
@@ -50,17 +51,17 @@ class ApplyForRegistrationWidget : public QWidget
 public:
     explicit ApplyForRegistrationWidget(QWidget *parent = 0);
     ~ApplyForRegistrationWidget();
-    
-    
+
+
 
 protected:
     void changeEvent(QEvent *e);
-    
+
 signals:
     void requestRegistrationServerInfo();
     void registration();
     void canceled();
-        
+
 public slots:
     void slotProcessRegistrationPacket(const RgeistrationPacket &packet);
     void slotProcessRegistrationServerInfo(quint8 regMode, const QString &extraMessage, const QString &regServerAddress);
@@ -70,18 +71,18 @@ private slots:
     void on_pushButtonRegister_clicked();
     bool isUserIDValid();
     bool isPasswordValid();
-    
+
     void requestRegistrationServerInfoTimeout();
     void registrationTimeout();
 
-    
+
 private:
     Ui::ApplyForRegistrationWidgetUI ui;
 
     IMUser *user;
 
 //    QRegExpValidator *validator;
-    
+
     bool m_registrationModeInfoResponseReceived;
     bool m_registrationResultReceived;
 

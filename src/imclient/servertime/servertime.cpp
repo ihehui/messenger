@@ -35,14 +35,16 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-ServerTime * ServerTime::m_instance = 0;
+ServerTime *ServerTime::m_instance = 0;
 
 
-ServerTime * ServerTime::instance(){
-    if(m_instance == 0){
+ServerTime *ServerTime::instance()
+{
+    if(m_instance == 0) {
         m_instance = new ServerTime();
     }
 
@@ -50,14 +52,16 @@ ServerTime * ServerTime::instance(){
 
 }
 
-void ServerTime::destoryInstance(){
+void ServerTime::destoryInstance()
+{
     delete m_instance;
     m_instance = 0;
 }
 
-void ServerTime::startSync(uint time_t){
+void ServerTime::startSync(uint time_t)
+{
 
-    if(!m_syncTimer){
+    if(!m_syncTimer) {
         m_syncTimer = new QTimer(this);
         m_syncTimer->setInterval(1000);
         connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(timeout()));
@@ -70,16 +74,18 @@ void ServerTime::startSync(uint time_t){
 
 }
 
-QDateTime ServerTime::time() {
+QDateTime ServerTime::time()
+{
     return m_startTime.addSecs(count);
 }
 
-QString ServerTime::timeString(const QString &format) const{
+QString ServerTime::timeString(const QString &format) const
+{
     return m_startTime.addSecs(count).toString(format);
 }
 
 ServerTime::ServerTime()
-    :QObject()
+    : QObject()
 {
 
     m_syncTimer = 0;
@@ -90,7 +96,7 @@ ServerTime::ServerTime()
 ServerTime::~ServerTime()
 {
 
-    if(m_syncTimer){
+    if(m_syncTimer) {
         m_syncTimer->stop();
         delete m_syncTimer;
     }
@@ -101,7 +107,8 @@ ServerTime::~ServerTime()
 }
 
 
-void ServerTime::timeout(){
+void ServerTime::timeout()
+{
     count++;
 }
 

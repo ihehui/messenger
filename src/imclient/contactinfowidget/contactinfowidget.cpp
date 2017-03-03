@@ -12,9 +12,10 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-QHash<QString, ContactInfoWidget*> ContactInfoWidget::m_openWindows = QHash<QString, ContactInfoWidget*>();
+QHash<QString, ContactInfoWidget *> ContactInfoWidget::m_openWindows = QHash<QString, ContactInfoWidget *>();
 
 ContactInfoWidget::ContactInfoWidget(IMUserBase *user, QWidget *parent, Qt::WindowFlags fl)
     : WidgetBase(parent, fl), m_user(user)
@@ -44,7 +45,8 @@ ContactInfoWidget::~ContactInfoWidget()
 
 }
 
-void ContactInfoWidget::languageChange(){
+void ContactInfoWidget::languageChange()
+{
 
     ui.retranslateUi(this);
 
@@ -52,7 +54,8 @@ void ContactInfoWidget::languageChange(){
 
 }
 
-void ContactInfoWidget::closeEvent(QCloseEvent *){
+void ContactInfoWidget::closeEvent(QCloseEvent *)
+{
     //QMessageBox::information(this, "closeEvent()", "closeEvent()");
 
 
@@ -61,13 +64,15 @@ void ContactInfoWidget::closeEvent(QCloseEvent *){
 
 }
 
-ContactInfoWidget * ContactInfoWidget::getContactInfoWidget(IMUserBase *user){
+ContactInfoWidget *ContactInfoWidget::getContactInfoWidget(IMUserBase *user)
+{
     Q_ASSERT_X(user, "ContactInfoWidget::getContactInfoWidget(...)", "Invalid IMUserBase!");
 
     return m_openWindows.value(user->getUserID());
 }
 
-void ContactInfoWidget::initUI(){
+void ContactInfoWidget::initUI()
+{
     QString userID = m_user->getUserID();
 
     ui.lineEditUserID->setText(userID);
@@ -88,11 +93,11 @@ void ContactInfoWidget::initUI(){
     ui.pushButtonApply->setEnabled(false);
 
 
-    if(userID == IMUser::instance()->getUserID()){
+    if(userID == IMUser::instance()->getUserID()) {
         setWindowTitle(tr("My Information"));
 
 
-    }else{
+    } else {
         setWindowTitle(tr("%1's Information").arg(m_user->getNickName()));
 
         ui.lineEditNickName->setReadOnly(true);
@@ -117,12 +122,14 @@ void ContactInfoWidget::initUI(){
 
 }
 
-void ContactInfoWidget::on_toolButtonUserFace_clicked(){
+void ContactInfoWidget::on_toolButtonUserFace_clicked()
+{
     //TODO
 
 }
 
-void ContactInfoWidget::on_pushButtonGeneralInformation_clicked(){
+void ContactInfoWidget::on_pushButtonGeneralInformation_clicked()
+{
     ui.pushButtonGeneralInformation->setChecked(true);
     ui.pushButtonMoreInformation->setChecked(false);
 
@@ -130,7 +137,8 @@ void ContactInfoWidget::on_pushButtonGeneralInformation_clicked(){
 
 }
 
-void ContactInfoWidget::on_pushButtonMoreInformation_clicked(){
+void ContactInfoWidget::on_pushButtonMoreInformation_clicked()
+{
     ui.pushButtonGeneralInformation->setChecked(false);
     ui.pushButtonMoreInformation->setChecked(true);
 
@@ -138,12 +146,14 @@ void ContactInfoWidget::on_pushButtonMoreInformation_clicked(){
 
 }
 
-void ContactInfoWidget::on_pushButtonSettings_clicked(){
+void ContactInfoWidget::on_pushButtonSettings_clicked()
+{
     //TODO
 
 }
 
-void ContactInfoWidget::on_pushButtonUpdate_clicked(){
+void ContactInfoWidget::on_pushButtonUpdate_clicked()
+{
     //TODO
 
     emit updateUserInfoRequested(m_user);
@@ -152,7 +162,8 @@ void ContactInfoWidget::on_pushButtonUpdate_clicked(){
 
 }
 
-void ContactInfoWidget::on_pushButtonOK_clicked(){
+void ContactInfoWidget::on_pushButtonOK_clicked()
+{
     //TODO
 
     emit saveUserInfoRequested(m_user);
@@ -161,11 +172,13 @@ void ContactInfoWidget::on_pushButtonOK_clicked(){
 
 }
 
-void ContactInfoWidget::on_pushButtonCancel_clicked(){
+void ContactInfoWidget::on_pushButtonCancel_clicked()
+{
     close();
 }
 
-void ContactInfoWidget::on_pushButtonApply_clicked(){
+void ContactInfoWidget::on_pushButtonApply_clicked()
+{
     //TODO
 
     emit saveUserInfoRequested(m_user);
@@ -176,16 +189,18 @@ void ContactInfoWidget::on_pushButtonApply_clicked(){
 
 }
 
-void ContactInfoWidget::on_lineEditNickName_editingFinished(){
+void ContactInfoWidget::on_lineEditNickName_editingFinished()
+{
     QString newNickName = ui.lineEditNickName->text();
-    if(newNickName != m_user->getNickName()){
+    if(newNickName != m_user->getNickName()) {
         m_user->setNickName(newNickName);
         m_user->addUpdatedPersonalInfoProperty(IM::PI_NickName, newNickName, true);
     }
 
 }
 
-void ContactInfoWidget::on_plainTextEditSignature_textChanged(){
+void ContactInfoWidget::on_plainTextEditSignature_textChanged()
+{
 
 }
 

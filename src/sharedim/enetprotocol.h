@@ -4,7 +4,8 @@
 #include "HHSharedENET/henetprotocolbase.h"
 #include "HHSharedNetwork/PacketBase"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ENETProtocol : public ENETProtocolBase

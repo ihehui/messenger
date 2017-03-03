@@ -50,7 +50,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 
@@ -61,14 +62,14 @@ quint8 UsersManager::m_activationMode = 0;
 quint8 UsersManager::m_passwordUpdateAuthMode = 0;
 
 
-QMutex * UsersManager::onlineUserMutex = new QMutex();
-QHash<QString/*User ID*/, UserInfo*> * UsersManager::onlineUserInfoHash = new QHash<QString, UserInfo*> ();
-QMutex * UsersManager::offlineUserMutex = new QMutex();
-QHash<QString/*User ID*/, UserInfo*> * UsersManager::offlineUserInfoHash = new QHash<QString, UserInfo*> ();
+QMutex *UsersManager::onlineUserMutex = new QMutex();
+QHash<QString/*User ID*/, UserInfo *> *UsersManager::onlineUserInfoHash = new QHash<QString, UserInfo *> ();
+QMutex *UsersManager::offlineUserMutex = new QMutex();
+QHash<QString/*User ID*/, UserInfo *> *UsersManager::offlineUserInfoHash = new QHash<QString, UserInfo *> ();
 
 
-QMutex * UsersManager::groupMutex = new QMutex();
-QHash<quint32/*Group ID*/, InterestGroup*> * UsersManager::m_interestGroupHash = new QHash<quint32, InterestGroup*> ();
+QMutex *UsersManager::groupMutex = new QMutex();
+QHash<quint32/*Group ID*/, InterestGroup *> *UsersManager::m_interestGroupHash = new QHash<quint32, InterestGroup *> ();
 
 
 
@@ -78,55 +79,62 @@ UsersManager::UsersManager(QObject *parent)
     openDatabase();
 }
 
-UsersManager::~UsersManager() {
+UsersManager::~UsersManager()
+{
     // TODO Auto-generated destructor stub
-    
+
 }
 
-quint8 UsersManager::activationMode(){
+quint8 UsersManager::activationMode()
+{
     return m_activationMode;
 }
 
-void UsersManager::setActivationMode(quint8 mode){
+void UsersManager::setActivationMode(quint8 mode)
+{
     m_activationMode = mode;
 }
 
-quint8 UsersManager::passwordUpdateAuthMode(){
+quint8 UsersManager::passwordUpdateAuthMode()
+{
     return m_passwordUpdateAuthMode;
 }
 
-void UsersManager::setPasswordUpdateAuthMode(quint8 mode){
+void UsersManager::setPasswordUpdateAuthMode(quint8 mode)
+{
     m_passwordUpdateAuthMode = mode;
 }
 
-UserInfo* UsersManager::getUserInfo(const QString &imUserID){
-    
-    if(imUserID.trimmed().isEmpty()){
+UserInfo *UsersManager::getUserInfo(const QString &imUserID)
+{
+
+    if(imUserID.trimmed().isEmpty()) {
         return 0;
     }
-    
-    UserInfo * userInfo = getOnlineUserInfo(imUserID);
+
+    UserInfo *userInfo = getOnlineUserInfo(imUserID);
     //    if(!userInfo){
     //        userInfo = getOnlineUserInfo(imUserID);
     //    }
-    if(!userInfo){
+    if(!userInfo) {
         userInfo = getOfflineUserInfo(imUserID);
     }
-    if(!userInfo){
+    if(!userInfo) {
         userInfo = queryUserInfo(imUserID);
     }
     return userInfo;
 
 }
 
-UserInfo* UsersManager::getCachedUserInfo(const QString &imUserID){
+UserInfo *UsersManager::getCachedUserInfo(const QString &imUserID)
+{
 
-    if(imUserID.trimmed().isEmpty()){
+    if(imUserID.trimmed().isEmpty()) {
         return 0;
     }
 
-    UserInfo * userInfo = getOnlineUserInfo(imUserID);
-    if(!userInfo){
+    UserInfo *userInfo = getOnlineUserInfo(imUserID);
+    if(!userInfo) {
         userInfo = getOfflineUserInfo(imUserID);
     }
 
@@ -134,32 +142,36 @@ UserInfo* UsersManager::getCachedUserInfo(const QString &imUserID){
 
 }
 
-UserInfo* UsersManager::getOnlineUserInfo(const QString &imUserID){
+UserInfo *UsersManager::getOnlineUserInfo(const QString &imUserID)
+{
     QMutexLocker locker(onlineUserMutex);
-    UserInfo * userInfo = 0;
-    if(onlineUserInfoHash->contains(imUserID)){
+    UserInfo *userInfo = 0;
+    if(onlineUserInfoHash->contains(imUserID)) {
         userInfo = onlineUserInfoHash->value(imUserID);
     }
     return userInfo;
 }
 
-UserInfo* UsersManager::getOfflineUserInfo(const QString &imUserID){
+UserInfo *UsersManager::getOfflineUserInfo(const QString &imUserID)
+{
     QMutexLocker locker(offlineUserMutex);
-    UserInfo * userInfo = 0;
-    if(offlineUserInfoHash->contains(imUserID)){
+    UserInfo *userInfo = 0;
+    if(offlineUserInfoHash->contains(imUserID)) {
         userInfo = offlineUserInfoHash->value(imUserID);
     }
     return userInfo;
 }
 
-QList<UserInfo*> UsersManager::onlineUsers(){
+QList<UserInfo *> UsersManager::onlineUsers()
+{
     QMutexLocker locker(onlineUserMutex);
     return onlineUserInfoHash->values();
 }
 
-void UsersManager::userOnline(UserInfo* userInfo){
+void UsersManager::userOnline(UserInfo *userInfo)
+{
 
-    if(userInfo){
+    if(userInfo) {
         QString userID = userInfo->getUserID();
         userInfo->setOnline();
 
@@ -173,9 +185,10 @@ void UsersManager::userOnline(UserInfo* userInfo){
 
 }
 
-void UsersManager::userOffline(UserInfo* userInfo){
+void UsersManager::userOffline(UserInfo *userInfo)
+{
 
-    if(userInfo){
+    if(userInfo) {
         QString userID = userInfo->getUserID();
         userInfo->setOffline();
 
@@ -187,24 +200,25 @@ void UsersManager::userOffline(UserInfo* userInfo){
 
         saveUserInfoToDatabase(userInfo);
 
-        qWarning()<<QString("User %1 Offline!").arg(userID);
+        qWarning() << QString("User %1 Offline!").arg(userID);
     }
 
 
 }
 
-bool UsersManager::canUserLogin(const QString &userID, const QString &clientVersion, IM::ErrorType *errorType){
+bool UsersManager::canUserLogin(const QString &userID, const QString &clientVersion, IM::ErrorType *errorType)
+{
     //    qWarning()<<"--canUserLogin(...)";
-    
+
     UserInfo *userInfo = getUserInfo(userID);
     //TODO:检查用户是否可以登陆及可登陆的服务器
-    if(userInfo){
-        if(userInfo->isBanned()){
+    if(userInfo) {
+        if(userInfo->isBanned()) {
             *errorType = IM::ERROR_IDBanned;
             return false;
         }
 
-    }else{
+    } else {
         *errorType = IM::ERROR_IDNotExist;
         return false;
     }
@@ -214,14 +228,15 @@ bool UsersManager::canUserLogin(const QString &userID, const QString &clientVers
 
 }
 
-void UsersManager::getUserLoginServer(const QString &userID, QHostAddress *serverAddress, quint16 *serverPort){
+void UsersManager::getUserLoginServer(const QString &userID, QHostAddress *serverAddress, quint16 *serverPort)
+{
     //    qWarning()<<"--getUserLoginServer(...)";
-    
+
     //TODO:处理登陆服务器
-    if(serverAddress){
+    if(serverAddress) {
         //        serverAddress = QHostAddress::Null;
     }
-    if(serverPort){
+    if(serverPort) {
         //        serverPort = 0;
     }
 
@@ -277,18 +292,19 @@ void UsersManager::getUserLoginServer(const QString &userID, QHostAddress *serve
 //    return userInfo;
 //}
 
-bool UsersManager::registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID){
-    
+bool UsersManager::registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID)
+{
+
     //TODO
-    
+
     UserInfo *userInfo = getUserInfo(userID);
-    if(userInfo){
+    if(userInfo) {
         *errorType = IM::ERROR_IDEXISTED;
         return false;
     }
-    
-    if(!db.isValid()){
-        if(!openDatabase()){
+
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             *errorType = IM::ERROR_UnKnownError;
             return false;
         }
@@ -296,77 +312,79 @@ bool UsersManager::registerNewUser(const QString &userID, const QString &passwor
     QSqlQuery query(db);
     //QString statement = QString("insert into users_detailed_info(UserID, UserPassword) values('%1', '%2') ").arg(userID).arg(password);
     QString statement = QString("call sp_CreateNewUser('%1', '%2', @sysID);").arg(userID).arg(password);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not add new user info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
-        
+
         *errorType = IM::ERROR_UnKnownError;
         return false;
     }
 
     statement = "select @sysID;";
     query.exec(statement);
-    if(!query.first()){
-        qCritical()<<QString("Can not query user SysID! Invalid record! User ID:%1").arg(userID);
+    if(!query.first()) {
+        qCritical() << QString("Can not query user SysID! Invalid record! User ID:%1").arg(userID);
         return false;
     }
 
-    if(sysID){
+    if(sysID) {
         *sysID = query.value(0).toUInt();
-        qDebug()<<"---------------------------------sysID:"<<*sysID;
-        if(*sysID == 0){
+        qDebug() << "---------------------------------sysID:" << *sysID;
+        if(*sysID == 0) {
             *errorType = IM::ERROR_UnKnownError;
             return false;
         }
     }
-    
+
     userInfo = getUserInfo(userID);
-    if(!userInfo){
+    if(!userInfo) {
         *errorType = IM::ERROR_UnKnownError;
         return false;
     }
-    
-    
+
+
     *errorType = IM::ERROR_NoError;
     return true;
-    
+
 }
 
-void UsersManager::updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message){
+void UsersManager::updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message)
+{
     UserInfo *userInfo = getUserInfo(userID);
-    if(!userInfo){
+    if(!userInfo) {
         return ;
     }
 
     userInfo->setPassword(newPassword);
-    userInfo->addUpdatedPersonalInfoProperty(IM::PI_Password, "'"+newPassword+"'", true);
-    
-    if(saveUserInfoToDatabase(userInfo)){
+    userInfo->addUpdatedPersonalInfoProperty(IM::PI_Password, "'" + newPassword + "'", true);
+
+    if(saveUserInfoToDatabase(userInfo)) {
         *errorType = IM::ERROR_NoError;
-    }else{
+    } else {
         *errorType = IM::ERROR_UnKnownError;
     }
 
 }
 
-QString UsersManager::searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex){
-    qDebug()<<"propertiesString:"<<propertiesString;
-    
-    if(propertiesString.trimmed().isEmpty()){
+QString UsersManager::searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex)
+{
+    qDebug() << "propertiesString:" << propertiesString;
+
+    if(propertiesString.trimmed().isEmpty()) {
         return QString();
     }
-    
+
     QStringList propertiesList = propertiesString.split(QString(CONTACT_INFO_SEPARATOR));
-    if(propertiesList.size() != 6){
-        qWarning()<<"ERROR! Invalid propertiesString!";
+    if(propertiesList.size() != 6) {
+        qWarning() << "ERROR! Invalid propertiesString!";
         return QString();
     }
 
@@ -379,7 +397,7 @@ QString UsersManager::searchContact(const QString &propertiesString, bool matchE
 
     IMUserBase::AgeSection as = IMUserBase::AgeSection(ageSectionString.toUInt());
     quint8 startAge = 0, endAge = 120;
-    switch(as){
+    switch(as) {
     case IMUserBase::Age_Any:
         break;
     case IMUserBase::Age_1_18:
@@ -408,75 +426,76 @@ QString UsersManager::searchContact(const QString &propertiesString, bool matchE
 
     QString queryString ;
 
-    if(matchExactly){
-        if(userID.isEmpty() && nickName.trimmed().isEmpty()){
+    if(matchExactly) {
+        if(userID.isEmpty() && nickName.trimmed().isEmpty()) {
             return QString();
         }
         queryString = QString("call sp_Contact_Search_MatchExactly('%1', '%2');").arg(userID).arg(nickName);
-    }else{
+    } else {
         queryString = QString("call sp_Contact_Search_MatchWildcard(%1, %2, %3, '%4', '%5', %6, %7);").arg(startAge).arg(endAge).arg(genderString.toUInt()).arg(hometown).arg(businessAddress).arg(startIndex).arg(pageSize);
     }
-    qDebug()<<"----queryString:"<<queryString;
+    qDebug() << "----queryString:" << queryString;
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return QString();
         }
     }
     QSqlQuery query(db);
-    
-    if(!query.exec(queryString)){
+
+    if(!query.exec(queryString)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not search contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return QString();
     }
-    
+
     QStringList usersInfoList;
-    while(query.next()){
+    while(query.next()) {
         //TODO:query安全性
         QString userID = query.value(0).toString();
         IM::OnlineState onlineState = IM::ONLINESTATE_OFFLINE;
-        if(searchOnlineUsersOnly){
+        if(searchOnlineUsersOnly) {
             UserInfo *info = getOnlineUserInfo(userID);
-            if(!info || (info->getOnlineState() != IM::ONLINESTATE_ONLINE)){
+            if(!info || (info->getOnlineState() != IM::ONLINESTATE_ONLINE)) {
                 continue;
-            }else{
+            } else {
                 onlineState = IM::ONLINESTATE_ONLINE;
             }
         }
-        
+
         //TODO
         //FORMAT:UserID,NickName,Gender,Age,Face,FriendshipApply,BusinessAddress,OnlineState
         QStringList userInfoList;
         userInfoList.append(userID);
-        for(int i=1; i<7; i++){
+        for(int i = 1; i < 7; i++) {
             userInfoList.append(query.value(i).toString());
             //qWarning()<<i<<":"<<query.value(i).toString();
         }
         userInfoList.append(QString::number(onlineState));
-        
+
         usersInfoList.append(userInfoList.join(QChar(SEPARTOR_RECORD)));
     }
-    
+
     return usersInfoList.join(QChar(SEPARTOR_GROUP));
-    
+
 }
 
 QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineUsersOnly,
-                   quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
-                   quint8 gender, quint8 age, bool matchExactly, int startIndex
-                   ){
+                                    quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
+                                    quint8 gender, quint8 age, bool matchExactly, int startIndex
+                                   )
+{
 
-    if(matchExactly && keyword.isEmpty()){
-        qWarning()<<"ERROR! Invalid keyword!";
+    if(matchExactly && keyword.isEmpty()) {
+        qWarning() << "ERROR! Invalid keyword!";
         return QString();
     }
 
     IMUserBase::AgeSection as = IMUserBase::AgeSection(age);
     quint8 startAge = 0, endAge = 120;
-    switch(as){
+    switch(as) {
     case IMUserBase::Age_Any:
         break;
     case IMUserBase::Age_1_18:
@@ -503,34 +522,34 @@ QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineU
 
     quint32 pageSize = SEARCH_RESULT_PAGE_SIZE;
 
-    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly?1:0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(location).arg(startIndex).arg(pageSize);
-    qDebug()<<"----queryString:"<<queryString;
+    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly ? 1 : 0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(location).arg(startIndex).arg(pageSize);
+    qDebug() << "----queryString:" << queryString;
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return QString();
         }
     }
     QSqlQuery query(db);
 
-    if(!query.exec(queryString)){
+    if(!query.exec(queryString)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not search contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return QString();
     }
 
     QStringList usersInfoList;
-    while(query.next()){
+    while(query.next()) {
         //TODO:query安全性
         QString userID = query.value(0).toString();
         IM::OnlineState onlineState = IM::ONLINESTATE_OFFLINE;
-        if(searchOnlineUsersOnly){
+        if(searchOnlineUsersOnly) {
             UserInfo *info = getOnlineUserInfo(userID);
-            if(!info || (info->getOnlineState() != IM::ONLINESTATE_ONLINE)){
+            if(!info || (info->getOnlineState() != IM::ONLINESTATE_ONLINE)) {
                 continue;
-            }else{
+            } else {
                 onlineState = IM::ONLINESTATE_ONLINE;
             }
         }
@@ -539,7 +558,7 @@ QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineU
         //FORMAT:UserID,NickName,Gender,Age,Face,FriendshipApply,BusinessAddress,OnlineState
         QStringList userInfoList;
         userInfoList.append(userID);
-        for(int i=1; i<7; i++){
+        for(int i = 1; i < 7; i++) {
             userInfoList.append(query.value(i).toString());
             //qWarning()<<i<<":"<<query.value(i).toString();
         }
@@ -552,10 +571,11 @@ QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineU
 }
 
 
-bool UsersManager::saveCachedChatMessageFromIMUser(const QString &senderID, const QString &receiverID, const QString &message){
+bool UsersManager::saveCachedChatMessageFromIMUser(const QString &senderID, const QString &receiverID, const QString &message)
+{
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -566,10 +586,10 @@ bool UsersManager::saveCachedChatMessageFromIMUser(const QString &senderID, cons
     msg.replace("\"", "\\\"");
     QString statement = QString("call sp_CacheChatMessage_FromContact_Save('%1', '%2', '%3' )  ").arg(senderID).arg(receiverID).arg(msg);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save contact chat message to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -583,15 +603,16 @@ bool UsersManager::saveCachedChatMessageFromIMUser(const QString &senderID, cons
 
 }
 
-QStringList UsersManager::cachedChatMessagesForIMUser(UserInfo* userInfo){
+QStringList UsersManager::cachedChatMessagesForIMUser(UserInfo *userInfo)
+{
     //TODO:
 
-    if(!userInfo){
+    if(!userInfo) {
         return QStringList();
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return QStringList();
         }
     }
@@ -603,21 +624,21 @@ QStringList UsersManager::cachedChatMessagesForIMUser(UserInfo* userInfo){
     //QString statement = QString("select SenderID, Message, TransmittingTime from cachedchatmessages where RecieverID='%1' ").arg(imUserID);
     QString statement = QString("call sp_CacheChatMessage_FromContact_Get('%1', '%2'); ").arg(imUserID).arg(userInfo->getLastLogoutTime().toString("yyyy-MM-dd hh:mm:ss"));
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query chat messages from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return QStringList();
     }
 
-    if((query.lastError().type() != QSqlError::NoError)){
-        qCritical()<<QString("Can not query chat messages from database! Error: %1").arg(query.lastError().text());
+    if((query.lastError().type() != QSqlError::NoError)) {
+        qCritical() << QString("Can not query chat messages from database! Error: %1").arg(query.lastError().text());
         return QStringList();
     }
 
     QStringList messages;
-    while(query.next()){
+    while(query.next()) {
         QStringList message;
         message.append(QVariant(query.value(0)).toString());
         message.append(QVariant(query.value(1)).toString());
@@ -631,21 +652,22 @@ QStringList UsersManager::cachedChatMessagesForIMUser(UserInfo* userInfo){
     //    query.exec(statement);
 
 
-    qWarning()<<"messages cached on server:"<<messages.size();
+    qWarning() << "messages cached on server:" << messages.size();
 
     return messages;
 
 }
 
-bool UsersManager::saveUserLastLoginInfo(UserInfo* userInfo, const QString &userHostAddress,quint16 userHostPort, const QString &deviceInfo){
-    qDebug()<<"--UsersManager::saveUserLoginInfo(...)";
+bool UsersManager::saveUserLastLoginInfo(UserInfo *userInfo, const QString &userHostAddress, quint16 userHostPort, const QString &deviceInfo)
+{
+    qDebug() << "--UsersManager::saveUserLoginInfo(...)";
 
-    if(!userInfo){
+    if(!userInfo) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -660,36 +682,37 @@ bool UsersManager::saveUserLastLoginInfo(UserInfo* userInfo, const QString &user
 
     //statement = QString("insert into loginhistories(UserID, IPAddress, LoginTime) values('%1', '%2', '%3') ").arg(imUserID).arg(userHostAddress).arg(curTime);
     QString statement = QString(" call sp_LogUserIn('%1', '%2', %3, '%4', @loginTme);  ").arg(imUserID).arg(userHostAddress).arg(userHostPort).arg(deviceInfo);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save user login info into database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
     statement = QString("select @loginTme;");
     query.exec(statement);
-    if(!query.first()){
-        qCritical()<<QString("Can not get user login time from database! Error: %1").arg(query.lastError().text());
+    if(!query.first()) {
+        qCritical() << QString("Can not get user login time from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
     userInfo->setLastLoginTime(query.value(0).toDateTime());
-    qDebug()<<"------------Login Time:"<<query.value(0).toString();
+    qDebug() << "------------Login Time:" << query.value(0).toString();
 
     return true;
 
 }
 
-bool UsersManager::saveUserLastLogoutInfo(UserInfo* userInfo){
-    qDebug()<<"--UsersManager::saveUserLastLogoutInfo(...)";
+bool UsersManager::saveUserLastLogoutInfo(UserInfo *userInfo)
+{
+    qDebug() << "--UsersManager::saveUserLastLogoutInfo(...)";
 
-    if(!userInfo){
+    if(!userInfo) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -697,39 +720,40 @@ bool UsersManager::saveUserLastLogoutInfo(UserInfo* userInfo){
 
     QString imUserID = userInfo->getUserID();
     QString loginTime = userInfo->getLastLoginTime().toString("yyyy-MM-dd hh:mm:ss");
-    qDebug()<<"-------------loginTime:"<<loginTime;
+    qDebug() << "-------------loginTime:" << loginTime;
 
     QString statement = QString(" call sp_LogUserOut('%1', '%2', @LogoutTime) ; ").arg(imUserID).arg(loginTime);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save user logout info into database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
     statement = QString("select @LogoutTime; ");
     query.exec(statement);
-    if(!query.first()){
-        qCritical()<<QString("Can not get user logout time from database! Error: %1").arg(query.lastError().text());
+    if(!query.first()) {
+        qCritical() << QString("Can not get user logout time from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
     userInfo->setLastLogoutTime(query.value(0).toDateTime());
-    qDebug()<<"------------logout Time:"<<query.value(0).toString();
+    qDebug() << "------------logout Time:" << query.value(0).toString();
 
 
     return true;
 
 }
 
-bool UsersManager::getUserLastLoginInfo(UserInfo *userInfo){
+bool UsersManager::getUserLastLoginInfo(UserInfo *userInfo)
+{
 
-    if(!userInfo){
+    if(!userInfo) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -739,15 +763,15 @@ bool UsersManager::getUserLastLoginInfo(UserInfo *userInfo){
     //QString statement = QString("SELECT IPAddress, LoginTime FROM loginhistories where ID = (select max(ID) from loginhistories where UserID = '%1')  ").arg(imUserID);
     QString statement = QString("call sp_GetUserLastLoginInfo('%1'); ").arg(imUserID);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user login info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
-    if(!query.first()){
-        qCritical()<<QString("No user login info returned from database! Error: %1").arg(query.lastError().text());
+    if(!query.first()) {
+        qCritical() << QString("No user login info returned from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
@@ -761,21 +785,22 @@ bool UsersManager::getUserLastLoginInfo(UserInfo *userInfo){
 
 }
 
-bool UsersManager::addNewContactForUserInDB(const QString &userID, const QString &contactID, quint32 contactGroupID){
+bool UsersManager::addNewContactForUserInDB(const QString &userID, const QString &contactID, quint32 contactGroupID)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
 
     QString statement = QString("call sp_Contact_Add('%1', '%2', %3);  ").arg(userID).arg(contactID).arg(contactGroupID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not add contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -785,21 +810,22 @@ bool UsersManager::addNewContactForUserInDB(const QString &userID, const QString
 }
 
 
-bool UsersManager::deleteContactForUserFromDB(const QString &userID, const QString &contactID, bool deleteMeFromOpposition, bool addToBlacklist){
+bool UsersManager::deleteContactForUserFromDB(const QString &userID, const QString &contactID, bool deleteMeFromOpposition, bool addToBlacklist)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
 
-    QString statement = QString("call sp_Contact_Delete('%1', '%2', %3, %4);  ").arg(userID).arg(contactID).arg(deleteMeFromOpposition?1:0).arg(addToBlacklist?1:0);
-    if(!query.exec(statement)){
+    QString statement = QString("call sp_Contact_Delete('%1', '%2', %3, %4);  ").arg(userID).arg(contactID).arg(deleteMeFromOpposition ? 1 : 0).arg(addToBlacklist ? 1 : 0);
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not delete contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -808,28 +834,29 @@ bool UsersManager::deleteContactForUserFromDB(const QString &userID, const QStri
 
 }
 
-bool UsersManager::moveContactForUserInDB(UserInfo *userInfo, const QString &contactID, quint32 newGroupID){
+bool UsersManager::moveContactForUserInDB(UserInfo *userInfo, const QString &contactID, quint32 newGroupID)
+{
 
-    if(!userInfo){
+    if(!userInfo) {
         return false;
     }
     int oldGroupID = userInfo->groupIDThatContactBelongsTo(contactID);
-    if(oldGroupID == ContactGroupBase::Group_Strangers_ID){
+    if(oldGroupID == ContactGroupBase::Group_Strangers_ID) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
 
     QString statement = QString("call sp_Contact_MoveToAnotherGroup('%1', '%2', %3);  ").arg(userInfo->getUserID()).arg(contactID).arg(newGroupID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not move contact for user in database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -840,21 +867,22 @@ bool UsersManager::moveContactForUserInDB(UserInfo *userInfo, const QString &con
 }
 
 
-bool UsersManager::addOrDeleteBlacklistedContactForUserFromDB(const QString &userID, const QString &contactID, bool addToBlacklist){
+bool UsersManager::addOrDeleteBlacklistedContactForUserFromDB(const QString &userID, const QString &contactID, bool addToBlacklist)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
 
-    QString statement = QString("call sp_Contact_Blacklisted_AddOrDelete('%1', '%2', %3);  ").arg(userID).arg(contactID).arg(addToBlacklist?1:0);
-    if(!query.exec(statement)){
+    QString statement = QString("call sp_Contact_Blacklisted_AddOrDelete('%1', '%2', %3);  ").arg(userID).arg(contactID).arg(addToBlacklist ? 1 : 0);
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not add or delete blacklisted contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -1105,15 +1133,16 @@ query.clear();
 }
 */
 
-UserInfo * UsersManager::queryUserInfo(const QString &imUserID){
+UserInfo *UsersManager::queryUserInfo(const QString &imUserID)
+{
     //    qWarning()<<"queryUserInfo(const QString &imUserID)";
 
     //TODO:查询错误处理
     UserInfo *info = new UserInfo(imUserID/*, this*/);
-    if(!queryUserInfo(info)){
+    if(!queryUserInfo(info)) {
         delete info;
         info = 0;
-    }else{
+    } else {
         QMutexLocker locker(offlineUserMutex);
         offlineUserInfoHash->insert(imUserID, info);
     }
@@ -1171,13 +1200,14 @@ UserInfo * UsersManager::queryUserInfo(const QString &imUserID){
 
 }
 
-bool UsersManager::queryUserInfo(UserInfo *info){
+bool UsersManager::queryUserInfo(UserInfo *info)
+{
     //qWarning()<<"queryUserInfo(UserInfo *info)";
 
-    if(!info){
+    if(!info) {
         return false;
     }
-    
+
     //    if(!query){
     //        if(!openDatabase()){
     //            return false;
@@ -1186,54 +1216,54 @@ bool UsersManager::queryUserInfo(UserInfo *info){
     //        query.clear();
     //    }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
-    
+
     QSqlRecord record;
     //    QString statement = QString("SELECT * FROM UsersSummaryInfo usi left join UsersDetailedInfo udi on usi.%1=udi.%1 where %2='%3' ").arg(info->databaseColumnName(IM::PI_SysID)).arg(info->databaseColumnName(IM::PI_UserID)).arg(info->getUserID());
     QString statement = QString("call sp_GetUserInfo('%1') ").arg(info->getUserID());
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
         //        logMessage(msg, QtServiceBase::Error);
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
 
         return false;
     }
-    
-    
+
+
     //    query = queryDatabase(statement, false);
-    
-    if((query.lastError().type() != QSqlError::NoError)){
-        qCritical()<<QString("Can not query data from local database! Error: %1").arg(query.lastError().text());
+
+    if((query.lastError().type() != QSqlError::NoError)) {
+        qCritical() << QString("Can not query data from local database! Error: %1").arg(query.lastError().text());
         return false;
     }
-    
-    
+
+
     //    if(!query.isValid()){
     //        qCritical()<<QString("Can not query data from local database! Error: %1").arg(query.lastError().text());
     //        return false;
     //    }
-    
-    if(!query.first()){
-        qCritical()<<QString("Can not query user info! Invalid record! User ID:%1").arg(info->getUserID());
+
+    if(!query.first()) {
+        qCritical() << QString("Can not query user info! Invalid record! User ID:%1").arg(info->getUserID());
         return false;
     }
 
     record = query.record();
-    
+
 
     //UserInfo *info = new UserInfo(imUserID, this);
     info->setSysID(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_SysID)))).toUInt());
@@ -1272,7 +1302,7 @@ bool UsersManager::queryUserInfo(UserInfo *info){
     info->setQuestionForSecurity(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_QuestionForSecurity)))).toString());
     info->setAnswerForSecurity(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_AnswerForSecurity)))).toString());
     info->setEmailForSecurity(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_EmailForSecurity)))).toString());
-    
+
     info->setCompanyName(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_CompanyName)))).toString());
     info->setJobTitle(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_JobTitle)))).toString());
     info->setBusinessAddress(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_BusinessAddress)))).toString());
@@ -1292,36 +1322,37 @@ bool UsersManager::queryUserInfo(UserInfo *info){
     info->clearUpdatedProperties();
 
 
-    
+
     return true;
-    
+
 
 }
 
-bool UsersManager::getUserAllContactGroupsInfoFromDatabase(UserInfo* info){
+bool UsersManager::getUserAllContactGroupsInfoFromDatabase(UserInfo *info)
+{
 
 
-    if(!info){
+    if(!info) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("call sp_GetAllContactGroupsInfoForUserAsString('%1'); ").arg(info->getUserID());
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user contact groups info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
 
     QStringList contactGroups;
-    while(query.next()){
+    while(query.next()) {
         quint32 groupID  = query.value(0).toUInt();
         QString groupName = query.value(1).toString();
 
@@ -1329,7 +1360,7 @@ bool UsersManager::getUserAllContactGroupsInfoFromDatabase(UserInfo* info){
         //e.g. user1,user2,user3
         QString contacts = query.value(2).toString();
 
-        contactGroups.append(QString::number(groupID)+","+groupName+","+contacts);
+        contactGroups.append(QString::number(groupID) + "," + groupName + "," + contacts);
     }
 
 
@@ -1344,14 +1375,15 @@ bool UsersManager::getUserAllContactGroupsInfoFromDatabase(UserInfo* info){
 
 
 
-bool UsersManager::getUserInterestGroupsFromDB(UserInfo* info){
+bool UsersManager::getUserInterestGroupsFromDB(UserInfo *info)
+{
 
-    if(!info){
+    if(!info) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1359,14 +1391,14 @@ bool UsersManager::getUserInterestGroupsFromDB(UserInfo* info){
     //QString statement = QString("select %1 from InterestGroupMembers where %2='%3' ").arg(InterestGroup::databaseColumnName(IM::PIG_GroupID).arg(InterestGroup::databaseColumnName(IM::PIG_MemberSysID)).arg(info->getUserID());
     QString statement = QString("call sp_GetUserInterestGroups('%1') ").arg(info->getUserID());
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user interest groups info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
-    if(!query.first()){
+    if(!query.first()) {
         return false;
     }
 
@@ -1384,38 +1416,39 @@ bool UsersManager::getUserInterestGroupsFromDB(UserInfo* info){
 }
 
 
-bool UsersManager::getUserAllContactsInfoFromDatabase(UserInfo* info, QString *infoString){
+bool UsersManager::getUserAllContactsInfoFromDatabase(UserInfo *info, QString *infoString)
+{
 
     Q_ASSERT(infoString);
 
     //FORMATE: GroupID,GroupName;UserID,PersonalSummaryInfoVersion,PersonalDetailInfoVersion,PersonalMessageInfoVersion;UserID,...||GroupID,GroupName;UserID,...
     //e.g. 100,Group-100;user1,10,10,2;user2,5,6,15||101,Group-101;user3,11,10,20
 
-    if(!info){
+    if(!info) {
         return false;
     }
-    if(!infoString){
+    if(!infoString) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("call sp_GetAllContactsInfoForUser('%1'); ").arg(info->getUserID());
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user contacts info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
 
     QStringList contactGroups;
-    while(query.next()){
+    while(query.next()) {
         quint32 groupID  = query.value(0).toUInt();
         QString groupName = query.value(1).toString();
 
@@ -1423,10 +1456,10 @@ bool UsersManager::getUserAllContactsInfoFromDatabase(UserInfo* info, QString *i
         //e.g. user1,10,10,2;user2,5,6,15;user3,11,10,20
         QString contactsInfo = query.value(2).toString();
 
-        if(contactsInfo.trimmed().isEmpty()){
-            contactGroups.append(QString::number(groupID)+","+groupName);
-        }else{
-            contactGroups.append(QString::number(groupID)+","+groupName+";"+contactsInfo);
+        if(contactsInfo.trimmed().isEmpty()) {
+            contactGroups.append(QString::number(groupID) + "," + groupName);
+        } else {
+            contactGroups.append(QString::number(groupID) + "," + groupName + ";" + contactsInfo);
         }
     }
     //FORMATE: GroupID,GroupName;UserID,PersonalSummaryInfoVersion,PersonalDetailInfoVersion,PersonalMessageInfoVersion;UserID,...||GroupID,GroupName;UserID,...
@@ -1437,32 +1470,33 @@ bool UsersManager::getUserAllContactsInfoFromDatabase(UserInfo* info, QString *i
 
 }
 
-bool UsersManager::getUserAllContactsInfoVersionFromDatabase(UserInfo* info, QString *infoString){
+bool UsersManager::getUserAllContactsInfoVersionFromDatabase(UserInfo *info, QString *infoString)
+{
 
     //FORMATE: UserID,PersonalSummaryInfoVersion,PersonalDetailInfoVersion,PersonalMessageInfoVersion;UserID,...
     //e.g. user1,10,10,2;user2,5,6,15;user3,11,10,20
 
     Q_ASSERT(infoString);
 
-    if(!info){
+    if(!info) {
         return false;
     }
-    if(!infoString){
+    if(!infoString) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("call sp_GetAllContactsInfoForUserAsString('%1'); ").arg(info->getUserID());
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user contacts info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
@@ -1474,44 +1508,45 @@ bool UsersManager::getUserAllContactsInfoVersionFromDatabase(UserInfo* info, QSt
 
 }
 
-IM::ErrorType UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID){
-    qDebug()<<"--UsersManager::createOrDeleteContactGroupInDB(...)  UserID:"<<info->getUserID()<<" groupName:"<<groupName<<" createGroup:"<<createGroup;
+IM::ErrorType UsersManager::createOrDeleteContactGroupInDB(UserInfo *info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID)
+{
+    qDebug() << "--UsersManager::createOrDeleteContactGroupInDB(...)  UserID:" << info->getUserID() << " groupName:" << groupName << " createGroup:" << createGroup;
 
     Q_ASSERT(groupID);
 
-    if(!info){
+    if(!info) {
         return IM::ERROR_IDNotExist;
     }
 
     quint32 gID = *groupID;
 
-    if(createGroup){
+    if(createGroup) {
         int newGroupID = info->getUnusedContactGroupID();
-        if(newGroupID < 0){
-            qCritical()<<"ERROR! Invalid unused contact group ID!"<<" Name:"<<groupName;
+        if(newGroupID < 0) {
+            qCritical() << "ERROR! Invalid unused contact group ID!" << " Name:" << groupName;
             return IM::ERROR_ServerError;
-        }else{
+        } else {
             gID = newGroupID;
         }
-    }else if(!info->hasContactGroup(gID)){
-        qCritical()<<"ERROR! Contact group does not exist!"<<" ID:"<<groupID;
+    } else if(!info->hasContactGroup(gID)) {
+        qCritical() << "ERROR! Contact group does not exist!" << " ID:" << groupID;
         return IM::ERROR_GROUP_ID_NotExist;
     }
 
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return IM::ERROR_ServerError;
         }
     }
     QSqlQuery query(db);
-    QString statement = QString("call sp_ContactGroup_CreateOrDelete('%1', %2, '%3', %4); ").arg(info->getUserID()).arg(gID).arg(groupName).arg(createGroup?1:0);
+    QString statement = QString("call sp_ContactGroup_CreateOrDelete('%1', %2, '%3', %4); ").arg(info->getUserID()).arg(gID).arg(groupName).arg(createGroup ? 1 : 0);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
-        QString msg = QString("Can not %1 contact group '%2' for user '%3'! %4 Error Type:%5 Error NO.:%6").arg(createGroup?"create":"delete").arg(groupName).arg(info->getUserID()).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        QString msg = QString("Can not %1 contact group '%2' for user '%3'! %4 Error Type:%5 Error NO.:%6").arg(createGroup ? "create" : "delete").arg(groupName).arg(info->getUserID()).arg(error.text()).arg(error.type()).arg(error.number());
+        qCritical() << msg;
 
         return IM::ERROR_ServerError;
     }
@@ -1529,10 +1564,10 @@ IM::ErrorType UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint
     //        info->clearUpdatedProperties();
     //    }
 
-    if(createGroup){
+    if(createGroup) {
         info->addContactGroup(gID, groupName);
         *groupID = gID;
-    }else{
+    } else {
         info->deleteContactGroup(gID);
     }
     //    qDebug()<<"Contact Groups:"<<info->getContactGroupsInfoString();
@@ -1542,19 +1577,20 @@ IM::ErrorType UsersManager::createOrDeleteContactGroupInDB(UserInfo* info, quint
 
 }
 
-bool UsersManager::updateContactGroupNameInDB(UserInfo* info, quint32 groupID, const QString &newGroupName){
+bool UsersManager::updateContactGroupNameInDB(UserInfo *info, quint32 groupID, const QString &newGroupName)
+{
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("call sp_ContactGroup_UpdateName('%1', %2, '%3'); ").arg(info->getUserID()).arg(groupID).arg(newGroupName);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not update user contact group name ! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
@@ -1566,27 +1602,28 @@ bool UsersManager::updateContactGroupNameInDB(UserInfo* info, quint32 groupID, c
 }
 
 
-bool UsersManager::saveUserInfoToDatabase(UserInfo *info){
+bool UsersManager::saveUserInfoToDatabase(UserInfo *info)
+{
     //TODO:
-    if(!info){
+    if(!info) {
         return false;
     }
-    
+
     QString summaryInfoUpdateSQLStatement = info->getUpdateSQLStatement(true);
     QString detailInfoStatement = info->getUpdateSQLStatement(false);
     QString statement = "" ;
-    if(!summaryInfoUpdateSQLStatement.trimmed().isEmpty()){
+    if(!summaryInfoUpdateSQLStatement.trimmed().isEmpty()) {
         statement = QString("update UsersSummaryInfo set %1 where %2='%3'; ").arg(summaryInfoUpdateSQLStatement).arg(info->databaseColumnName(IM::PI_SysID)).arg(info->getSysID());
     }
-    if(!detailInfoStatement.trimmed().isEmpty()){
+    if(!detailInfoStatement.trimmed().isEmpty()) {
         statement += QString("update UsersDetailedInfo set %1 where %2='%3'; ").arg(summaryInfoUpdateSQLStatement).arg(info->databaseColumnName(IM::PI_SysID)).arg(info->getSysID());
     }
 
-    if(statement.isEmpty()){
+    if(statement.isEmpty()) {
         return false;
     }
 
-    
+
     //    if(!query){
     //        if(!openDatabase()){
     //            return false;
@@ -1595,49 +1632,50 @@ bool UsersManager::saveUserInfoToDatabase(UserInfo *info){
     //        query.clear();
     //    }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     //    QString statement = QString("update users_detailed_info set %1 where %2='%3' ").arg(updateSQLStatement).arg(info->databaseColumnName(IM::PI_UserID)).arg(info->getUserID());
-    
+
     //    query = queryDatabase(statement, false);
     //    if((query.lastError().type() != QSqlError::NoError)){
     //        qCritical()<<QString("Can not query data from local database! Error: %1").arg(query.lastError().text());
     //        return false;
     //    }
-    
-    if(!query.exec(statement)){
+
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not write user info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
         //        logMessage(msg, QtServiceBase::Error);
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
 
         return false;
-    }else{
+    } else {
         info->clearUpdatedProperties();
     }
-    
-    
+
+
     return true;
-    
-    
+
+
 }
 
-bool UsersManager::saveFriendshipApplyRequestToDB(const QString &applicantID, const QString &contactID, const QString &message, quint8 resultCode, bool senderRead, bool receiverRead){
+bool UsersManager::saveFriendshipApplyRequestToDB(const QString &applicantID, const QString &contactID, const QString &message, quint8 resultCode, bool senderRead, bool receiverRead)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1645,14 +1683,14 @@ bool UsersManager::saveFriendshipApplyRequestToDB(const QString &applicantID, co
     //QString statement = QString("insert into friendshipapply(SenderID, ReceiverID, ExtraMessage, Result, SenderRead, ReceiverRead) values('%1',  '%2', '%3', '%4', '%5', '%6' ) ")
     QString statement = QString("call sp_FriendshipApplyRequest_Add('%1',  '%2', '%3', %4, %5, %6 ) ")
 
-            .arg(applicantID).arg(contactID).arg(message).arg(resultCode)
-            .arg(senderRead?1:0).arg(receiverRead?1:0)
-            ;
+                        .arg(applicantID).arg(contactID).arg(message).arg(resultCode)
+                        .arg(senderRead ? 1 : 0).arg(receiverRead ? 1 : 0)
+                        ;
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("ERROR! Can not write friendship application info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -1661,11 +1699,12 @@ bool UsersManager::saveFriendshipApplyRequestToDB(const QString &applicantID, co
 
 }
 
-bool UsersManager::deleteFriendshipApplyRequest(const QString &applicantID, const QString &contactID){
+bool UsersManager::deleteFriendshipApplyRequest(const QString &applicantID, const QString &contactID)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1673,25 +1712,26 @@ bool UsersManager::deleteFriendshipApplyRequest(const QString &applicantID, cons
     //QString statement = QString("delete from friendshipapply where Sender='%1' and Receiver='%2' ").arg(applicantID).arg(contactID);
     QString statement = QString("call sp_FriendshipApplyRequest_Delete('%1', '%2'); ").arg(applicantID).arg(contactID);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not delete friendship application info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
     return true;
 }
 
-bool UsersManager::getFriendshipApplyRequest(const QString &userID, QList<QStringList> *sentApplicationList, QList<QStringList> *receivedApplicationList){
-    qDebug()<<"--UsersManager::getFriendshipApplyRequest(...)";
+bool UsersManager::getFriendshipApplyRequest(const QString &userID, QList<QStringList> *sentApplicationList, QList<QStringList> *receivedApplicationList)
+{
+    qDebug() << "--UsersManager::getFriendshipApplyRequest(...)";
 
-    if(!sentApplicationList || !receivedApplicationList){
+    if(!sentApplicationList || !receivedApplicationList) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1699,23 +1739,25 @@ bool UsersManager::getFriendshipApplyRequest(const QString &userID, QList<QStrin
 
     //QString statement = QString("select ReceiverID, Result, ExtraMessage from friendshipapply where SenderID='%1' and SenderRead = '0' ").arg(userID);
     QString statement = QString("call sp_FriendshipApplyRequest_SentByUser_Get('%1'); ").arg(userID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not get friendship application info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
-    while(query.next()){
+    while(query.next()) {
 
         UserInfo::FriendshipApplyResult faResult = UserInfo::FriendshipApplyResult(query.value(1).toUInt());
-        if(faResult == UserInfo::FAR_UNKNOWN){continue;}
+        if(faResult == UserInfo::FAR_UNKNOWN) {
+            continue;
+        }
 
         QStringList list;
         list << query.value(0).toString()
-             <<QString::number(query.value(1).toUInt())
-            <<query.value(2).toString()
-              ;
+             << QString::number(query.value(1).toUInt())
+             << query.value(2).toString()
+             ;
         sentApplicationList->append(list);
 
     }
@@ -1723,19 +1765,19 @@ bool UsersManager::getFriendshipApplyRequest(const QString &userID, QList<QStrin
     //statement = QString("select SenderID, Result, ExtraMessage from friendshipapply where ReceiverID='%1' and ReceiverRead = '0' ").arg(userID);
     statement = QString("call sp_FriendshipApplyRequest_SentToUser_Get('%1'); ").arg(userID);
     query.clear();
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not get friendship application info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
-    while(query.next()){
+    while(query.next()) {
         QStringList list;
         list << query.value(0).toString()
-             <<QString::number(query.value(1).toUInt())
-            <<query.value(2).toString()
-              ;
+             << QString::number(query.value(1).toUInt())
+             << query.value(2).toString()
+             ;
         receivedApplicationList->append(list);
 
     }
@@ -1754,15 +1796,16 @@ bool UsersManager::getFriendshipApplyRequest(const QString &userID, QList<QStrin
 }
 
 
-QString UsersManager::getInterestGroupsListForUser(UserInfo* userInfo){
-    qDebug()<<"--UsersManager::getInterestGroupsListForUser(...)";
+QString UsersManager::getInterestGroupsListForUser(UserInfo *userInfo)
+{
+    qDebug() << "--UsersManager::getInterestGroupsListForUser(...)";
 
 
     //Interest Groups List Format: GroupID,GroupInfoVersion,MemberListInfoVersion;GroupID,GroupInfoVersion,MemberListInfoVersion
 
 
-    if(!userInfo){
-        qDebug()<<"invalid userInfo";
+    if(!userInfo) {
+        qDebug() << "invalid userInfo";
         return "";
     }
 
@@ -1770,64 +1813,73 @@ QString UsersManager::getInterestGroupsListForUser(UserInfo* userInfo){
     QList<quint32> groups = userInfo->getInterestGroups();
     foreach (quint32 groupID, groups) {
         InterestGroup *group = getInterestGroup(groupID);
-        if(!group){
-            qDebug()<<"invalid group";
+        if(!group) {
+            qDebug() << "invalid group";
             return "";
         }
         infoList.append(QString::number(groupID) + "," + QString::number(group->getGroupInfoVersion()) + "," + QString::number(group->getGroupMemberListInfoVersion()));
     }
-    
+
     return infoList.join(";");
 
 }
 
 //Format: ?
-QString UsersManager::getInterestGroupInfoStringForUser(UserInfo* userInfo, quint32 groupID){
+QString UsersManager::getInterestGroupInfoStringForUser(UserInfo *userInfo, quint32 groupID)
+{
 
     QString infoString = "";
-    
-    if(!userInfo){
+
+    if(!userInfo) {
         return infoString;
     }
-    
+
     InterestGroup *group = getInterestGroup(groupID);
-    if(!group){
+    if(!group) {
         return infoString;
     }
-    
+
     return group->getGroupInfoString();
-    
+
 
 }
 
 //Format: ?
-QString UsersManager::getInterestGroupMembersInfoStringForUser(UserInfo* userInfo, InterestGroup *group){
+QString UsersManager::getInterestGroupMembersInfoStringForUser(UserInfo *userInfo, InterestGroup *group)
+{
 
     QString infoString = "";
-    
-    if(!userInfo){return infoString;}
-    if(!group){return infoString;}
-    
+
+    if(!userInfo) {
+        return infoString;
+    }
+    if(!group) {
+        return infoString;
+    }
+
     QStringList infoList;
     QHash <QString/*Member's ID*/, InterestGroup::MemberRole/*Member's Role*/> membersHash = group->getMembersHash();
     QStringList members = membersHash.keys();
-    
+
     foreach (QString memberUserID, members) {
         UserInfo *memberInfo = getUserInfo(memberUserID);
-        if(!memberInfo){continue;}
+        if(!memberInfo) {
+            continue;
+        }
         QStringList memberInfoList;
         memberInfoList << memberInfo->getUserID() << QString::number(memberInfo->getPersonalSummaryInfoVersion()) << QString::number(membersHash.value(memberUserID));
         infoList.append(memberInfoList.join(QString(CONTACT_INFO_SEPARATOR)));
     }
-    
+
     return infoList.join(QString(PACKET_DATA_SEPARTOR));
 
 }
 
 
-bool UsersManager::openDatabase(bool reopen){
+bool UsersManager::openDatabase(bool reopen)
+{
 
-    if(reopen){
+    if(reopen) {
         //        if(query){
         //            query.clear();
         //            delete query;
@@ -1839,7 +1891,7 @@ bool UsersManager::openDatabase(bool reopen){
 
     //QSqlDatabase db = QSqlDatabase::database(Server_DB_CONNECTION_NAME);
     db = QSqlDatabase::database(Server_DB_CONNECTION_NAME);
-    if(!db.isValid()){
+    if(!db.isValid()) {
         QSqlError err;
         //        err = databaseUtility->openDatabase(MYSQL_DB_CONNECTION_NAME,
         //                                            REMOTE_SITOY_COMPUTERS_DB_DRIVER,
@@ -1867,8 +1919,8 @@ bool UsersManager::openDatabase(bool reopen){
     }
 
     db = QSqlDatabase::database(Server_DB_CONNECTION_NAME);
-    if(!db.isOpen()){
-        qCritical()<<QString("Database is not open! %1").arg(db.lastError().text());
+    if(!db.isOpen()) {
+        qCritical() << QString("Database is not open! %1").arg(db.lastError().text());
         return false;
     }
 
@@ -1885,7 +1937,8 @@ bool UsersManager::openDatabase(bool reopen){
 
 
 
-QSqlQuery UsersManager::queryDatabase(const QString & queryString, bool localConfigDatabase) {
+QSqlQuery UsersManager::queryDatabase(const QString &queryString, bool localConfigDatabase)
+{
 
     QSqlQuery query;
     DatabaseUtility du;
@@ -1893,7 +1946,7 @@ QSqlQuery UsersManager::queryDatabase(const QString & queryString, bool localCon
     Settings settings;
     QString userPrivateDataFilePath = settings.getDataRootPath();
 
-    if(localConfigDatabase){
+    if(localConfigDatabase) {
         query = du.queryDatabase(queryString,
                                  LOCAL_SERVER_DB_CONNECTION_NAME,
                                  LOCAL_SERVER_DB_DRIVER,
@@ -1903,7 +1956,7 @@ QSqlQuery UsersManager::queryDatabase(const QString & queryString, bool localCon
                                  "",
                                  userPrivateDataFilePath,
                                  HEHUI::SQLITE);
-    }else{
+    } else {
         query = du.queryDatabase(queryString,
                                  REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME,
                                  REMOTE_SITOY_COMPUTERS_DB_DRIVER,
@@ -1921,9 +1974,10 @@ QSqlQuery UsersManager::queryDatabase(const QString & queryString, bool localCon
 }
 
 
-QSqlQuery UsersManager::queryDatabase(const QString & queryString, const QString &connectionName, const QString &driver,
+QSqlQuery UsersManager::queryDatabase(const QString &queryString, const QString &connectionName, const QString &driver,
                                       const QString &host, int port, const QString &user, const QString &passwd,
-                                      const QString &databaseName, HEHUI::DatabaseType databaseType) {
+                                      const QString &databaseName, HEHUI::DatabaseType databaseType)
+{
 
 
     QSqlQuery query;
@@ -1943,34 +1997,40 @@ QSqlQuery UsersManager::queryDatabase(const QString & queryString, const QString
 
 
 
-/////////////////////////// Group Manager ////////////////////////////////////////    
+/////////////////////////// Group Manager ////////////////////////////////////////
 
-InterestGroup* UsersManager::getInterestGroup(quint32 groupID){
-    
-    if(groupID < 1){
+InterestGroup *UsersManager::getInterestGroup(quint32 groupID)
+{
+
+    if(groupID < 1) {
         return 0;
     }
-    
-    InterestGroup * group = 0;
-    if(m_interestGroupHash->contains(groupID)){
+
+    InterestGroup *group = 0;
+    if(m_interestGroupHash->contains(groupID)) {
         group = m_interestGroupHash->value(groupID);
-    }else{
+    } else {
         group = queryInterestGroup(groupID);
     }
-    
+
 
     return group;
 
 }
 
-quint32 UsersManager::createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName, quint8 type){
-    qDebug()<<"UsersManager::createNewInterestGroup(...) "<<" creatorID:"<<creatorInfo->getUserID()<<" groupName:"<<groupName;
+quint32 UsersManager::createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName, quint8 type)
+{
+    qDebug() << "UsersManager::createNewInterestGroup(...) " << " creatorID:" << creatorInfo->getUserID() << " groupName:" << groupName;
 
-    if(!creatorInfo){return 0;}
-    if(groupName.trimmed().isEmpty()){return 0;}
+    if(!creatorInfo) {
+        return 0;
+    }
+    if(groupName.trimmed().isEmpty()) {
+        return 0;
+    }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             //*errorType = IM::ERROR_UnKnownError;
             return 0;
         }
@@ -1978,54 +2038,57 @@ quint32 UsersManager::createNewInterestGroup(UserInfo *creatorInfo, const QStrin
 
     QSqlQuery query(db);
     QString statement = QString("call sp_InterestGroup_Create('%1', '%2', @GroupID); ").arg(creatorInfo->getUserID()).arg(groupName);
-    
-    if(!query.exec(statement)){
+
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not create new group! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
-        
+        qCritical() << msg;
+
         return 0;
     }
-    
-    
+
+
     statement = QString("select @GroupID; ");
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query group id from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
-        
+        qCritical() << msg;
+
         return 0;
     }
-    
-    if(!query.first()){
+
+    if(!query.first()) {
         return 0;
     }
-    
+
     quint32 groupID = query.value(0).toUInt();
-    qDebug()<<"-----------groupID:"<<groupID;
+    qDebug() << "-----------groupID:" << groupID;
 
     InterestGroup *group = queryInterestGroup(groupID);
-    if(!group){
+    if(!group) {
         return 0;
     }
 
     creatorInfo->joinOrLeaveInterestGroup(groupID, true);
-    
+
     return groupID;
-    
+
 }
 
-bool UsersManager::disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID){
-    qDebug()<<"UsersManager::disbandInterestGroup(...) "<<" creatorID:"<<creatorInfo->getUserID()<<" groupID:"<<groupID;
+bool UsersManager::disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID)
+{
+    qDebug() << "UsersManager::disbandInterestGroup(...) " << " creatorID:" << creatorInfo->getUserID() << " groupID:" << groupID;
 
-    if(!creatorInfo){return false;}
+    if(!creatorInfo) {
+        return false;
+    }
     InterestGroup *group = getInterestGroup(groupID);
-    if(group->memberRole(creatorInfo->getUserID()) != InterestGroup::Role_Creator){
+    if(group->memberRole(creatorInfo->getUserID()) != InterestGroup::Role_Creator) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             //*errorType = IM::ERROR_UnKnownError;
             return false;
         }
@@ -2034,10 +2097,10 @@ bool UsersManager::disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID){
     QSqlQuery query(db);
     QString statement = QString("call sp_InterestGroup_Disband(%1); ").arg(groupID);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not disband group! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
@@ -2049,14 +2112,19 @@ bool UsersManager::disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID){
 
 }
 
-bool UsersManager::memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGroup *group, bool join){
-    qDebug()<<"UsersManager::memberJoinOrQuitInterestGroup(...) "<<" memberID:"<<userInfo->getUserID()<<" groupID:"<<group->getGroupID();
+bool UsersManager::memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGroup *group, bool join)
+{
+    qDebug() << "UsersManager::memberJoinOrQuitInterestGroup(...) " << " memberID:" << userInfo->getUserID() << " groupID:" << group->getGroupID();
 
-    if(!userInfo){return false;}
-    if(!group){return false;}
+    if(!userInfo) {
+        return false;
+    }
+    if(!group) {
+        return false;
+    }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             //*errorType = IM::ERROR_UnKnownError;
             return false;
         }
@@ -2065,26 +2133,26 @@ bool UsersManager::memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGro
 
     quint32 groupID = group->getGroupID();
     QString memberID = userInfo->getUserID();
-    QString statement = QString("call sp_InterestGroup_MemberJoinOrQuit('%1', %2, %3, @MemberListVersion); ").arg(memberID).arg(groupID).arg(join?1:0);
-    if(!query.exec(statement)){
+    QString statement = QString("call sp_InterestGroup_MemberJoinOrQuit('%1', %2, %3, @MemberListVersion); ").arg(memberID).arg(groupID).arg(join ? 1 : 0);
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Member '%1' failed to %2 group ! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
 
     statement = QString("select @MemberListVersion; ");
     query.exec(statement);
-    if(!query.first()){
+    if(!query.first()) {
         QString msg = QString("Can not query group member list version! %1 ").arg(query.lastError().text());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
-    if(join){
+    if(join) {
         group->addMember(memberID, InterestGroupBase::Role_Member);
-    }else{
+    } else {
         group->deleteMember(memberID);
     }
     group->setGroupMemberListInfoVersion(query.value(0).toUInt());
@@ -2097,128 +2165,136 @@ bool UsersManager::memberJoinOrQuitInterestGroup(UserInfo *userInfo, InterestGro
 }
 
 
-QList<UserInfo *> UsersManager::getAllOnlineInterestGroupMembers(quint32 groupID){
+QList<UserInfo *> UsersManager::getAllOnlineInterestGroupMembers(quint32 groupID)
+{
 
     QList<UserInfo *> onlineMembers;
 
-    InterestGroup * group = getInterestGroup(groupID);
-    if(!group){return onlineMembers;}
+    InterestGroup *group = getInterestGroup(groupID);
+    if(!group) {
+        return onlineMembers;
+    }
 
     foreach (QString memberID, group->members()) {
         UserInfo *user = getOnlineUserInfo(memberID);
-        if(user){onlineMembers.append(user);}
+        if(user) {
+            onlineMembers.append(user);
+        }
     }
 
     return onlineMembers;
 
 }
 
-QString UsersManager::searchInterestGroup(const QString &keyword, int startIndex){
+QString UsersManager::searchInterestGroup(const QString &keyword, int startIndex)
+{
 
-    if(keyword.trimmed().isEmpty()){
+    if(keyword.trimmed().isEmpty()) {
         return QString();
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return QString();
         }
     }
     QSqlQuery query(db);
-    
+
     quint32 groupID = keyword.toUInt();
     quint32 pageSize = SEARCH_RESULT_PAGE_SIZE;
     QString queryString;
-    if(groupID){
+    if(groupID) {
         queryString = QString("call sp_InterestGroup_Search(%1, '%2', %3, %4) ;").arg(groupID).arg("").arg(startIndex).arg(pageSize);
 
-    }else{
-        queryString = QString("call sp_InterestGroup_Search(%1, '%2', %3, %4) ;").arg("null").arg("%"+keyword+"%").arg(startIndex).arg(pageSize);
+    } else {
+        queryString = QString("call sp_InterestGroup_Search(%1, '%2', %3, %4) ;").arg("null").arg("%" + keyword + "%").arg(startIndex).arg(pageSize);
     }
-    if(!query.exec(queryString)){
+    if(!query.exec(queryString)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query interest group info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return QString();
     }
-    
+
     QStringList groupsInfoList;
-    while(query.next()){
-        
+    while(query.next()) {
+
         QStringList infoList;
-        for(int i=0; i<5; i++){
+        for(int i = 0; i < 5; i++) {
             infoList.append(query.value(i).toString());
             //            qWarning()<<i<<":"<<query.value(i).toString();
         }
-        
+
         groupsInfoList.append(infoList.join(QChar(SEPARTOR_RECORD)));
     }
-    
+
     return groupsInfoList.join(QChar(SEPARTOR_GROUP));
-    
+
 }
 
-bool UsersManager::saveInterestGroupToDatabase(InterestGroup *groupInfo){
+bool UsersManager::saveInterestGroupToDatabase(InterestGroup *groupInfo)
+{
     //TODO:
-    if(!groupInfo){
+    if(!groupInfo) {
         return false;
     }
-    
-    QString updateSQLStatement = groupInfo->getUpdateSQLStatement();
-    if(updateSQLStatement.trimmed().isEmpty()){
-        return false;
-    }
-    
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    QString updateSQLStatement = groupInfo->getUpdateSQLStatement();
+    if(updateSQLStatement.trimmed().isEmpty()) {
+        return false;
+    }
+
+
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("update groups set %1 where %2='%3' ").arg(updateSQLStatement).arg(groupInfo->databaseColumnName(IM::PIG_GroupID)).arg(groupInfo->getGroupID());
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not write group info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
         //        logMessage(msg, QtServiceBase::Error);
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
 
         return false;
-    }else{
+    } else {
         groupInfo->clearUpdatedProperties();
     }
-    
-    
+
+
     return true;
-    
-    
+
+
 }
 
-bool UsersManager::saveOrDeleteMembershipApplication(const QString &applicantID, quint32 groupID, const QString &message, bool save){
+bool UsersManager::saveOrDeleteMembershipApplication(const QString &applicantID, quint32 groupID, const QString &message, bool save)
+{
 
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
     QString statement = QString("call sp_InterestGroup_SaveOrDeleteMembershipApplication('%1',  %2, '%3' ); ")
-            .arg(applicantID).arg(groupID).arg(message).arg(save?1:0);
+                        .arg(applicantID).arg(groupID).arg(message).arg(save ? 1 : 0);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not write membership application info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
@@ -2227,39 +2303,40 @@ bool UsersManager::saveOrDeleteMembershipApplication(const QString &applicantID,
 
 }
 
-bool UsersManager::getMembershipApplyRequest(quint32 groupID, QList<QStringList> *receivedApplicationList){
+bool UsersManager::getMembershipApplyRequest(quint32 groupID, QList<QStringList> *receivedApplicationList)
+{
 
-    if(!receivedApplicationList){
+    if(!receivedApplicationList) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
 
     QString statement = QString("select ApplicantSystemID, ExtraMessage from membershipapply where GroupID='%1' ").arg(groupID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not get membership application info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
 
         return false;
     }
-    while(query.next()){
+    while(query.next()) {
         QStringList list;
-        list <<QString::number(query.value(0).toUInt())
-            <<query.value(1).toString()
-              ;
+        list << QString::number(query.value(0).toUInt())
+             << query.value(1).toString()
+             ;
         receivedApplicationList->append(list);
 
     }
@@ -2272,10 +2349,11 @@ bool UsersManager::getMembershipApplyRequest(quint32 groupID, QList<QStringList>
 
 }
 
-bool UsersManager::saveCachedInterestGroupChatMessageFromIMUser(const QString &senderID, quint32 interestGroupID, const QString &message){
+bool UsersManager::saveCachedInterestGroupChatMessageFromIMUser(const QString &senderID, quint32 interestGroupID, const QString &message)
+{
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -2286,15 +2364,15 @@ bool UsersManager::saveCachedInterestGroupChatMessageFromIMUser(const QString &s
     msg.replace("\"", "\\\"");
     //QString statement = QString("insert into CachedInterestGroupChatMessages(SenderID, InterestGroupID, Message) values('%1', '%2', '%3' )  ").arg(senderID).arg(interestGroupID).arg(msg);
     QString statement = QString("call sp_CachedChatMessages_FromInterestGroup_Save('%1', %2, '%3');  ").arg(senderID).arg(interestGroupID).arg(msg);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save group chat message to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
         //        logMessage(msg, QtServiceBase::Error);
-        qCritical()<<msg;
+        qCritical() << msg;
 
         //TODO:数据库重启，重新连接
         //MySQL数据库重启，重新连接
-        if(error.number() == 2006){
+        if(error.number() == 2006) {
             query.clear();
             openDatabase(true);
         }
@@ -2312,19 +2390,20 @@ bool UsersManager::saveCachedInterestGroupChatMessageFromIMUser(const QString &s
 
 }
 
-QStringList UsersManager::getCachedInterestGroupChatMessagesForUserFromDB(UserInfo* userInfo){
+QStringList UsersManager::getCachedInterestGroupChatMessagesForUserFromDB(UserInfo *userInfo)
+{
     //TODO:
 
-    if(!userInfo){
+    if(!userInfo) {
         return QStringList();
     }
 
-    if(userInfo->getInterestGroups().isEmpty()){
+    if(userInfo->getInterestGroups().isEmpty()) {
         return QStringList();
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return QStringList();
         }
     }
@@ -2335,20 +2414,20 @@ QStringList UsersManager::getCachedInterestGroupChatMessagesForUserFromDB(UserIn
     //QString statement = QString("select InterestGroupID, SenderID,  Message, TransmittingTime from cachedinterestgroupchatmessages where InterestGroupID in (%1) and TransmittingTime>'%2'  ").arg(interestgroups.join(",")).arg(userInfo->getLastLoginTime().toString("yyyy-MM-dd hh:mm:ss"));
     QString statement = QString("call sp_CachedChatMessages_FromInterestGroup_Get('%1', '%2');  ").arg(userInfo->getUserID()).arg(userInfo->getLastLogoutTime().toString("yyyy-MM-dd hh:mm:ss"));
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query cached InterestGroup chat messages from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return QStringList();
     }
 
-    if((query.lastError().type() != QSqlError::NoError)){
-        qCritical()<<QString("Can not query cached InterestGroup chat messages from database! Error: %1").arg(query.lastError().text());
+    if((query.lastError().type() != QSqlError::NoError)) {
+        qCritical() << QString("Can not query cached InterestGroup chat messages from database! Error: %1").arg(query.lastError().text());
         return QStringList();
     }
 
     QStringList messages;
-    while(query.next()){
+    while(query.next()) {
         QStringList message;
         message.append(QVariant(query.value(0)).toString());
         message.append(QVariant(query.value(1)).toString());
@@ -2369,50 +2448,52 @@ QStringList UsersManager::getCachedInterestGroupChatMessagesForUserFromDB(UserIn
 
 
 
-InterestGroup * UsersManager::queryInterestGroup(quint32 groupID){
-    
+InterestGroup *UsersManager::queryInterestGroup(quint32 groupID)
+{
+
     InterestGroup *group = new InterestGroup(groupID);
-    if(!queryInterestGroup(group)){
+    if(!queryInterestGroup(group)) {
         delete group;
         group = 0;
     }
-    
+
     return group;
-    
+
 }
 
-bool UsersManager::queryInterestGroup(InterestGroup *info){
+bool UsersManager::queryInterestGroup(InterestGroup *info)
+{
 
-    if(!info){
+    if(!info) {
         return false;
     }
 
-    if(!db.isValid()){
-        if(!openDatabase()){
+    if(!db.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(db);
-    
+
     quint32 groupID = info->getGroupID();
     //QString statement = QString("select * from groups where %1='%2' ").arg(info->databaseColumnName(IM::PIG_GroupID)).arg(info->getGroupID());
     QString statement = QString("call sp_GetInterestGroupInfo(%1); ").arg(groupID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query group info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
-    
 
-    if((query.lastError().type() != QSqlError::NoError)){
-        qCritical()<<QString("Can not query data from database! Error: %1").arg(query.lastError().text());
+
+    if((query.lastError().type() != QSqlError::NoError)) {
+        qCritical() << QString("Can not query data from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
-    if(!query.first()){
-        qCritical()<<QString("Can not query group info! Invalid record! Group ID:%1").arg(groupID);
+    if(!query.first()) {
+        qCritical() << QString("Can not query group info! Invalid record! Group ID:%1").arg(groupID);
         return false;
     }
 
@@ -2435,42 +2516,42 @@ bool UsersManager::queryInterestGroup(InterestGroup *info){
 
     //    info->setLastUpdateTime(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PIG_LastUpdateTime)))).toDateTime());
 
-    
+
     info->clearUpdatedProperties();
-    
-    
-    
+
+
+
     //TODO:Members
 
     //statement = QString("select MemberUserID, MemberRole from groupmembers where GroupID=%1 ").arg(info->getGroupID());
     statement = QString("call sp_GetInterestGroupMembers(%1);").arg(groupID);
     query.clear();
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query group members info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
 
         return false;
     }
 
-    if((query.lastError().type() != QSqlError::NoError)){
-        qCritical()<<QString("Can not query data from database! Error: %1").arg(query.lastError().text());
+    if((query.lastError().type() != QSqlError::NoError)) {
+        qCritical() << QString("Can not query data from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
     QHash <QString/*Member's ID*/, InterestGroup::MemberRole/*Member's Role*/> membersHash;
-    
+
     while (query.next()) {
         membersHash.insert(query.value(0).toString(), InterestGroup::MemberRole(query.value(1).toUInt()) );
     }
-    
+
     info->setMembersHash(membersHash);
-    
+
     m_interestGroupHash->insert(groupID, info);
 
     return true;
-    
-    
+
+
 }
 
 
@@ -2483,7 +2564,7 @@ bool UsersManager::queryInterestGroup(InterestGroup *info){
 
 
 
-/////////////////////////// ---Group Manager--- ////////////////////////////////////////    
+/////////////////////////// ---Group Manager--- ////////////////////////////////////////
 
 
 

@@ -8,7 +8,8 @@
 #include "contactsmanager/contact.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class UserInfoTipWindow : public QWidget
@@ -35,11 +36,13 @@ public slots:
 
 
 private slots:
-    void on_toolButtonEmail_clicked(){
+    void on_toolButtonEmail_clicked()
+    {
         sendEmail();
     }
 
-    void on_toolButtonUserInfo_clicked(){
+    void on_toolButtonUserInfo_clicked()
+    {
         emit showUserInfoRequested(m_contact);
     }
 

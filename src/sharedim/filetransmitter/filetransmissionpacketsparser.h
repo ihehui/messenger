@@ -49,10 +49,12 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-class SHAREDIMLIB_API FileTransmissionPacketsParserBase : public QObject{
+class SHAREDIMLIB_API FileTransmissionPacketsParserBase : public QObject
+{
     Q_OBJECT
 public:
     FileTransmissionPacketsParserBase(const QString &myID, QObject *parent = 0);
@@ -63,19 +65,21 @@ public slots:
 
     virtual void parseOtherIncomingPacketData(PacketBase *packet);
 
-    int connectToPeer(const QHostAddress &peerAddress, quint16 peerPort){
+    int connectToPeer(const QHostAddress &peerAddress, quint16 peerPort)
+    {
         QString errorMessage;
         int socket = INVALID_SOCK_ID;
         socket = m_rtp->connectToHost(peerAddress, peerPort, 10000, &errorMessage);
-        if(socket == INVALID_SOCK_ID){
-            qCritical()<<tr("ERROR! Can not connect to host! %1").arg(errorMessage);
+        if(socket == INVALID_SOCK_ID) {
+            qCritical() << tr("ERROR! Can not connect to host! %1").arg(errorMessage);
         }
 
         return socket;
     }
 
 
-    bool requestDataForward(int serverSocketID, const QString &receiverID, const QByteArray &data){
+    bool requestDataForward(int serverSocketID, const QString &receiverID, const QByteArray &data)
+    {
 
         DataForwardPacket p(getSessionEncryptionKey(serverSocketID));
         p.data = data;
@@ -83,19 +87,24 @@ public slots:
         p.isRequest = 1;
 
         QByteArray ba = p.toByteArray();
-        if(ba.isEmpty()){return false;}
+        if(ba.isEmpty()) {
+            return false;
+        }
 
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool forwardData(int socketID, const QByteArray &data){
+    bool forwardData(int socketID, const QByteArray &data)
+    {
 
         DataForwardPacket p(getSessionEncryptionKey(socketID));
         p.data = data;
         p.isRequest = 0;
 
         QByteArray ba = p.toByteArray();
-        if(ba.isEmpty()){return false;}
+        if(ba.isEmpty()) {
+            return false;
+        }
 
         return m_rtp->sendReliableData(socketID, &ba);
     }
@@ -103,7 +112,8 @@ public slots:
 
 
     ///////////////////////////////////////////////
-    bool requestFileServerInfo(SOCKETID socketID){
+    bool requestFileServerInfo(SOCKETID socketID)
+    {
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
         //packet.FileServerInfo.address = "";
@@ -112,7 +122,8 @@ public slots:
         QByteArray ba = packet.toByteArray();
         return m_rtp->sendReliableData(socketID, &ba);
     }
-    bool responseFileServerInfo(SOCKETID socketID, const QString &address, quint16 port){
+    bool responseFileServerInfo(SOCKETID socketID, const QString &address, quint16 port)
+    {
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
         packet.FileServerInfo.address = address;
@@ -122,7 +133,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath){
+    bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath)
+    {
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileSystemInfoRequest;
         packet.FileSystemInfoRequest.parentDirPath = parentDirPath;
@@ -131,7 +143,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseFileSystemInfo(SOCKETID socketID, const QString &baseDirPath, const QByteArray &fileSystemInfoData){
+    bool responseFileSystemInfo(SOCKETID socketID, const QString &baseDirPath, const QByteArray &fileSystemInfoData)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileSystemInfoResponse;
@@ -142,7 +155,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestDeleteFiles(SOCKETID socketID, const QString &remoteBaseDir, const QStringList &remoteFiles){
+    bool requestDeleteFiles(SOCKETID socketID, const QString &remoteBaseDir, const QStringList &remoteFiles)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileDeletingRequest;
@@ -153,7 +167,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseDeletingFiles(SOCKETID socketID, const QString &baseDirPath, const QStringList &failedFiles){
+    bool responseDeletingFiles(SOCKETID socketID, const QString &baseDirPath, const QStringList &failedFiles)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileDeletingResponse;
@@ -164,7 +179,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestRenameFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &oldFileName, const QString &newFileName){
+    bool requestRenameFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &oldFileName, const QString &newFileName)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileRenamingRequest;
@@ -176,7 +192,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseRenamingFiles(SOCKETID socketID, const QString &baseDirPath, const QString &fileName, bool renamed, const QString &message){
+    bool responseRenamingFiles(SOCKETID socketID, const QString &baseDirPath, const QString &fileName, bool renamed, const QString &message)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileRenamingResponse;
@@ -189,7 +206,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestUploadFile(SOCKETID socketID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = ""){
+    bool requestUploadFile(SOCKETID socketID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = "")
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileUploadingRequest;
@@ -202,7 +220,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestDownloadFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &remoteFileName, const QString &localFileSaveDir){
+    bool requestDownloadFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &remoteFileName, const QString &localFileSaveDir)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileDownloadingRequest;
@@ -214,7 +233,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseFileDownloadRequest(SOCKETID socketID, bool accepted, const QString &fileName, const QByteArray &fileMD5Sum = QByteArray(), quint64 size = 0){
+    bool responseFileDownloadRequest(SOCKETID socketID, bool accepted, const QString &fileName, const QByteArray &fileMD5Sum = QByteArray(), quint64 size = 0)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileDownloadingResponse;
@@ -228,7 +248,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message){
+    bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileUploadingResponse;
@@ -240,7 +261,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool requestFileData(SOCKETID socketID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex){
+    bool requestFileData(SOCKETID socketID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex)
+    {
         //qDebug()<<"--requestFileData(...) "<<" startPieceIndex:"<<startPieceIndex<<" endPieceIndex:"<<endPieceIndex;
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
@@ -253,7 +275,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool sendFileData(SOCKETID socketID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *pieceMD5){
+    bool sendFileData(SOCKETID socketID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *pieceMD5)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileData;
@@ -266,7 +289,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool fileTXStatusChanged(SOCKETID socketID, const QByteArray &fileMD5, quint8 status){
+    bool fileTXStatusChanged(SOCKETID socketID, const QByteArray &fileMD5, quint8 status)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileTXStatus;
@@ -277,7 +301,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool fileTXError(SOCKETID socketID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString){
+    bool fileTXError(SOCKETID socketID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString)
+    {
 
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileTXError;
@@ -289,7 +314,8 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool stopFileTX(SOCKETID socketID, const QString &remoteFileName, const QByteArray &fileMD5){
+    bool stopFileTX(SOCKETID socketID, const QString &remoteFileName, const QByteArray &fileMD5)
+    {
         FileTransferPacket packet(getSessionEncryptionKey(socketID));
         packet.InfoType = FileTransferPacket::FT_FileTXStop;
         packet.FileTXError.fileName = remoteFileName;

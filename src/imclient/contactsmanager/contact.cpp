@@ -29,17 +29,18 @@
 
 #include "contact.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 Contact::Contact(QObject *parent)
-    :IMUserBase(parent)
+    : IMUserBase(parent)
 {
     contactGroupID = defaultStrangerContactGroupID();
     interestGroupID = 0;
     systemGroupID = 0;
 
     m_remarkName = "";
-    m_showRemarkName= true;
+    m_showRemarkName = true;
 
     m_socketID = INVALID_SOCK_ID;
 
@@ -47,14 +48,14 @@ Contact::Contact(QObject *parent)
 }
 
 Contact::Contact(const QString &contactID, QObject *parent)
-    :IMUserBase(contactID, parent)
+    : IMUserBase(contactID, parent)
 {
     contactGroupID = defaultStrangerContactGroupID();
     interestGroupID = 0;
     systemGroupID = 0;
 
     m_remarkName = "";
-    m_showRemarkName= true;
+    m_showRemarkName = true;
 
     m_socketID = INVALID_SOCK_ID;
 
@@ -62,33 +63,35 @@ Contact::Contact(const QString &contactID, QObject *parent)
 }
 
 Contact::Contact(const QString &contactID, const QString &nickname, QObject *parent)
-    :IMUserBase(contactID, parent)
+    : IMUserBase(contactID, parent)
 {
 
     setNickName(nickname);
-    
+
     contactGroupID = defaultStrangerContactGroupID();
     interestGroupID = 0;
     systemGroupID = 0;
 
     m_remarkName = "";
-    m_showRemarkName= true;
+    m_showRemarkName = true;
 
     m_socketID = INVALID_SOCK_ID;
 
 
 }
 
-Contact::~Contact() {
-	// TODO Auto-generated destructor stub
+Contact::~Contact()
+{
+    // TODO Auto-generated destructor stub
 }
 
-QString Contact::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
-    
+QString Contact::databaseColumnName(IM::PropertyIDOfUser propertyID) const
+{
+
 //    qDebug()<<"--Contact::databaseColumnName(...)";
-    
+
     QString columnName = "";
-    switch(propertyID){
+    switch(propertyID) {
     case IM::PI_UserID:
         columnName = "UserID";
         break;
@@ -110,7 +113,7 @@ QString Contact::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
     case IM::PI_ContactGroupID :
         columnName = "ContactGroupID";
         break;
-        
+
     case IM::PI_PersonalSummaryInfoVersion:
         columnName = "PersonalSummaryInfoVersion";
         break;
@@ -196,7 +199,7 @@ QString Contact::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
     case IM::PI_RemarkName :
         columnName = "RemarkName";
         break;
-        
+
     default:
         columnName = "";
 
@@ -211,23 +214,28 @@ QString Contact::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
 
 }
 
-bool Contact::isFriend(){
+bool Contact::isFriend()
+{
     return (contactGroupID != defaultStrangerContactGroupID()) && (contactGroupID != defaultBlacklistContactGroupID());
 }
 
-bool Contact::isStranger(){
+bool Contact::isStranger()
+{
     return contactGroupID == defaultStrangerContactGroupID();
 }
 
-bool Contact::isBlacklisted(){
+bool Contact::isBlacklisted()
+{
     return contactGroupID == defaultBlacklistContactGroupID();
 }
 
-void Contact::appandUnreadMessage(const QString &time, const QString &message){
+void Contact::appandUnreadMessage(const QString &time, const QString &message)
+{
     unreadMessages.insertMulti(time, message);
 }
 
-QMap<QString/*Time String*/, QString/*Message*/> Contact::takeUnreadMessages(){
+QMap<QString/*Time String*/, QString/*Message*/> Contact::takeUnreadMessages()
+{
 
     QMap<QString, QString> messages = unreadMessages;
     unreadMessages.clear();

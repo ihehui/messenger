@@ -16,23 +16,25 @@
 #include "HHSharedGUI/hloginbase.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class Login :public LoginBase{
+class Login : public LoginBase
+{
 
 public:
-        Login(IMUser *user, QObject *parent = 0);
-	virtual ~Login();
+    Login(IMUser *user, QObject *parent = 0);
+    virtual ~Login();
 
-	bool isVerified();
+    bool isVerified();
 
 private:
-	bool verifyUser();
-	 //bool canLogin();
+    bool verifyUser();
+    //bool canLogin();
 
-        IMUser *user;
+    IMUser *user;
 
-	//QLocalServer *localServer;
+    //QLocalServer *localServer;
 
 
 

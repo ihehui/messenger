@@ -38,25 +38,27 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class ServerInfoModel : public QAbstractTableModel {
-	Q_OBJECT
+class ServerInfoModel : public QAbstractTableModel
+{
+    Q_OBJECT
 
 public:
-	ServerInfoModel(QObject *parent = 0);
-	virtual ~ServerInfoModel();
+    ServerInfoModel(QObject *parent = 0);
+    virtual ~ServerInfoModel();
 
-    void setServersList(QList<ServerInfo*> serversList);
+    void setServersList(QList<ServerInfo *> serversList);
 
-    int rowCount ( const QModelIndex & parent = QModelIndex() ) const ;
-    int	columnCount ( const QModelIndex & parent = QModelIndex() ) const;
-    QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const ;
+    int rowCount ( const QModelIndex &parent = QModelIndex() ) const ;
+    int	columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const ;
     QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
 
 private:
-	QList<ServerInfo *> serversList;
+    QList<ServerInfo *> serversList;
 
 
 };

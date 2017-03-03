@@ -49,7 +49,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class SHAREDIMLIB_API IMUserBase : public User//, public Singleton<IMUserBase>
 {
@@ -57,16 +58,16 @@ class SHAREDIMLIB_API IMUserBase : public User//, public Singleton<IMUserBase>
     //friend class Singleton<IMUserBase>;
 
 public:
-    enum FriendshipApply{FA_AUTO_ACCEPT = 0, FA_REQUIRE_AUTHENTICATION = 1};
-    enum FriendshipApplyResult{FAR_UNKNOWN = 0, FAR_ACCEPTED = 1, FAR_DENIED};
+    enum FriendshipApply {FA_AUTO_ACCEPT = 0, FA_REQUIRE_AUTHENTICATION = 1};
+    enum FriendshipApplyResult {FAR_UNKNOWN = 0, FAR_ACCEPTED = 1, FAR_DENIED};
 
-    enum ShortTalk{ST_AUTO_ACCEPT = 0, ST_PROMPT = 1, ST_DENY = 2};
-    enum AgeSection{Age_Any = 0, Age_1_18, Age_19_30, Age_23_30, Age_31_40, Age_40_};
+    enum ShortTalk {ST_AUTO_ACCEPT = 0, ST_PROMPT = 1, ST_DENY = 2};
+    enum AgeSection {Age_Any = 0, Age_1_18, Age_19_30, Age_23_30, Age_31_40, Age_40_};
 
-    enum AccountState{AS_Invalid = 0, AS_Normal, AS_Banned, AS_Limitted};
+    enum AccountState {AS_Invalid = 0, AS_Normal, AS_Banned, AS_Limitted};
 
     IMUserBase(QObject *parent = 0);
-    IMUserBase(const QString & userID, QObject *parent = 0);
+    IMUserBase(const QString &userID, QObject *parent = 0);
     virtual ~IMUserBase();
 
     static QString defaultFriendContactGroupName();
@@ -77,15 +78,15 @@ public:
     static quint32 defaultBlacklistContactGroupID();
 
 //    QByteArray encryptedPassword() const;
-    
+
     void addUpdatedPersonalInfoProperty(IM::PropertyIDOfUser propertyID, const QString &value, bool summaryInfo);
     QString getUpdateSQLStatement(bool summaryInfo) const;
     void clearUpdatedProperties();
-    
+
     virtual QString databaseColumnName(IM::PropertyIDOfUser propertyID) const = 0;
 
     quint32 updatePersonalContactGroupsInfoVersion();
-    
+
 
 
     FriendshipApply getFriendshipApply() const
@@ -103,10 +104,12 @@ public:
 //        return personalContactGroupsHash;
 //    }
 
-    quint32 getPersonalMessageInfoVersion() const{
+    quint32 getPersonalMessageInfoVersion() const
+    {
         return personalMessageInfoVersion;
     }
-    QString getPersonalMessage() const{
+    QString getPersonalMessage() const
+    {
         return personalMessage;
     }
 
@@ -114,13 +117,13 @@ public:
     {
         return personalContactGroupsInfoVersion;
     }
-    
+
 
     quint32 getInterestGroupInfoVersion() const
     {
         return interestGroupInfoVersion;
     }
-    
+
 //    QList<quint32> getInterestGroups() const
 //    {
 //        return interestGroups;
@@ -181,11 +184,13 @@ public:
 //        this->personalContactGroupsHash = personalContactGroups;
 //    }
 
-    void setPersonalMessageInfoVersion(quint32 personalMessageInfoVersion){
+    void setPersonalMessageInfoVersion(quint32 personalMessageInfoVersion)
+    {
         this->personalMessageInfoVersion = personalMessageInfoVersion;
         addUpdatedPersonalInfoProperty(IM::PI_PersonalMessageInfoVersion, QString::number(personalMessageInfoVersion), true);
     }
-    void setPersonalMessage(const QString &personalMessage){
+    void setPersonalMessage(const QString &personalMessage)
+    {
         this->personalMessage = personalMessage;
         addUpdatedPersonalInfoProperty(IM::PI_PersonalMessage, "'" + personalMessage + "'", true);
     }
@@ -204,7 +209,7 @@ public:
 
     }
 
-    
+
     void setPersonalSummaryInfoVersion(quint32 personalSummaryInfoVersion)
     {
         this->personalSummaryInfoVersion = personalSummaryInfoVersion;
@@ -229,32 +234,45 @@ public:
         this->userRole = userRole;
     }
 
-    void setAccountState(AccountState state){
+    void setAccountState(AccountState state)
+    {
         this->accountState = state;
     }
-    AccountState getAccountState() const{
+    AccountState getAccountState() const
+    {
         return accountState;
     }
 
-    void setLastLoginDeviceInfo(const QString deviceInfo){
+    void setLastLoginDeviceInfo(const QString deviceInfo)
+    {
         this->lastLoginDeviceInfo = deviceInfo;
     }
-    QString getLastLoginDeviceInfo() const{
+    QString getLastLoginDeviceInfo() const
+    {
         return this->lastLoginDeviceInfo;
     }
 
 
 
-    void setSocketID(int socketID){this->m_socketID = socketID;}
-    int getSocketID(){return m_socketID;}
-    bool isConnected(){return m_socketID != INVALID_SOCK_ID;}
+    void setSocketID(int socketID)
+    {
+        this->m_socketID = socketID;
+    }
+    int getSocketID()
+    {
+        return m_socketID;
+    }
+    bool isConnected()
+    {
+        return m_socketID != INVALID_SOCK_ID;
+    }
 
 
 
 
 private:
     void init();
-    
+
 
 
 public slots:
@@ -267,12 +285,12 @@ public slots:
 
     QList<ContactGroupBase *> getContactGroups(bool noStrangers = true, bool noBlacklisted = true);
     QStringList friendContactGroupNames();
-    ContactGroupBase * getContactGroup(int personalContactGroupID);
-    ContactGroupBase * getContactGroup(const QString &groupName);
+    ContactGroupBase *getContactGroup(int personalContactGroupID);
+    ContactGroupBase *getContactGroup(const QString &groupName);
     quint32 getContactGroupID(const QString &groupName);
     QString getContactGroupName(int groupID) const;
 
-    ContactGroupBase * addContactGroup(int contactGroupID, const QString &groupName);
+    ContactGroupBase *addContactGroup(int contactGroupID, const QString &groupName);
     void deleteContactGroup(quint32 contactGroupID);
     void renameContactGroup(quint32 contactGroupID, const QString &newGroupName);
 
@@ -310,11 +328,11 @@ public slots:
     int getUnusedContactGroupID();
 
     //    QString groupNameThatContactBelongsTo(const QString &contactID) const;
-    
+
     void ensureDefaultGroups();
-    ContactGroupBase * friendsGroup() const;
-    ContactGroupBase * strangersGroup() const;
-    ContactGroupBase * blacklistGroup() const;
+    ContactGroupBase *friendsGroup() const;
+    ContactGroupBase *strangersGroup() const;
+    ContactGroupBase *blacklistGroup() const;
 
 
 private:
@@ -334,7 +352,7 @@ private:
 
 //    QList<quint32/*Group ID*/> interestGroups;
     quint32 interestGroupInfoVersion;
-    
+
     quint32 personalSummaryInfoVersion;
     quint32 personalDetailInfoVersion;
     quint32 personalContactGroupsInfoVersion;
@@ -347,7 +365,7 @@ private:
     AccountState accountState;
 
     QByteArray sessionEncryptionKey;
-    
+
     QHash<IM::PropertyIDOfUser/*Property ID*/, QString/*SQL Update Statement*/> updatedSummaryInfoProperties;
     QHash<IM::PropertyIDOfUser/*Property ID*/, QString/*SQL Update Statement*/> updatedDetailInfoProperties;
     QMutex *updatedPropertiesMutex;

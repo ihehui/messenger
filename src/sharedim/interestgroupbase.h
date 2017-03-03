@@ -22,17 +22,19 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-class SHAREDIMLIB_API InterestGroupBase : public IMGroupBase {
+class SHAREDIMLIB_API InterestGroupBase : public IMGroupBase
+{
     Q_OBJECT
 public:
 
-    enum GroupType{Group_SystemDefault=1, Group_UserCreated=2};
-    enum MemberRole{Role_Creator =1, Role_Administrator=2, Role_Member=3};
+    enum GroupType {Group_SystemDefault = 1, Group_UserCreated = 2};
+    enum MemberRole {Role_Creator = 1, Role_Administrator = 2, Role_Member = 3};
 
-    enum LogType{
-        LOG_GroupCreated=1,
+    enum LogType {
+        LOG_GroupCreated = 1,
         Log_GroupDisbanded,
         LOG_ContactInvitedToJoin,
         Log_ContactRequestToJoin,
@@ -45,8 +47,8 @@ public:
         LOG_ContactRenamed
     };
 
-    enum Privacy{
-        Allow_Anyone_To_Join=1,
+    enum Privacy {
+        Allow_Anyone_To_Join = 1,
         Request_Verfication_To_Join,
         Only_Invited_Can_Join
     };
@@ -54,10 +56,10 @@ public:
 
     InterestGroupBase(quint32 groupID = 0, const QString &groupName = "", QObject *parent = 0);
     virtual ~InterestGroupBase();
-    
+
     void setGroupInfoString(const QString &infoString);
     QString getGroupInfoString();
-    
+
     void addMember(const QString &memberuserID, MemberRole memberRole);
     void deleteMember(const QString &memberuserID);
     bool hasMember(const QString &memberUserID);
@@ -67,10 +69,10 @@ public:
     bool isAdmin(const QString &memberUserID);
     bool isCreator(const QString &memberUserID);
 
-    
-    
-    
-    
+
+
+
+
 
     QString getAnnouncement() const
     {
@@ -92,7 +94,7 @@ public:
         return m_groupType;
     }
 
-    QHash<QString,MemberRole> getMembersHash() const
+    QHash<QString, MemberRole> getMembersHash() const
     {
         return membersHash;
     }
@@ -107,7 +109,8 @@ public:
         return remark;
     }
 
-    quint8 getState(){
+    quint8 getState()
+    {
         return state;
     }
 
@@ -118,22 +121,22 @@ public:
     void setAnnouncement(QString announcement)
     {
         this->announcement = announcement;
-        addUpdatedProperty(IM::PIG_Announcement, "'"+announcement+"'");
-        
+        addUpdatedProperty(IM::PIG_Announcement, "'" + announcement + "'");
+
     }
 
     void setCreationTime(QDateTime creationTime)
     {
         this->creationTime = creationTime;
-        addUpdatedProperty(IM::PIG_CreationTime, "'"+creationTime.toString("yyyy.MM.dd hh:mm:ss")+"'");
-        
+        addUpdatedProperty(IM::PIG_CreationTime, "'" + creationTime.toString("yyyy.MM.dd hh:mm:ss") + "'");
+
     }
 
     void setDescription(QString description)
     {
         this->description = description;
-        addUpdatedProperty(IM::PIG_Description, "'"+description+"'");
-        
+        addUpdatedProperty(IM::PIG_Description, "'" + description + "'");
+
     }
 
 
@@ -141,11 +144,11 @@ public:
     {
         this->m_groupType = GroupType(groupTypeID);
         addUpdatedProperty(IM::PIG_GroupTypeID, QString::number(groupTypeID));
-        
+
     }
 
 
-    void setMembersHash(QHash<QString,MemberRole> membersHash)
+    void setMembersHash(QHash<QString, MemberRole> membersHash)
     {
         this->membersHash = membersHash;
     }
@@ -154,26 +157,29 @@ public:
     {
         this->parentGroupID = parentGroupID;
         addUpdatedProperty(IM::PIG_ParentGroupID, QString::number(parentGroupID) );
-        
+
     }
 
     void setRemark(QString remark)
     {
         this->remark = remark;
-        addUpdatedProperty(IM::PIG_Remark, "'"+remark+"'");
-        
+        addUpdatedProperty(IM::PIG_Remark, "'" + remark + "'");
+
     }
 
-    void setState(quint8 state){
+    void setState(quint8 state)
+    {
         this->state = state;
         addUpdatedProperty(IM::PIG_State, QString::number(state) );
     }
 
-    void setPrivacy(quint8 privacy){
+    void setPrivacy(quint8 privacy)
+    {
         this->privacy = Privacy(privacy);
         addUpdatedProperty(IM::PIG_Privacy, QString::number(privacy) );
     }
-    quint8 getPrivacy(){
+    quint8 getPrivacy()
+    {
         return quint8(privacy);
     }
 
@@ -182,11 +188,11 @@ public:
 protected:
 
 private:
-    
+
     GroupType m_groupType;
     quint32 parentGroupID;
     QDateTime creationTime;
-    
+
     QString description;
     QString announcement;
     QString remark;

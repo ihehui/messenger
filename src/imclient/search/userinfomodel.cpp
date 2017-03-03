@@ -36,13 +36,16 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-ContactInfo::ContactInfo(QString userID){
+ContactInfo::ContactInfo(QString userID)
+{
     this->userID = userID;
 }
 
-bool ContactInfo::isNull(){
+bool ContactInfo::isNull()
+{
     return userID.trimmed().isEmpty();
 }
 
@@ -50,17 +53,19 @@ bool ContactInfo::isNull(){
 
 
 UserInfoModel::UserInfoModel(QObject *parent)
-	:QAbstractTableModel(parent)
+    : QAbstractTableModel(parent)
 {
-	// TODO Auto-generated constructor stub
+    // TODO Auto-generated constructor stub
 
 }
 
-UserInfoModel::~UserInfoModel() {
+UserInfoModel::~UserInfoModel()
+{
     setUsersInfoString("");
 }
 
-void UserInfoModel::setUsersInfoString(const QString &usersInfoString){
+void UserInfoModel::setUsersInfoString(const QString &usersInfoString)
+{
 
     //TODO
     //FORMAT:UserID,NickName,Gender,Age,Face,FriendshipApply,BusinessAddress,OnlineState
@@ -74,7 +79,9 @@ void UserInfoModel::setUsersInfoString(const QString &usersInfoString){
     QStringList usersList = usersInfoString.split(QChar(SEPARTOR_GROUP));
     foreach (QString userInfo, usersList) {
         QStringList userInfoList = userInfo.split(QChar(SEPARTOR_RECORD));
-        if(userInfoList.size() != 8){continue;}
+        if(userInfoList.size() != 8) {
+            continue;
+        }
 
         ContactInfo contactInfo;
         contactInfo.userID = userInfoList.at(0);
@@ -94,43 +101,47 @@ void UserInfoModel::setUsersInfoString(const QString &usersInfoString){
 
 }
 
-ContactInfo UserInfoModel::getContactInfo(int row){
+ContactInfo UserInfoModel::getContactInfo(int row)
+{
     return contacts.at(row);
 }
 
-int UserInfoModel::rowCount ( const QModelIndex & parent) const {
-    if(parent.isValid()){
+int UserInfoModel::rowCount ( const QModelIndex &parent) const
+{
+    if(parent.isValid()) {
         return 0;
     }
     return contacts.size();
-    
+
 }
 
-int UserInfoModel::columnCount ( const QModelIndex & parent) const{
-    if(parent.isValid()){
+int UserInfoModel::columnCount ( const QModelIndex &parent) const
+{
+    if(parent.isValid()) {
         return 0;
     }
-    
+
     return 5;
-    
+
 }
 
-QVariant UserInfoModel::data ( const QModelIndex & index, int role) const{
-    if(!index.isValid()){
+QVariant UserInfoModel::data ( const QModelIndex &index, int role) const
+{
+    if(!index.isValid()) {
         return QVariant();
     }
-    
+
     int row = index.row();
-    if((row < 0) || (row >= contacts.size())){
+    if((row < 0) || (row >= contacts.size())) {
         return QVariant();
     }
-    
+
     ContactInfo info = contacts.at(row);
-    if(info.isNull()){
+    if(info.isNull()) {
         return QVariant();
     }
-    
-    if(role == Qt::DisplayRole || role == Qt::EditRole){
+
+    if(role == Qt::DisplayRole || role == Qt::EditRole) {
         switch (index.column()) {
         case 0:
             return info.userID;
@@ -150,7 +161,7 @@ QVariant UserInfoModel::data ( const QModelIndex & index, int role) const{
         default:
             return QVariant();
         }
-    }else if(role == Qt::DecorationRole){
+    } else if(role == Qt::DecorationRole) {
         switch (index.column()) {
         case 0:
             return ImageResource::createIconForContact(info.face, info.onlineState);
@@ -158,22 +169,23 @@ QVariant UserInfoModel::data ( const QModelIndex & index, int role) const{
         default:
             return QVariant();
         }
-    
+
     }
-    
-    
+
+
     return QVariant();
 
 
 
 }
 
-QVariant UserInfoModel::headerData ( int section, Qt::Orientation orientation, int role) const{
-    if(role != Qt::DisplayRole){
+QVariant UserInfoModel::headerData ( int section, Qt::Orientation orientation, int role) const
+{
+    if(role != Qt::DisplayRole) {
         return QVariant();
     }
-    
-    if(orientation ==  Qt::Horizontal){
+
+    if(orientation ==  Qt::Horizontal) {
         switch (section) {
         case 0:
             return QString(tr("User ID"));
@@ -194,9 +206,9 @@ QVariant UserInfoModel::headerData ( int section, Qt::Orientation orientation, i
             return QVariant();
             break;
         }
-        
+
     }
-    
+
     return QVariant();
 
 }

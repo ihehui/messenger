@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QHostAddress>
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class FileServer;
@@ -29,7 +30,7 @@ public slots:
 
 
 private:
-    QHash<QString /*Host Name*/, FileServer*> m_servers;
+    QHash<QString /*Host Name*/, FileServer *> m_servers;
 
 
 };

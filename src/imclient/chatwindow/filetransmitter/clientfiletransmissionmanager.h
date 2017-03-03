@@ -10,7 +10,8 @@
 
 #include "HHSharedCore/hsingleton.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ClientFileTransmissionManager : public FileTransmissionManagerBase

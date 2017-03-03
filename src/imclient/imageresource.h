@@ -19,9 +19,11 @@
 #include "HHSharedGUI/himageresourcebase.h"
 
 
-namespace HEHUI{
+namespace HEHUI
+{
 
-class ImageResource : public HEHUI::ImageResourceBase{
+class ImageResource : public HEHUI::ImageResourceBase
+{
     Q_OBJECT
 public:
     ImageResource(QObject *parent = 0);

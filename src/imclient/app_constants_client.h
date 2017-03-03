@@ -13,89 +13,89 @@
 
 
 #ifndef APP_NAME
-#define APP_NAME	"Messenger"
+    #define APP_NAME	"Messenger"
 #endif
 
 #ifndef APP_VERSION
-#define APP_VERSION	"2011.2.25.1"
+    #define APP_VERSION	"2011.2.25.1"
 #endif
 
 #ifndef APP_ICON_PATH
-#define APP_ICON_PATH	"/images/app.png"
+    #define APP_ICON_PATH	"/images/app.png"
 #endif
 
 #ifndef APP_AUTHOR
-#define APP_AUTHOR	"HeHui"
+    #define APP_AUTHOR	"HeHui"
 #endif
 
 #ifndef APP_AUTHOR_EMAIL
-#define APP_AUTHOR_EMAIL	"hehui@hehui.org"
+    #define APP_AUTHOR_EMAIL	"hehui@hehui.org"
 #endif
 
 #ifndef APP_ORG
-#define APP_ORG	"HeHui"
+    #define APP_ORG	"HeHui"
 #endif
 
 #ifndef APP_ORG_DOMAIN
-#define APP_ORG_DOMAIN	"www.hehui.org"
+    #define APP_ORG_DOMAIN	"www.hehui.org"
 #endif
 
 #ifndef APP_LICENSE
-#define APP_LICENSE	"LGPL"
+    #define APP_LICENSE	"LGPL"
 #endif
 
 #ifndef APP_SPLASH_IMAGE_PATH
-#define APP_SPLASH_IMAGE_PATH	"/images/splash.png"
+    #define APP_SPLASH_IMAGE_PATH	"/images/splash.png"
 #endif
 
 
 #ifndef LOCAL_USERDATA_DB_CONNECTION_NAME
-#define LOCAL_USERDATA_DB_CONNECTION_NAME	"LOCAL_USERDATA_DB"
+    #define LOCAL_USERDATA_DB_CONNECTION_NAME	"LOCAL_USERDATA_DB"
 #endif
 
 #ifndef LOCAL_USERDATA_DB_NAME
-#define LOCAL_USERDATA_DB_NAME	"userdata.db"
+    #define LOCAL_USERDATA_DB_NAME	"userdata.db"
 #endif
 
 #ifndef LOCAL_USERDATA_DB_DRIVER
-#define LOCAL_USERDATA_DB_DRIVER	"QSQLITE"
+    #define LOCAL_USERDATA_DB_DRIVER	"QSQLITE"
 #endif
 
 
 
 #ifndef USER_FACE_FILE_PATH_PREFIX
-#define USER_FACE_FILE_PATH_PREFIX	":/face"
+    #define USER_FACE_FILE_PATH_PREFIX	":/face"
 #endif
 
 #ifndef USER_FACE_DEFAULT_INDEX
-#define USER_FACE_DEFAULT_INDEX	 "0"
+    #define USER_FACE_DEFAULT_INDEX	 "0"
 #endif
 
 #ifndef PNG_FILE_PATH_AWAY
-#define PNG_FILE_PATH_AWAY	 "/images/away.png"
+    #define PNG_FILE_PATH_AWAY	 "/images/away.png"
 #endif
 
 #ifndef PNG_FILE_PATH_BUSY
-#define PNG_FILE_PATH_BUSY	 "/images/busy.png"
+    #define PNG_FILE_PATH_BUSY	 "/images/busy.png"
 #endif
 
 #ifndef PNG_FILE_PATH_INVISIBLE
-#define PNG_FILE_PATH_INVISIBLE	 "/images/invisible.png"
+    #define PNG_FILE_PATH_INVISIBLE	 "/images/invisible.png"
 #endif
 
 #ifndef MAX_GROUP_MEMBERS_COUNT
-#define MAX_GROUP_MEMBERS_COUNT	 256
+    #define MAX_GROUP_MEMBERS_COUNT	 256
 #endif
 
 #ifndef MAX_GROUPS_COUNT
-#define MAX_GROUPS_COUNT    20
+    #define MAX_GROUPS_COUNT    20
 #endif
 
 
 
 
 
-enum SystemTrayIconDataType{
+enum SystemTrayIconDataType {
     STIDT_Unknown = 0,
     STIDT_SystemMessage,
     STIDT_ServerAnnouncement,
@@ -104,7 +104,7 @@ enum SystemTrayIconDataType{
     STIDT_ContactChatMessage,
     STIDT_InterestGroupChatMessage,
     STIDT_InterestGroupMemberJoinedOrQuitted
-    
+
 
 
 };

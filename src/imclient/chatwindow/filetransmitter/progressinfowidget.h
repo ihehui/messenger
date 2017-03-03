@@ -12,7 +12,8 @@
 class FileTransmissionListWidget;
 
 
-namespace Ui {
+namespace Ui
+{
 class ProgressInfoWidget;
 }
 

@@ -33,11 +33,12 @@
 #include <QNetworkInterface>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QString &myID, QObject *parent)
-    :QObject(parent), m_myID(myID)
+    : QObject(parent), m_myID(myID)
 {
 
     cryptography = new Cryptography();
@@ -46,15 +47,15 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
 
     QString errorMessage = "";
     m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
-    if(!m_udpServer){
-        qCritical()<<tr("ERROR! Can not start UDP listening! %1").arg(errorMessage);
-    }else{
-        qWarning()<<QString("UDP listening on port %1 for file transmission!").arg(m_udpServer->localPort());
+    if(!m_udpServer) {
+        qCritical() << tr("ERROR! Can not start UDP listening! %1").arg(errorMessage);
+    } else {
+        qWarning() << QString("UDP listening on port %1 for file transmission!").arg(m_udpServer->localPort());
     }
 
     m_rtp = m_resourcesManager->startRTP(QHostAddress::Any, 0, true, &errorMessage);
-    if(!errorMessage.isEmpty()){
-        qCritical()<<errorMessage;
+    if(!errorMessage.isEmpty()) {
+        qCritical() << errorMessage;
     }
     //connect(m_rtp, SIGNAL(connected(int, const QString &, quint16)), this, SLOT(peerConnected(int, const QString &, quint16)));
     connect(m_rtp, SIGNAL(disconnected(int)), this, SLOT(peerDisconnected(int)));
@@ -63,7 +64,7 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
 
     //m_udpServer = m_resourcesManager->getUDPServer();
     Q_ASSERT_X(m_udpServer, "IMClientPacketsParser::IMClientPacketsParser(...)", "Invalid UDPServer!");
-    connect(m_udpServer, SIGNAL(signalNewUDPPacketReceived(Packet*)), this, SLOT(parseIncomingPacketData(Packet*)), Qt::QueuedConnection);
+    connect(m_udpServer, SIGNAL(signalNewUDPPacketReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
 
     //m_rtp = m_resourcesManager->getRTP();
     Q_ASSERT(m_rtp);
@@ -72,39 +73,40 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
     Q_ASSERT(m_udtProtocol);
     m_udtProtocol->startWaitingForIOInOneThread(20);
     //m_udtProtocol->startWaitingForIOInSeparateThread(100, 1000);
-    connect(m_udtProtocol, SIGNAL(packetReceived(Packet*)), this, SLOT(parseIncomingPacketData(Packet*)), Qt::QueuedConnection);
+    connect(m_udtProtocol, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
 
     m_tcpServer = m_rtp->getTCPServer();
     Q_ASSERT(m_tcpServer);
-    connect(m_tcpServer, SIGNAL(packetReceived(Packet*)), this, SLOT(parseIncomingPacketData(Packet*)), Qt::QueuedConnection);
+    connect(m_tcpServer, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
 
 //    m_socketConnectedToServer = INVALID_SOCK_ID;
 
 
-    
+
 
 }
 
-FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase() {
+FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase()
+{
     // TODO Auto-generated destructor stub
 
-    qDebug()<<"IMClientPacketsParser::~IMClientPacketsParser() ";
+    qDebug() << "IMClientPacketsParser::~IMClientPacketsParser() ";
 
     QMutexLocker locker(&mutex);
 
 
-    if(cryptography){
+    if(cryptography) {
         delete cryptography;
         cryptography = 0;
     }
 
 
 
-    if(m_udpServer){
+    if(m_udpServer) {
         m_udpServer->close();
     }
 
-    if(m_rtp){
+    if(m_rtp) {
         m_rtp->stopServers();
     }
 
@@ -119,7 +121,8 @@ FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase() {
 
 
 
-void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *packet){
+void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *packet)
+{
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
 
     quint8 packetType = packet->getPacketType();
@@ -131,57 +134,57 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *pack
 
 
 
-    switch(packetType){
-    case quint8(IM::CMD_DataForward):
-    {
+    switch(packetType) {
+    case quint8(IM::CMD_DataForward): {
         DataForwardPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
         QByteArray data = p.data;
 
-        if(p.isRequest){
+        if(p.isRequest) {
             QString receiverID = p.receiver;
             forwardData(peerSocketHash.value(receiverID), data);
-        }else{
+        } else {
             PacketBase packet2;
-            if(packet2.fromByteArray(&data)){
+            if(packet2.fromByteArray(&data)) {
                 packet2.setSocketID(socketID);
                 parseIncomingPacketData(&packet2);
-            }else{
-                qWarning()<<"ERROR! Can not convert data to Packet!";
+            } else {
+                qWarning() << "ERROR! Can not convert data to Packet!";
             }
         }
 
         //qDebug()<<"~~CMD_DataForward";
     }
-        break;
+    break;
 
-        ////////////////////////////////////////////
-    case quint8(IM::CMD_FileTransfer):
-    {
+    ////////////////////////////////////////////
+    case quint8(IM::CMD_FileTransfer): {
         FileTransferPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
         emit signalFileTransferPacketReceived(p);
         //qDebug()<<"~~CMD_FileTransfer";
     }
-        break;
+    break;
 
 
 
     default:
         parseOtherIncomingPacketData(packet);
-        qWarning()<<"Unknown Packet Type:"<<packetType
-                 <<" From:"<<peerAddress.toString()
-                <<" Port:"<<peerPort;
+        qWarning() << "Unknown Packet Type:" << packetType
+                   << " From:" << peerAddress.toString()
+                   << " Port:" << peerPort;
         return;
     }
 
 
 }
 
-void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(PacketBase *packet){
+void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(PacketBase *packet)
+{
     //TODO
 }
 
 
-QStringList FileTransmissionPacketsParserBase::runningNICAddresses(){
+QStringList FileTransmissionPacketsParserBase::runningNICAddresses()
+{
 
     QStringList addresses;
 
@@ -190,8 +193,12 @@ QStringList FileTransmissionPacketsParserBase::runningNICAddresses(){
             foreach (QNetworkAddressEntry entry, nic.addressEntries()) {
                 //qDebug()<<"IP:"<<entry.ip()<<" Hardware Address:"<<interface.hardwareAddress()<<" Flags:"<<interface.flags();
                 QHostAddress ip = entry.ip();
-                if(ip.protocol() == QAbstractSocket::IPv6Protocol){continue;}
-                if(ip.isLoopback()){continue;}
+                if(ip.protocol() == QAbstractSocket::IPv6Protocol) {
+                    continue;
+                }
+                if(ip.isLoopback()) {
+                    continue;
+                }
 
                 addresses.append(ip.toString());
             }
@@ -202,22 +209,26 @@ QStringList FileTransmissionPacketsParserBase::runningNICAddresses(){
 
 }
 
-QString FileTransmissionPacketsParserBase::lastErrorMessage() const{
+QString FileTransmissionPacketsParserBase::lastErrorMessage() const
+{
     return m_rtp->lastErrorString();
 }
 
-void FileTransmissionPacketsParserBase::setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey){
+void FileTransmissionPacketsParserBase::setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey)
+{
     sessionEncryptionKeyWithPeerHash[peerID] = encryptionKey;
 }
 
-void FileTransmissionPacketsParserBase::peerDisconnected(int socketID){
+void FileTransmissionPacketsParserBase::peerDisconnected(int socketID)
+{
     QString peerID = peerSocketHash.key(socketID);
     peerSocketHash.remove(peerID);
 
     emit signalPeerDisconnected(peerID);
 }
 
-QByteArray FileTransmissionPacketsParserBase::getSessionEncryptionKey(SOCKETID socketID){
+QByteArray FileTransmissionPacketsParserBase::getSessionEncryptionKey(SOCKETID socketID)
+{
     QString peerID = peerSocketHash.key(socketID);
     return sessionEncryptionKeyWithPeerHash.value(peerID);
 }

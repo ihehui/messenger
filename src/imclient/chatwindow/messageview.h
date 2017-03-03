@@ -45,14 +45,15 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class MessageView : public QWidget
 {
     Q_OBJECT
 
 public:
-    enum ImageDownloadStatus{ImageDownloading, ImageDownloaded, ImageDownloadingFailed};
+    enum ImageDownloadStatus {ImageDownloading, ImageDownloaded, ImageDownloadingFailed};
 
     explicit MessageView(bool isGroupChat, QWidget *parent = 0);
 

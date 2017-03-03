@@ -16,7 +16,8 @@
 #include "HHSharedCore/huser.h"
 #include "HHSharedCore/hsingleton.h"
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class ClientResourcesManager: public ResourcesManager, public Singleton<ClientResourcesManager>

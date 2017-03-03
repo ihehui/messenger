@@ -29,10 +29,12 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
-class MainWindow: public MainWindowBase {
+class MainWindow: public MainWindowBase
+{
     Q_OBJECT
 
 public:
@@ -48,8 +50,8 @@ public:
 
 
 protected:
-    void closeEvent(QCloseEvent * event);
-    void changeEvent(QEvent * event);
+    void closeEvent(QCloseEvent *event);
+    void changeEvent(QEvent *event);
 
 
 signals:
@@ -87,7 +89,7 @@ private slots:
     void requestChatWithContact(Contact *contact);
     void handleTooltipEventOnContactItem(Contact *contact, const QPoint &global_item_topLeft_pos, const QPoint &global_mouse_pos);
 
-    void showProgressDialog(const QString &labelText = "", const QString & cancelButtonText = "", int minimum = 0, int maximum = 0);
+    void showProgressDialog(const QString &labelText = "", const QString &cancelButtonText = "", int minimum = 0, int maximum = 0);
     void hideProgressDialog();
 
 
@@ -173,7 +175,7 @@ private slots:
     void joinInterestGroup(quint32 groupID, const QString &verificationMessage);
     void slotQuitInterestGroup();
 
-    void interestGroupItemActivated(QListWidgetItem * item );
+    void interestGroupItemActivated(QListWidgetItem *item );
     void updateAllInterestGroupsInfoToUI();
     void addInterestGroupToUI(InterestGroup *interestGroup);
     void deleteInterestGroupFromUI(InterestGroup *interestGroup);
@@ -193,7 +195,10 @@ private slots:
 
 
 
-    void on_toolButtonUserFace_clicked(){showUserInfo(m_myself);}
+    void on_toolButtonUserFace_clicked()
+    {
+        showUserInfo(m_myself);
+    }
     void showUserInfo(IMUserBase *user);
 
     void requestLogin(const QHostAddress &serverHostAddress, quint16 serverPort);
@@ -278,7 +283,7 @@ private:
     UDPServer *m_udpServer;
     RTP *m_rtp;
     int m_socketConnectedToServer;
-    QHash<int/*Socket ID*/, Contact*/*Contact*/> m_contactSocketsHash;
+    QHash<int/*Socket ID*/, Contact */*Contact*/> m_contactSocketsHash;
 
 
     Search *search;

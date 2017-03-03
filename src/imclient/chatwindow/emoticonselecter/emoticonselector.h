@@ -32,14 +32,14 @@
 //#include "evautil.h"
 
 #ifndef NUM_W
-#define NUM_COLUMN         15
-#define NUM_ROW           8
-#define NUM_GRIDS     (NUM_COLUMN * NUM_ROW)
-//#define QQ_SMILEY_AMOUNT 135
+    #define NUM_COLUMN         15
+    #define NUM_ROW           8
+    #define NUM_GRIDS     (NUM_COLUMN * NUM_ROW)
+    //#define QQ_SMILEY_AMOUNT 135
 #endif
 
 #ifndef SYSTEM_EMOTICONS_COUNT
-#define SYSTEM_EMOTICONS_COUNT 107
+    #define SYSTEM_EMOTICONS_COUNT 107
 #endif
 
 
@@ -50,11 +50,17 @@ class EmoticonPanel : public QFrame
     Q_OBJECT
 
 public:
-    EmoticonPanel(int groupIndex, const QString &groupName, QWidget* parent = 0);
+    EmoticonPanel(int groupIndex, const QString &groupName, QWidget *parent = 0);
 
     virtual ~EmoticonPanel();
-    int numPages() { return m_Surfaces.count();}
-    int page() { return m_CurrPage; }
+    int numPages()
+    {
+        return m_Surfaces.count();
+    }
+    int page()
+    {
+        return m_CurrPage;
+    }
     void setPage(int index);
 
 
@@ -65,14 +71,14 @@ public:
 private:
 
     void addEmoticonsPanel(int iStartIndex = 0);
-    
+
 protected:
     virtual void paintEvent( QPaintEvent *e);
-    virtual void mouseReleaseEvent( QMouseEvent * e);
-    
+    virtual void mouseReleaseEvent( QMouseEvent *e);
+
 signals:
     void signalEmoticonSelected(const QString &iconPath, bool isSystemEmoticon);
-    
+
 
 private:
     QString m_groupName;
@@ -96,17 +102,17 @@ class EmoticonSelector : public EmoticonSelectorUIBase
     Q_OBJECT
 
 public:
-    EmoticonSelector( QWidget* parent = 0,
+    EmoticonSelector( QWidget *parent = 0,
                       const QString &objectName = "",
                       Qt::WindowFlags fl = Qt::Popup | Qt::FramelessWindowHint);
-    
-    
+
+
     ~EmoticonSelector();
-    
+
 private:
     void loadSystemEmoticons();
     void loadCustomEmoticons();
-    
+
 
 signals:
     void signalEmoticonSelected(const QString &iconPath, bool isSystemEmoticon);
@@ -124,7 +130,7 @@ private slots:
 
 protected:
     virtual void paintEvent( QPaintEvent *e);
-    virtual void mouseReleaseEvent( QMouseEvent * e);
+    virtual void mouseReleaseEvent( QMouseEvent *e);
 
 private:
 

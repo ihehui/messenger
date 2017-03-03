@@ -32,24 +32,26 @@
 #include "./contactsmanager/contactsmanager.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 IMUser *IMUser::imUserInstance = 0;
 
-IMUser * IMUser::instance(){
-    if(imUserInstance == 0){
-		imUserInstance = new IMUser();
-	}
+IMUser *IMUser::instance()
+{
+    if(imUserInstance == 0) {
+        imUserInstance = new IMUser();
+    }
 
-	return imUserInstance;
+    return imUserInstance;
 
 }
 
-IMUser::IMUser(const QString & userID, QObject *parent)
-	:IMUserBase(userID, parent)
+IMUser::IMUser(const QString &userID, QObject *parent)
+    : IMUserBase(userID, parent)
 {
-	stateAfterLoggedin = IM::ONLINESTATE_ONLINE;
+    stateAfterLoggedin = IM::ONLINESTATE_ONLINE;
     m_loginServerAddress = "";
     m_loginServerPort = 0;
     m_regServerAddress = "";
@@ -63,101 +65,124 @@ IMUser::IMUser(const QString & userID, QObject *parent)
 
 }
 
-IMUser::~IMUser() {
-	// TODO Auto-generated destructor stub
+IMUser::~IMUser()
+{
+    // TODO Auto-generated destructor stub
 }
 
 
 
-bool IMUser::loadMyInfoFromLocalDatabase(){
+bool IMUser::loadMyInfoFromLocalDatabase()
+{
 
     return ContactsManager::instance()->getMyInfoFormLocalDatabase();
-    
+
 }
 
-bool IMUser::saveMyInfoToLocalDatabase(){
+bool IMUser::saveMyInfoToLocalDatabase()
+{
     return ContactsManager::instance()->saveMyInfoToDatabase();
 }
 
-bool IMUser::setContactInfoString(const QString &contactID, const QString &contactInfoString, bool summaryInfo){
+bool IMUser::setContactInfoString(const QString &contactID, const QString &contactInfoString, bool summaryInfo)
+{
     return ContactsManager::instance()->setContactInfoString(contactID, contactInfoString, summaryInfo);
 }
 
-bool IMUser::saveContactInfoToLocalDatabase(const QString &contactID){
+bool IMUser::saveContactInfoToLocalDatabase(const QString &contactID)
+{
     return ContactsManager::instance()->saveContactInfoToDatabase(contactID);
-    
+
 }
 
-IM::OnlineState IMUser::getStateAfterLoggedin() const{
+IM::OnlineState IMUser::getStateAfterLoggedin() const
+{
     return stateAfterLoggedin;
 }
 
-void IMUser::setStateAfterLoggedin(IM::OnlineState state){
+void IMUser::setStateAfterLoggedin(IM::OnlineState state)
+{
     this->stateAfterLoggedin = state;
 }
 
-void IMUser::setLoginServerAddress(const QString &serverAddress){
+void IMUser::setLoginServerAddress(const QString &serverAddress)
+{
     m_loginServerAddress = serverAddress;
 }
 
-QString IMUser::getLoginServerAddress() const{
+QString IMUser::getLoginServerAddress() const
+{
     return m_loginServerAddress;
 }
 
-void IMUser::setLoginServerPort(quint16 serverPort){
+void IMUser::setLoginServerPort(quint16 serverPort)
+{
     m_loginServerPort = serverPort;
 }
 
-quint16 IMUser::getLoginServerPort() const{
+quint16 IMUser::getLoginServerPort() const
+{
     return m_loginServerPort;
 }
 
-void IMUser::setRegistrationServerAddressInfo(const QString &regServerAddress){
+void IMUser::setRegistrationServerAddressInfo(const QString &regServerAddress)
+{
     m_regServerAddress = regServerAddress;
 }
 
-QString IMUser::getRegistrationServerAddressInfo() const{
+QString IMUser::getRegistrationServerAddressInfo() const
+{
     return m_regServerAddress;
 }
 
-void IMUser::setFileServerAddress(const QString &serverAddress){
+void IMUser::setFileServerAddress(const QString &serverAddress)
+{
     m_fileServerAddress = serverAddress;
 }
 
-QString IMUser::getFileServerAddress(){
+QString IMUser::getFileServerAddress()
+{
     return m_fileServerAddress;
 }
 
-void IMUser::setFileServerPort(quint16 serverPort){
+void IMUser::setFileServerPort(quint16 serverPort)
+{
     m_fileServerPort = serverPort;
 }
 
-quint16 IMUser::getFileServerPort(){
+quint16 IMUser::getFileServerPort()
+{
     return m_fileServerPort;
 }
 
-void IMUser::showStrangers(bool show){
+void IMUser::showStrangers(bool show)
+{
     m_showStrangers = show;
 }
 
-bool IMUser::isStrangersShown(){
+bool IMUser::isStrangersShown()
+{
     return m_showStrangers;
 }
 
 
-void IMUser::setAutoDownloadImageFromContact(bool autoDownload){
+void IMUser::setAutoDownloadImageFromContact(bool autoDownload)
+{
     m_autoDownloadImageFromContact = autoDownload;
 }
 
-bool IMUser::isAutoDownloadImageFromContact(){
+bool IMUser::isAutoDownloadImageFromContact()
+{
     return m_autoDownloadImageFromContact;
 }
 
-void IMUser::setSyncAllChatMessagesToServer(bool sync){
+void IMUser::setSyncAllChatMessagesToServer(bool sync)
+{
     m_syncAllChatMessagesToServer = sync;
 }
 
-bool IMUser::isSyncAllChatMessagesToServer(){
+bool IMUser::isSyncAllChatMessagesToServer()
+{
     return m_syncAllChatMessagesToServer;
 }
 
@@ -211,16 +236,18 @@ bool IMUser::isSyncAllChatMessagesToServer(){
 //}
 
 
-bool IMUser::isFriendContact(const QString &contactID){
+bool IMUser::isFriendContact(const QString &contactID)
+{
 
     return ContactsManager::instance()->isFriendContact(contactID);
 }
 
-QString IMUser::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
+QString IMUser::databaseColumnName(IM::PropertyIDOfUser propertyID) const
+{
     //qDebug()<<"--IMUser::databaseColumnName(...)";
-    
+
     QString columnName = "";
-    switch(propertyID){
+    switch(propertyID) {
     case IM::PI_SysID:
         columnName = "SysID";
         break;
@@ -242,13 +269,13 @@ QString IMUser::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
     case IM::PI_Face:
         columnName = "Face";
         break;
-          
+
     case IM::PI_PersonalContactGroupsInfoVersion :
         columnName = "PersonalContactGroupsInfoVersion";
         break;
     case IM::PI_InterestGroupsInfoVersion :
         columnName = "InterestGroupsInfoVersion";
-        break;  
+        break;
     case IM::PI_PersonalMessageInfoVersion:
         columnName = "PersonalMessageInfoVersion";
         break;
@@ -316,7 +343,7 @@ QString IMUser::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
 //    case IM::PI_EmailForSecurity:
 //        columnName = "EmailForSecurity";
 //        break;
-        
+
     case IM::PI_CompanyName:
         columnName = "CompanyName";
         break;
@@ -345,7 +372,7 @@ QString IMUser::databaseColumnName(IM::PropertyIDOfUser propertyID) const{
         columnName = "RegistrationTime";
         break;
 
-        
+
     default:
         columnName = "";
 

@@ -24,7 +24,8 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 class ChatWindowManager : public QMainWindow, public Singleton<ChatWindowManager>
 {
@@ -32,7 +33,7 @@ class ChatWindowManager : public QMainWindow, public Singleton<ChatWindowManager
     friend class Singleton<ChatWindowManager>;
 
 public:
-    enum ChatWindowDisplayStyle{TabbedChatWindow = 0, MDIChatWindow, SeparatedChatWindow};
+    enum ChatWindowDisplayStyle {TabbedChatWindow = 0, MDIChatWindow, SeparatedChatWindow};
     ChatWindowManager(QWidget *parent = 0);
     ~ChatWindowManager();
 
@@ -126,15 +127,15 @@ private slots:
 private:
     //	bool isChatWindowOpened(Contact *contact);
 
-    ContactChatWidget * createContactChatWindow(Contact *contact);
-    QMdiSubWindow* findChatWithContactMdiSubWindow(Contact *contact);
-    ContactChatWidget * findContactChatTabWidget(Contact *contact);
+    ContactChatWidget *createContactChatWindow(Contact *contact);
+    QMdiSubWindow *findChatWithContactMdiSubWindow(Contact *contact);
+    ContactChatWidget *findContactChatTabWidget(Contact *contact);
 
-    GroupChatWindow* createInterestGroupChatWindow(InterestGroup *group);
-    QMdiSubWindow* findChatWithInterestGroupMdiSubWindow(InterestGroup *group);
-    GroupChatWindow * findInterestGroupChatTabWidget(InterestGroup *group);
+    GroupChatWindow *createInterestGroupChatWindow(InterestGroup *group);
+    QMdiSubWindow *findChatWithInterestGroupMdiSubWindow(InterestGroup *group);
+    GroupChatWindow *findInterestGroupChatTabWidget(InterestGroup *group);
 
-    QMenu * chatHistoryMenu();
+    QMenu *chatHistoryMenu();
 
     bool initFileTransmission();
 

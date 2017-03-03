@@ -25,16 +25,17 @@
 
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 //QHash<int, ContactGroup*> ContactsManager::contactGroupHash = QHash<int, ContactGroup*>();
 //QHash<QString, Contact*> ContactsManager::contactHash = QHash<QString, Contact*>();
 
 ContactsManager::ContactsManager(QObject *parent)
-    :QObject(parent)
+    : QObject(parent)
 {
-    qDebug()<<"----ContactsManager::ContactsManager(QObject *parent)~~";
+    qDebug() << "----ContactsManager::ContactsManager(QObject *parent)~~";
 
     //        query = 0;
     //userPrivateDataFilePath = Settings::instance()->getUserPrivateDataFilePath(IMUser::instance()->getUserID());
@@ -46,20 +47,22 @@ ContactsManager::ContactsManager(QObject *parent)
 
 }
 
-ContactsManager::~ContactsManager() {
-    
+ContactsManager::~ContactsManager()
+{
+
     //    if(query){
     //        query->clear();
     //    }
     //    delete query;
     //    query = 0;
-    
-    
-    
-    
+
+
+
+
 }
 
-bool ContactsManager::isFriendContact(const QString &contactID){
+bool ContactsManager::isFriendContact(const QString &contactID)
+{
 
     //TODO:改进
 
@@ -67,10 +70,12 @@ bool ContactsManager::isFriendContact(const QString &contactID){
 //        return false;
 //    }
 
-    Contact * contact = contactHash.value(contactID);
-    if(!contact){return false;}
+    Contact *contact = contactHash.value(contactID);
+    if(!contact) {
+        return false;
+    }
     int groupID = contact->getContactGroupID();
-    if((groupID == ContactGroupBase::Group_Strangers_ID) || (groupID == ContactGroupBase::Group_Blacklist_ID)){
+    if((groupID == ContactGroupBase::Group_Strangers_ID) || (groupID == ContactGroupBase::Group_Blacklist_ID)) {
         return false;
     }
 
@@ -78,18 +83,22 @@ bool ContactsManager::isFriendContact(const QString &contactID){
 
 }
 
-bool ContactsManager::isStranger(const QString &contactID){
-    Contact * contact = contactHash.value(contactID);
-    if(!contact){return false;}
+bool ContactsManager::isStranger(const QString &contactID)
+{
+    Contact *contact = contactHash.value(contactID);
+    if(!contact) {
+        return false;
+    }
     int groupID = contact->getContactGroupID();
-    if((groupID == ContactGroupBase::Group_Strangers_ID)){
+    if((groupID == ContactGroupBase::Group_Strangers_ID)) {
         return true;
     }
 
     return false;
 }
 
-bool ContactsManager::hasUserInfo(const QString &userID){
+bool ContactsManager::hasUserInfo(const QString &userID)
+{
 //    bool has = false;
 //    QStringList contacts = contactHash.keys();
 //    foreach (QString id, contacts) {
@@ -105,11 +114,12 @@ bool ContactsManager::hasUserInfo(const QString &userID){
 
 }
 
-Contact * ContactsManager::getUser(const QString &contactID){
-    Contact * contact = 0;
-    if(contactHash.contains(contactID)){
+Contact *ContactsManager::getUser(const QString &contactID)
+{
+    Contact *contact = 0;
+    if(contactHash.contains(contactID)) {
         contact = contactHash.value(contactID);
-    }else{
+    } else {
         //contact = new Contact(contactID, this);
     }
 
@@ -117,34 +127,36 @@ Contact * ContactsManager::getUser(const QString &contactID){
 
 }
 
-QHash<QString, Contact *> ContactsManager::getAllUsers(){
+QHash<QString, Contact *> ContactsManager::getAllUsers()
+{
     return contactHash;
 }
 
-bool ContactsManager::loadInterestGroups(){
+bool ContactsManager::loadInterestGroups()
+{
 
     QString groupQueryString = QString("select * from interestgroups");
-    
+
     QSqlQueryModel *model = new QSqlQueryModel(this);
-    
+
     model->setQuery(queryDatabase(groupQueryString, true));
-    if(model->lastError().type() != QSqlError::NoError){
-        qCritical()<<"Query Error!"<<model->lastError().text();
+    if(model->lastError().type() != QSqlError::NoError) {
+        qCritical() << "Query Error!" << model->lastError().text();
         delete model;
         return false;
     }
 
-    for (int j=0; j<model->rowCount(); j++) {
+    for (int j = 0; j < model->rowCount(); j++) {
         quint32 groupID = QVariant(model->record(j).value("GroupID")).toUInt();
         InterestGroup *interestGroup = new InterestGroup(groupID, "", this);
         interestGroup->setGroupTypeID(QVariant(model->record(j).value("TypeID")).toUInt());
         interestGroup->setParentGroupID(QVariant(model->record(j).value("ParentGroup")).toUInt());
         interestGroup->setCreatorID(QVariant(model->record(j).value("Creator")).toString());
-        
+
         interestGroup->setGroupName(QVariant(model->record(j).value("GroupName")).toString());
         interestGroup->setCreationTime(QVariant(model->record(j).value("CreationTime")).toDateTime());
         interestGroup->setGroupInfoVersion(QVariant(model->record(j).value("GroupInfoVersion")).toUInt());
-        
+
         interestGroup->setGroupMemberListInfoVersion(QVariant(model->record(j).value("MemberListVersion")).toUInt());
         interestGroup->setDescription(QVariant(model->record(j).value("Description")).toString());
         interestGroup->setAnnouncement(QVariant(model->record(j).value("Announcement")).toString());
@@ -152,7 +164,7 @@ bool ContactsManager::loadInterestGroups(){
         interestGroup->setState(QVariant(model->record(j).value("State")).toUInt());
 
         interestGroup->clearUpdatedProperties();
-        
+
         interestGroupsHash.insert(groupID, interestGroup);
         //m_myself->addInterestGroup(groupID);
 
@@ -160,123 +172,129 @@ bool ContactsManager::loadInterestGroups(){
 
         qApp->processEvents();
     }
-    
-    
+
+
     model->deleteLater();
 
     return true;
-    
+
 }
 
-InterestGroup * ContactsManager::getInterestGroup(quint32 groupID){
+InterestGroup *ContactsManager::getInterestGroup(quint32 groupID)
+{
 
-    InterestGroup * group = 0;
-    if(interestGroupsHash.contains(groupID)){
+    InterestGroup *group = 0;
+    if(interestGroupsHash.contains(groupID)) {
         group = interestGroupsHash.value(groupID);
     }
-    
+
     return group;
 }
 
-bool ContactsManager::addNewInterestGroupToDatabase(InterestGroup *interestGroup){
-    
+bool ContactsManager::addNewInterestGroupToDatabase(InterestGroup *interestGroup)
+{
+
     quint32 groupID = interestGroup->getGroupID();
 
-    if(interestGroupsHash.contains(groupID)){
+    if(interestGroupsHash.contains(groupID)) {
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
 
     QString queryString = QString("Insert  Into [interestgroups] ([GroupID]) Values(%1)").arg(groupID);
-    
-    if(!query.exec(queryString)){
-        qCritical()<<"Can not insert new interest group data to database! Error:"<<query.lastError().text();
+
+    if(!query.exec(queryString)) {
+        qCritical() << "Can not insert new interest group data to database! Error:" << query.lastError().text();
         return false;
     }
-    
+
     interestGroupsHash.insert(groupID, interestGroup);
     //m_myself->addInterestGroup(groupID);
-    
+
     return true;
-    
+
 }
 
-bool ContactsManager::removeInterestGroupFromLocalDB(quint32 groupID){
-    
+bool ContactsManager::removeInterestGroupFromLocalDB(quint32 groupID)
+{
 
-    if(!interestGroupsHash.contains(groupID)){
+
+    if(!interestGroupsHash.contains(groupID)) {
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
-    
-    
+
+
     QString queryString = QString("delete  from [interestgroups] where GroupID='%1' ").arg(groupID) ;
-    
-    if(!query.exec(queryString)){
-        qCritical()<<"Can not delete interest group data from database! Error:"<<query.lastError().text();
+
+    if(!query.exec(queryString)) {
+        qCritical() << "Can not delete interest group data from database! Error:" << query.lastError().text();
         return false;
     }
-    
+
     interestGroupsHash.remove(groupID);
-    
-    
+
+
     return true;
-    
+
 }
 
 
-bool ContactsManager::saveInterestGroupInfoToDatabase(InterestGroup *interestGroup){
+bool ContactsManager::saveInterestGroupInfoToDatabase(InterestGroup *interestGroup)
+{
 
-    if(!interestGroup){
+    if(!interestGroup) {
         return false;
     }
-        
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
 
     QString updateSQLStatement = interestGroup->getUpdateSQLStatement();
-    if(updateSQLStatement.trimmed().isEmpty()){
+    if(updateSQLStatement.trimmed().isEmpty()) {
         return false;
     }
-    
+
     QString statement = QString("update interestgroups set %1 where GroupID='%2' ").arg(updateSQLStatement).arg(interestGroup->getGroupID());
-    qDebug()<<"statement:"<<statement;
-    if(!query.exec(statement)){
+    qDebug() << "statement:" << statement;
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save interest group info to database! Group ID:%1, %2 Error Type:%3 Error NO.:%4").arg(interestGroup->getGroupID()).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     interestGroup->clearUpdatedProperties();
-    
+
     return true;
-    
-    
+
+
 }
 
 
-QList<InterestGroup *> ContactsManager::getInterestGroupsList(){
+QList<InterestGroup *> ContactsManager::getInterestGroupsList()
+{
     return interestGroupsHash.values();
 }
 
-QList<quint32> ContactsManager::getInterestGroupIDsList(){
+QList<quint32> ContactsManager::getInterestGroupIDsList()
+{
     return interestGroupsHash.keys();
 }
 
@@ -286,84 +304,87 @@ QList<quint32> ContactsManager::getInterestGroupIDsList(){
 //    return group->getState();
 //}
 
-bool ContactsManager::saveInterestGroupMemberToDatabase(quint32 groupID, const QString &userID, quint32 memberRole){
+bool ContactsManager::saveInterestGroupMemberToDatabase(quint32 groupID, const QString &userID, quint32 memberRole)
+{
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
 
     QString statement = QString("insert into interestgroupmembers(MemberID, GroupID, MemberRole) values('%1', %2, %3)  ").arg(userID).arg(groupID).arg(memberRole);
-    
-    if(!query.exec(statement)){
+
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save interest group member info to database! Group ID:%1, User ID:%2! %3 Error Type:%4 Error NO.:%5").arg(groupID).arg(userID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     return true;
 
 }
 
 
-bool ContactsManager::saveInterestGroupMembersToDatabase(InterestGroup *interestGroup){
+bool ContactsManager::saveInterestGroupMembersToDatabase(InterestGroup *interestGroup)
+{
 
-    if(!interestGroup){
-        qCritical()<<"ERROR! Invalid InterestGroup!";
+    if(!interestGroup) {
+        qCritical() << "ERROR! Invalid InterestGroup!";
         return false;
     }
-    
+
     //TODO:
-    QHash<QString,InterestGroup::MemberRole> membersHash = interestGroup->getMembersHash();
-    if(membersHash.isEmpty()){
-        qCritical()<<"ERROR! Empty membersHash!";
+    QHash<QString, InterestGroup::MemberRole> membersHash = interestGroup->getMembersHash();
+    if(membersHash.isEmpty()) {
+        qCritical() << "ERROR! Empty membersHash!";
         return false;
     }
     quint32 groupID = interestGroup->getGroupID();
-    
-    
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+
+
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
 
     QString statement = QString("delete from interestgroupmembers where GroupID=%1 ").arg(groupID);
-    
-    if(!query.exec(statement)){
+
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not delete interest group members from database! Group ID:%1, %2 Error Type:%3 Error NO.:%4").arg(groupID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     QStringList members = membersHash.keys();
-    
+
     foreach (QString userID, members) {
-        
-        if(!saveInterestGroupMemberToDatabase(groupID, userID, membersHash.value(userID))){
+
+        if(!saveInterestGroupMemberToDatabase(groupID, userID, membersHash.value(userID))) {
             return false;
         }
-        
+
     }
-    
+
     return true;
-    
+
 }
 
-bool ContactsManager::fetchAllInterestGroupMembers(InterestGroup *interestGroup){
+bool ContactsManager::fetchAllInterestGroupMembers(InterestGroup *interestGroup)
+{
 
-    if(!interestGroup){
-        qCritical()<<"ERROR! Invalid InterestGroup!";
+    if(!interestGroup) {
+        qCritical() << "ERROR! Invalid InterestGroup!";
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -371,10 +392,10 @@ bool ContactsManager::fetchAllInterestGroupMembers(InterestGroup *interestGroup)
 
     quint32 groupID = interestGroup->getGroupID();
     QString statement = QString("select MemberID, MemberRole from interestgroupmembers where GroupID=%1 ").arg(groupID);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query interest group members from database! Group ID:%1, %2 Error Type:%3 Error NO.:%4").arg(groupID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -390,21 +411,22 @@ bool ContactsManager::fetchAllInterestGroupMembers(InterestGroup *interestGroup)
 
 }
 
-bool ContactsManager::saveContactChatMessageToDatabase(const QString &senderID, const QString &receiverID, const QString &message, const QString &time){
+bool ContactsManager::saveContactChatMessageToDatabase(const QString &senderID, const QString &receiverID, const QString &message, const QString &time)
+{
 
-    if(message.isEmpty()){
-        qWarning()<<"Empty Contact Chat Message!";
+    if(message.isEmpty()) {
+        qWarning() << "Empty Contact Chat Message!";
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
 
     QString t = time;
-    if(t.trimmed().isEmpty()){
+    if(t.trimmed().isEmpty()) {
         t = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     }
 
@@ -412,10 +434,10 @@ bool ContactsManager::saveContactChatMessageToDatabase(const QString &senderID, 
 
     QString statement = QString("insert into contactchatmessages(SenderID, ReceiverID, Message, DeliveryTime) values('%1', '%2', '%3', '%4') ").arg(senderID).arg(receiverID).arg(message).arg(t);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save contact chat message to database! Sender ID:%1, Receiver ID:%2,  %3 Error Type:%4 Error NO.:%5").arg(senderID).arg(receiverID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -424,22 +446,23 @@ bool ContactsManager::saveContactChatMessageToDatabase(const QString &senderID, 
 
 }
 
-bool ContactsManager::saveInterestGroupChatMessageToDatabase(const QString &senderID, quint32 interestGroupID, const QString &message, const QString &time){
-    qDebug()<<"--ContactsManager::saveInterestGroupChatMessageToDatabase(...) senderID:"<<senderID<<" interestGroupID:"<<interestGroupID<<" message:"<<message;
+bool ContactsManager::saveInterestGroupChatMessageToDatabase(const QString &senderID, quint32 interestGroupID, const QString &message, const QString &time)
+{
+    qDebug() << "--ContactsManager::saveInterestGroupChatMessageToDatabase(...) senderID:" << senderID << " interestGroupID:" << interestGroupID << " message:" << message;
 
-    if(message.isEmpty()){
-        qWarning()<<"Empty Interest Group Chat Message!";
+    if(message.isEmpty()) {
+        qWarning() << "Empty Interest Group Chat Message!";
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
 
     QString t = time;
-    if(t.trimmed().isEmpty()){
+    if(t.trimmed().isEmpty()) {
         t = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     }
 
@@ -447,10 +470,10 @@ bool ContactsManager::saveInterestGroupChatMessageToDatabase(const QString &send
 
     QString statement = QString("insert into interestgroupchatmessages(SenderID, GroupID, Message, DeliveryTime) values('%1', '%2', '%3', '%4') ").arg(senderID).arg(interestGroupID).arg(message).arg(t);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save interestgroup chat message to database! Sender ID:%1, GroupID ID:%2,  %3 Error Type:%4 Error NO.:%5").arg(senderID).arg(interestGroupID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
 
@@ -459,15 +482,16 @@ bool ContactsManager::saveInterestGroupChatMessageToDatabase(const QString &send
 
 }
 
-Contact * ContactsManager::createNewContact(const QString &contactID, int groupID, const QString &nickname, const QString &face){
-    qDebug()<<"--ContactsManager::createNewContact(...) "<<" contactID:"<<contactID<<" groupID:"<<groupID;
+Contact *ContactsManager::createNewContact(const QString &contactID, int groupID, const QString &nickname, const QString &face)
+{
+    qDebug() << "--ContactsManager::createNewContact(...) " << " contactID:" << contactID << " groupID:" << groupID;
 
 
     Q_ASSERT(!contactHash.contains(contactID));
     Q_ASSERT(contactID != m_myself->getUserID());
 
-    if(contactID == m_myself->getUserID()){
-        qCritical()<<"ERROR! Contact ID is myself!";
+    if(contactID == m_myself->getUserID()) {
+        qCritical() << "ERROR! Contact ID is myself!";
         return 0;
     }
 
@@ -478,14 +502,14 @@ Contact * ContactsManager::createNewContact(const QString &contactID, int groupI
 //        contact->setFace(face);
 //        contact->setContactGroupID(groupID);
 //    }else{
-        contact = new Contact(contactID, nickname, this);
-        contact->setFace(face);
-        contact->setContactGroupID(groupID);
+    contact = new Contact(contactID, nickname, this);
+    contact->setFace(face);
+    contact->setContactGroupID(groupID);
 
-        if(!slotAddNewContactToDatabase(contact)){
-            //delete contact;
-            //contact = 0;
-        }
+    if(!slotAddNewContactToDatabase(contact)) {
+        //delete contact;
+        //contact = 0;
+    }
 
 //    }
 
@@ -493,18 +517,23 @@ Contact * ContactsManager::createNewContact(const QString &contactID, int groupI
 
 }
 
-int ContactsManager::onlineContactGroupMembersCount(int contactGroupID){
+int ContactsManager::onlineContactGroupMembersCount(int contactGroupID)
+{
 
     ContactGroupBase *group = m_myself->getContactGroup(contactGroupID);
-    if(!group){return 0;}
+    if(!group) {
+        return 0;
+    }
 
     int onlineCount = 0;
     QStringList members = group->members();
     foreach (QString contactID, members) {
         Contact *contact = contactHash.value(contactID);
-        if(!contact){continue;}
+        if(!contact) {
+            continue;
+        }
         IM::OnlineState state = contact->getOnlineState();
-        if(state != IM::ONLINESTATE_OFFLINE && (state != IM::ONLINESTATE_INVISIBLE) ){
+        if(state != IM::ONLINESTATE_OFFLINE && (state != IM::ONLINESTATE_INVISIBLE) ) {
             onlineCount++;
         }
     }
@@ -513,17 +542,18 @@ int ContactsManager::onlineContactGroupMembersCount(int contactGroupID){
 
 }
 
-void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
-    qDebug()<<"ContactsManager::slotFetchAllContactsInfo(...)";
+void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView)
+{
+    qDebug() << "ContactsManager::slotFetchAllContactsInfo(...)";
 
     QString groupQueryString = QString("select * from contactgroups;");
-    
+
     QSqlQueryModel *model = new QSqlQueryModel(this);
     QSqlQueryModel *contactsModel = new QSqlQueryModel(this);
-    
+
     model->setQuery(queryDatabase(groupQueryString, true));
-    if(model->lastError().type() != QSqlError::NoError){
-        qCritical()<<"Query Error!"<<model->lastError().text();
+    if(model->lastError().type() != QSqlError::NoError) {
+        qCritical() << "Query Error!" << model->lastError().text();
         delete model;
         delete contactsModel;
         return;
@@ -533,8 +563,8 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
         model->fetchMore();
     }
 
-    
-    for (int i=0; i<model->rowCount(); i++) {
+
+    for (int i = 0; i < model->rowCount(); i++) {
         quint32 groupID = QVariant(model->record(i).value("GroupID")).toUInt();
         QString groupName = QVariant(model->record(i).value("GroupName")).toString();
 
@@ -548,12 +578,12 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
 //        group->setGroupMemberListInfoVersion(memberListVersion);
 
 
-        QList<Contact*> list;
+        QList<Contact *> list;
         QString contactsQueryString = QString("select * from contacts_detailed_info where ContactGroupID=%1") .arg(groupID);
-        
+
         contactsModel->setQuery(queryDatabase(contactsQueryString, true));
-        if(contactsModel->lastError().type() != QSqlError::NoError){
-            qCritical()<<"Query Error!"<<contactsModel->lastError().text();
+        if(contactsModel->lastError().type() != QSqlError::NoError) {
+            qCritical() << "Query Error!" << contactsModel->lastError().text();
             delete model;
             delete contactsModel;
             return;
@@ -562,11 +592,11 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
         while (contactsModel->canFetchMore()) {
             contactsModel->fetchMore();
         }
-        
-        for (int j=0; j<contactsModel->rowCount(); j++) {
+
+        for (int j = 0; j < contactsModel->rowCount(); j++) {
             QString contactUID = QVariant(contactsModel->record(j).value("UserID")).toString();
             Contact *contact = getUser(contactUID);
-            if(!contact){
+            if(!contact) {
                 contact = new Contact(contactUID, this);
             }
 
@@ -575,21 +605,21 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
             contact->setGender(IMUserBase::Gender(QVariant(contactsModel->record(j).value("Gender")).toUInt()));
             contact->setAge(IMUserBase::Gender(QVariant(contactsModel->record(j).value("Age")).toUInt()));
             contact->setFace(QVariant(contactsModel->record(j).value("Face")).toString());
-            
+
             //            contact->setInterestGroupID(QVariant(contactsModel->record(j).value("InterestGroupID")).toUInt());
             //            contact->setSystemGroupID(QVariant(contactsModel->record(j).value("SystemGroupID")).toUInt());
             contact->setPersonalDetailInfoVersion(QVariant(contactsModel->record(j).value("PersonalInfoVersion")).toUInt());
-            
+
             contact->setHomeAddress(QVariant(contactsModel->record(j).value("HomeAddress")).toString());
             contact->setHomePhoneNumber(QVariant(contactsModel->record(j).value("HomePhoneNumber")).toString());
             contact->setHomeZipCode(QVariant(contactsModel->record(j).value("HomeZipCode")).toString());
             contact->setPersonalHomepage(QVariant(contactsModel->record(j).value("PersonalHomepage")).toString());
             contact->setPersonalEmailAddress(QVariant(contactsModel->record(j).value("PersonalEmailAddress")).toString());
-            
+
             contact->setLastLoginTime(QVariant(contactsModel->record(j).value("LastLoginTime")).toDateTime());
             contact->setLastLoginExternalHostAddress(QVariant(contactsModel->record(j).value("LastLoginHostAddress")).toString());
             contact->setLastLoginExternalHostPort(QVariant(contactsModel->record(j).value("LastLoginHostPort")).toUInt());
-            
+
             //contact->setQuestionForSecurity(QVariant(contactsModel->record(j).value("QuestionForSecurity")).toString());
             //contact->setAnswerForSecurity(QVariant(contactsModel->record(j).value("AnswerForSecurity")).toString());
             contact->setCompanyName(QVariant(contactsModel->record(j).value("CompanyName")).toString());
@@ -612,11 +642,11 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
 
         }
 
-        if(groupID == ContactGroupBase::Group_Friends_ID){
+        if(groupID == ContactGroupBase::Group_Friends_ID) {
             group->setGroupName(ContactGroupBase::Group_Friends_Name);
-        }else if(groupID == ContactGroupBase::Group_Strangers_ID){
+        } else if(groupID == ContactGroupBase::Group_Strangers_ID) {
             group->setGroupName(ContactGroupBase::Group_Strangers_Name);
-        }else if(groupID == ContactGroupBase::Group_Blacklist_ID){
+        } else if(groupID == ContactGroupBase::Group_Blacklist_ID) {
             group->setGroupName(ContactGroupBase::Group_Blacklist_Name);
         }
 
@@ -629,7 +659,7 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
 //    expandListView->setCategoryHidden(QString::number(ContactGroupBase::Group_Strangers_ID), true);
 //    expandListView->setCategoryHidden(QString::number(ContactGroupBase::Group_Blacklist_ID), true);
 
-    if(!m_myself->isStrangersShown()){
+    if(!m_myself->isStrangersShown()) {
         expandListView->setCategoryHidden(QString::number(ContactGroupBase::Group_Strangers_ID), true);
     }
 
@@ -637,15 +667,16 @@ void ContactsManager::slotFetchAllContactsInfo2(ItemBoxWidget *expandListView){
     expandListView->setCategoryExpanded(QString::number(ContactGroupBase::Group_Strangers_ID), false);
     expandListView->setCategoryExpanded(QString::number(ContactGroupBase::Group_Blacklist_ID), false);
 
-    
+
     contactsModel->deleteLater();
     model->deleteLater();
 
 
 }
 
-void ContactsManager::slotFetchAllContactsInfoFromDB(){
-    qDebug()<<"ContactsManager::slotFetchAllContactsInfoFromDB()";
+void ContactsManager::slotFetchAllContactsInfoFromDB()
+{
+    qDebug() << "ContactsManager::slotFetchAllContactsInfoFromDB()";
 
     //Q_ASSERT(contactHash.isEmpty());
     foreach (Contact *contact, contactHash.values()) {
@@ -660,8 +691,8 @@ void ContactsManager::slotFetchAllContactsInfoFromDB(){
     QString contactsQueryString = QString("select * from contacts_detailed_info;");
 
     contactsModel->setQuery(queryDatabase(contactsQueryString, true));
-    if(contactsModel->lastError().type() != QSqlError::NoError){
-        qCritical()<<"Query Error!"<<contactsModel->lastError().text();
+    if(contactsModel->lastError().type() != QSqlError::NoError) {
+        qCritical() << "Query Error!" << contactsModel->lastError().text();
         delete contactsModel;
         return;
     }
@@ -670,10 +701,10 @@ void ContactsManager::slotFetchAllContactsInfoFromDB(){
         contactsModel->fetchMore();
     }
 
-    for (int j=0; j<contactsModel->rowCount(); j++) {
+    for (int j = 0; j < contactsModel->rowCount(); j++) {
         QString contactUID = QVariant(contactsModel->record(j).value("UserID")).toString();
         Contact *contact = getUser(contactUID);
-        if(!contact){
+        if(!contact) {
             contact = new Contact(contactUID, this);
         }
 
@@ -724,15 +755,16 @@ void ContactsManager::slotFetchAllContactsInfoFromDB(){
 
 }
 
-void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<quint32> *interestGroups){
-    qDebug()<<"ContactsManager::slotFetchRecentChatsFromDB()";
+void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<quint32> *interestGroups)
+{
+    qDebug() << "ContactsManager::slotFetchRecentChatsFromDB()";
 
     Q_ASSERT(contacts);
     Q_ASSERT(interestGroups);
 
 
     QDateTime time = ServerTime::instance()->time();
-    if(time.isNull()){
+    if(time.isNull()) {
         time = QDateTime::currentDateTime();
     }
     time = time.addDays(-7);
@@ -742,10 +774,10 @@ void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<qu
     QSqlQuery query(localUserDataDB);
 
     QString statement = QString("SELECT DISTINCT SenderID AS Contacts FROM contactchatmessages where SenderID <> '%1' and DeliveryTime > '%2' UNION SELECT DISTINCT ReceiverID FROM contactchatmessages where ReceiverID <> '%1' and DeliveryTime > '%2'; ").arg(m_myself->getUserID()).arg(timeString);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query recent contacts from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return ;
     }
 
@@ -753,16 +785,16 @@ void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<qu
     while (query.next()) {
         contactList.append(query.value(0).toString());
     }
-    if(contacts){
+    if(contacts) {
         *contacts = contactList;
     }
 
 
     statement = QString("SELECT DISTINCT GroupID AS Groups FROM interestgroupchatmessages where DeliveryTime > '%1' ; ").arg(timeString);
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query recent chat groups from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return ;
     }
 
@@ -771,7 +803,7 @@ void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<qu
         groupList.append(query.value(0).toUInt());
     }
 
-    if(interestGroups){
+    if(interestGroups) {
         *interestGroups = groupList;
     }
 
@@ -781,8 +813,9 @@ void ContactsManager::slotFetchRecentChatsFromDB(QStringList *contacts, QList<qu
 
 }
 
-void ContactsManager::slotAddNewContactGroupToUI(ItemBoxWidget *expandListView, int personalContactGroupID, const QString &groupName){
-    qDebug()<<"--ContactsManager::slotAddNewContactGroupToUI(...)";
+void ContactsManager::slotAddNewContactGroupToUI(ItemBoxWidget *expandListView, int personalContactGroupID, const QString &groupName)
+{
+    qDebug() << "--ContactsManager::slotAddNewContactGroupToUI(...)";
 
     //    Category *category = new Category();
     //    category->setID(QString::number(groupID));
@@ -799,16 +832,18 @@ void ContactsManager::slotAddNewContactGroupToUI(ItemBoxWidget *expandListView, 
 
 }
 
-void ContactsManager::slotDeleteContactGroupFromUI(ItemBoxWidget *expandListView, int contactGroupID){
+void ContactsManager::slotDeleteContactGroupFromUI(ItemBoxWidget *expandListView, int contactGroupID)
+{
 
     expandListView->removeCategory(QString::number(contactGroupID));
 }
 
-void ContactsManager::addContactToUI(ItemBoxWidget *expandListView, int groupID, const QString &contactID){
-    qDebug()<<"--ContactsManager::addContactToUI(...)  groupID:"<<groupID<<" contactID:"<<contactID;
+void ContactsManager::addContactToUI(ItemBoxWidget *expandListView, int groupID, const QString &contactID)
+{
+    qDebug() << "--ContactsManager::addContactToUI(...)  groupID:" << groupID << " contactID:" << contactID;
 
     Contact *contact = 0;
-    if(!contactHash.contains(contactID)){
+    if(!contactHash.contains(contactID)) {
         return;
     }
     contact = contactHash.value(contactID);
@@ -833,16 +868,18 @@ void ContactsManager::addContactToUI(ItemBoxWidget *expandListView, int groupID,
 
 }
 
-void ContactsManager::deleteContactFromUI(ItemBoxWidget *expandListView, quint32 groupID, const QString &contactID){
+void ContactsManager::deleteContactFromUI(ItemBoxWidget *expandListView, quint32 groupID, const QString &contactID)
+{
 
     expandListView->removeItem(QString::number(groupID), contactID);
 
 }
 
-void ContactsManager::moveContactToUI(ItemBoxWidget *expandListView, quint32 old_groupID, quint32 new_groupID, const QString &contactID){
-    qDebug()<<"moveContactToUI(...)";
+void ContactsManager::moveContactToUI(ItemBoxWidget *expandListView, quint32 old_groupID, quint32 new_groupID, const QString &contactID)
+{
+    qDebug() << "moveContactToUI(...)";
 
-    if(!contactHash.contains(contactID)){
+    if(!contactHash.contains(contactID)) {
         return;
     }
     expandListView->moveItem(QString::number(old_groupID), QString::number(new_groupID), contactID);
@@ -852,11 +889,12 @@ void ContactsManager::moveContactToUI(ItemBoxWidget *expandListView, quint32 old
 
 }
 
-void ContactsManager::updateContactToUI(ItemBoxWidget *expandListView, int personalContactGroupID, const QString &contactID){
+void ContactsManager::updateContactToUI(ItemBoxWidget *expandListView, int personalContactGroupID, const QString &contactID)
+{
 
 
     Contact *contact = 0;
-    if(!contactHash.contains(contactID)){
+    if(!contactHash.contains(contactID)) {
         return;
     }
     contact = contactHash.value(contactID);
@@ -869,7 +907,8 @@ void ContactsManager::updateContactToUI(ItemBoxWidget *expandListView, int perso
 }
 
 
-void ContactsManager::renameContactGroupToUI(ItemBoxWidget *expandListView, quint32 groupID, const QString &new_groupName){
+void ContactsManager::renameContactGroupToUI(ItemBoxWidget *expandListView, quint32 groupID, const QString &new_groupName)
+{
 
     //    ContactGroup *contactGroup = 0;
     //    int groupID = getGroup(group_name);
@@ -886,15 +925,15 @@ void ContactsManager::renameContactGroupToUI(ItemBoxWidget *expandListView, quin
 }
 
 
-void ContactsManager::slotLoadContactGroupToUI(ItemBoxWidget *expandListView, int groupID, const QString groupName, QList<Contact*> contactList){
-    qDebug()<<"--ContactsManager::slotLoadContactGroupToUI(...)  groupID:"<<groupID<<" groupName:"<<groupName;
+void ContactsManager::slotLoadContactGroupToUI(ItemBoxWidget *expandListView, int groupID, const QString groupName, QList<Contact *> contactList)
+{
+    qDebug() << "--ContactsManager::slotLoadContactGroupToUI(...)  groupID:" << groupID << " groupName:" << groupName;
 
     Category category;
     category.setID(QString::number(groupID));
     category.setName(groupName);
 
-    foreach(Contact *contact, contactList)
-    {
+    foreach(Contact *contact, contactList) {
         //ObjectItem *objectItem = new ObjectItem();
         ObjectItem objectItem;
         objectItem.setID(contact->getUserID());
@@ -938,7 +977,8 @@ void ContactsManager::slotLoadContactGroupToUI(ItemBoxWidget *expandListView, in
 
 }
 
-inline void ContactsManager::addNewContactGroupToUI(ItemBoxWidget *expandListView, Category category){
+inline void ContactsManager::addNewContactGroupToUI(ItemBoxWidget *expandListView, Category category)
+{
 
 //    int groupID = category.id().toInt();
 //    if(groupID == ContactGroupBase::Group_Friends_ID){
@@ -951,13 +991,13 @@ inline void ContactsManager::addNewContactGroupToUI(ItemBoxWidget *expandListVie
 
 
     int groupID = category.id().toInt();
-    if(groupID == ContactGroupBase::Group_Friends_ID){
+    if(groupID == ContactGroupBase::Group_Friends_ID) {
         expandListView->addCategory(category, 0);
-    }else if(groupID == ContactGroupBase::Group_Strangers_ID ){
-        expandListView->addCategory(category, expandListView->categoryCount()-1);
-    }else if(groupID == ContactGroupBase::Group_Blacklist_ID){
+    } else if(groupID == ContactGroupBase::Group_Strangers_ID ) {
+        expandListView->addCategory(category, expandListView->categoryCount() - 1);
+    } else if(groupID == ContactGroupBase::Group_Blacklist_ID) {
         expandListView->addCategory(category, -1);
-    }else{
+    } else {
         expandListView->addCategory(category, 1);
     }
 
@@ -979,33 +1019,35 @@ inline void ContactsManager::addNewContactGroupToUI(ItemBoxWidget *expandListVie
 
 //}
 
-bool ContactsManager::deleteContact(const QString &contactID, bool addToBlacklist){
+bool ContactsManager::deleteContact(const QString &contactID, bool addToBlacklist)
+{
 
     Contact *contact = contactHash.value(contactID);
-    if(!contact){
+    if(!contact) {
         return false;
     }
 
     int oldGroupID = contact->getContactGroupID();
-    if(addToBlacklist){
+    if(addToBlacklist) {
         contact->setContactGroupID(ContactGroupBase::Group_Blacklist_ID);
         m_myself->moveContactToAnotherGroup(contactID, oldGroupID, ContactGroupBase::Group_Blacklist_ID);
-    }else{
+    } else {
         contact->setContactGroupID(ContactGroupBase::Group_Strangers_ID);
         //if(oldGroupID == ContactGroupBase::Group_Strangers_ID){
         //    m_imUser->strangersGroup()->deleteMember(contactID);
         //}else{
-            m_myself->moveContactToAnotherGroup(contactID, oldGroupID, ContactGroupBase::Group_Strangers_ID);
+        m_myself->moveContactToAnotherGroup(contactID, oldGroupID, ContactGroupBase::Group_Strangers_ID);
         //}
     }
 
     return true;
 }
 
-bool ContactsManager::moveContact(const QString &contactID, quint32 oldGroupID, quint32 newGroupID){
+bool ContactsManager::moveContact(const QString &contactID, quint32 oldGroupID, quint32 newGroupID)
+{
 
     Contact *contact = contactHash.value(contactID);
-    if(!contact){
+    if(!contact) {
         return false;
     }
     contact->setContactGroupID(newGroupID);
@@ -1017,9 +1059,10 @@ bool ContactsManager::moveContact(const QString &contactID, quint32 oldGroupID, 
 }
 
 
-void ContactsManager::slotChangeContactOnlineState(const QString &contactID, quint8 onlineStateCode, const QString &peerAddress, quint16 peerPort, const QString &greetingInfo){
+void ContactsManager::slotChangeContactOnlineState(const QString &contactID, quint8 onlineStateCode, const QString &peerAddress, quint16 peerPort, const QString &greetingInfo)
+{
 
-    qDebug()<<"----ContactsManager::slotChangeContactOnlineState(...) "<<" contactID:"<<contactID;
+    qDebug() << "----ContactsManager::slotChangeContactOnlineState(...) " << " contactID:" << contactID;
 
     Contact *contact = contactHash.value(contactID);
     contact->setOnlineState(IM::OnlineState(onlineStateCode));
@@ -1030,32 +1073,33 @@ void ContactsManager::slotChangeContactOnlineState(const QString &contactID, qui
 
 //添加新的联系人
 //Add new contact
-bool ContactsManager::slotAddNewContactToDatabase(Contact *contact){
-    qDebug()<<"----ContactsManager::slotAddNewContactToDatabase(...)  Contact ID:"<<contact->getUserID();
-    
-    if(contactHash.contains(contact->getUserID())){
-        qCritical()<<"Error! Contact already exists!";
+bool ContactsManager::slotAddNewContactToDatabase(Contact *contact)
+{
+    qDebug() << "----ContactsManager::slotAddNewContactToDatabase(...)  Contact ID:" << contact->getUserID();
+
+    if(contactHash.contains(contact->getUserID())) {
+        qCritical() << "Error! Contact already exists!";
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
-    
+
     QString contactUID = contact->getUserID();
     int contactsGroupID = contact->getContactGroupID();
     QString contactNickName = contact->getNickName();
     QString face = contact->getFace();
-    
+
     QString queryString = QString("Insert  Into [contacts_detailed_info] ([UserID],[NickName],[Face],[ContactGroupID]) Values('%1', '%2', '%3', %4)")
-            .arg(contactUID).arg(contactNickName).arg(face).arg(contactsGroupID) ;
+                          .arg(contactUID).arg(contactNickName).arg(face).arg(contactsGroupID) ;
     //QSqlQuery query = queryDatabase(queryString, true);
-    
-    if(!query.exec(queryString)){
-        qCritical()<<"ERROR! Can not insert new contact data to database! "<<query.lastError().text();
+
+    if(!query.exec(queryString)) {
+        qCritical() << "ERROR! Can not insert new contact data to database! " << query.lastError().text();
         return false;
     }
 
@@ -1064,24 +1108,25 @@ bool ContactsManager::slotAddNewContactToDatabase(Contact *contact){
     m_myself->addNewContact(contactUID, contactsGroupID);
 
     return true;
-    
+
 }
 
 //删除联系人
 //Delete contact
-bool ContactsManager::slotdeleteContactFromDatabase(Contact *contact){
-    qDebug()<<"----ContactsManager::slotdeleteContactFromDatabase(...)";
+bool ContactsManager::slotdeleteContactFromDatabase(Contact *contact)
+{
+    qDebug() << "----ContactsManager::slotdeleteContactFromDatabase(...)";
 
     QString contactID = contact->getUserID();
 
-    if(!contactHash.contains(contactID)){
+    if(!contactHash.contains(contactID)) {
         return false;
     }
     contactHash.remove(contactID);
 
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1090,8 +1135,8 @@ bool ContactsManager::slotdeleteContactFromDatabase(Contact *contact){
     QString contactUID = contact->getUserID();
 
     QString queryString = QString("Delete  From [contacts_detailed_info] Where [UserID] ='%1' ").arg(contactUID);
-    if(!query.exec(queryString)){
-        qCritical()<<"Can not delete contact data from database! Error:"<<query.lastError().text();
+    if(!query.exec(queryString)) {
+        qCritical() << "Can not delete contact data from database! Error:" << query.lastError().text();
         return false;
     }
 
@@ -1113,7 +1158,7 @@ bool ContactsManager::slotdeleteContactFromDatabase(Contact *contact){
 //        }
 //    }
 //    QSqlQuery query(localUserDataDB);
-    
+
 //    QString queryString = QString("Select [GroupName]  From [contactgroups] where [GroupID] = %1 ").arg(personalContactGroupID);
 
 //    //QSqlQuery query = queryDatabase(queryString, true);
@@ -1122,44 +1167,45 @@ bool ContactsManager::slotdeleteContactFromDatabase(Contact *contact){
 
 //        return "";
 //    }
-    
+
 //    query.first();
 //    if(!query.isValid()){
 //        return "";
 //    }
-    
-    
+
+
 //    return query.value(0).toString();
-    
+
 //}
 
-bool ContactsManager::slotAddNewContactGroupToDatabase(quint32 groupID, const QString &groupName){
-    qDebug()<<"--slotAddNewContactGroupToDatabase(...) groupID:"<<groupID<<" groupName"<<groupName;
+bool ContactsManager::slotAddNewContactGroupToDatabase(quint32 groupID, const QString &groupName)
+{
+    qDebug() << "--slotAddNewContactGroupToDatabase(...) groupID:" << groupID << " groupName" << groupName;
 
-    Q_ASSERT(groupID>0);
-    if(groupName.trimmed().isEmpty()){
+    Q_ASSERT(groupID > 0);
+    if(groupName.trimmed().isEmpty()) {
         return false;
     }
 
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
-    
+
     QString queryString = QString("Insert  Into [contactgroups] ([GroupID], [GroupName]) Values(%1, '%2')").arg(groupID).arg(groupName);
 //    if(!groupID){
 //        queryString = QString("Insert  Into [contactgroups] ([GroupID], [GroupName]) Values(NULL, '%1')").arg(groupName);
 //    }
 
-    if(!query.exec(queryString)){
-        qCritical()<<QString("Can not add new contact group! Group Name:'%1', Error:%2").arg(groupName).arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("Can not add new contact group! Group Name:'%1', Error:%2").arg(groupName).arg(query.lastError().text());
 
         return false;
     }
-    
+
 //    if(!groupID){
 
 //        queryString = QString("Select [GroupID]  From [contactgroups] where [GroupName] = '%1' ").arg(groupName);
@@ -1181,21 +1227,22 @@ bool ContactsManager::slotAddNewContactGroupToDatabase(quint32 groupID, const QS
 ////        group->setGroupName(groupName);
 
 //    }
-    
+
 //    return groupID;
 
     return true;
-    
-} 
 
-bool ContactsManager::renameContactGroupToDatabase(quint32 groupID, const QString &new_groupName){
+}
 
-    if(!m_myself->hasContactGroup(groupID)){
+bool ContactsManager::renameContactGroupToDatabase(quint32 groupID, const QString &new_groupName)
+{
+
+    if(!m_myself->hasContactGroup(groupID)) {
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1203,8 +1250,8 @@ bool ContactsManager::renameContactGroupToDatabase(quint32 groupID, const QStrin
 
     QString queryString = QString("Update [contactgroups] Set [GroupName] = '%1' where [GroupID] = %2 ").arg(new_groupName).arg(groupID);
 
-    if(!query.exec(queryString)){
-        qCritical()<<QString("Can not rename contact group! Group ID:'%1', Error:%2").arg(groupID).arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("Can not rename contact group! Group ID:'%1', Error:%2").arg(groupID).arg(query.lastError().text());
 
         return false;
     }
@@ -1217,16 +1264,17 @@ bool ContactsManager::renameContactGroupToDatabase(quint32 groupID, const QStrin
 
 }
 
-bool ContactsManager::deleteContactGroupFromDatabase(int groupID){
-    qDebug()<<"--ContactsManager::deleteContactGroupFromDatabase(..) groupID:"<<groupID;
+bool ContactsManager::deleteContactGroupFromDatabase(int groupID)
+{
+    qDebug() << "--ContactsManager::deleteContactGroupFromDatabase(..) groupID:" << groupID;
 
-    if(!m_myself->hasContactGroup(groupID)){
-        qCritical()<<"ERROR! Contact group does not exist!"<<" Group ID:"<<groupID;
+    if(!m_myself->hasContactGroup(groupID)) {
+        qCritical() << "ERROR! Contact group does not exist!" << " Group ID:" << groupID;
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1234,8 +1282,8 @@ bool ContactsManager::deleteContactGroupFromDatabase(int groupID){
 
     QString queryString = QString("Delete From [contactgroups] where [GroupID] = %1 ").arg(groupID);
 
-    if(!query.exec(queryString)){
-        qCritical()<<QString("Can not delete contact group! Group Name:'%1', Error:%2").arg(groupID).arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("Can not delete contact group! Group Name:'%1', Error:%2").arg(groupID).arg(query.lastError().text());
 
         return false;
     }
@@ -1244,12 +1292,13 @@ bool ContactsManager::deleteContactGroupFromDatabase(int groupID){
 
 }
 
-bool ContactsManager::resetAllContactGroupInDatabase(){
-    qDebug()<<"--ContactsManager::resetAllContactGroupInDatabase() ";
+bool ContactsManager::resetAllContactGroupInDatabase()
+{
+    qDebug() << "--ContactsManager::resetAllContactGroupInDatabase() ";
 
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1257,20 +1306,20 @@ bool ContactsManager::resetAllContactGroupInDatabase(){
 
     QString queryString = QString("Delete From [contactgroups] where [GroupID] <> %1 ; ").arg(ContactGroupBase::Group_Strangers_ID);
 
-    if(!query.exec(queryString)){
-        qCritical()<<QString("ERROR! Can not delete contact groups! %1").arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("ERROR! Can not delete contact groups! %1").arg(query.lastError().text());
         return false;
     }
 
     queryString = QString("Insert  Into [contactgroups] ([GroupID], [GroupName]) Values(%1, '%2') ; ").arg(ContactGroupBase::Group_Blacklist_ID).arg(ContactGroupBase::Group_Blacklist_Name);
-    if(!query.exec(queryString)){
-        qCritical()<<QString("ERROR! Can not create contact group '%1' ! %2").arg(ContactGroupBase::Group_Blacklist_Name).arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("ERROR! Can not create contact group '%1' ! %2").arg(ContactGroupBase::Group_Blacklist_Name).arg(query.lastError().text());
         return false;
     }
 
     queryString = QString("Insert  Into [contactgroups] ([GroupID], [GroupName]) Values(%1, '%2') ; ").arg(ContactGroupBase::Group_Friends_ID).arg(ContactGroupBase::Group_Friends_Name);
-    if(!query.exec(queryString)){
-        qCritical()<<QString("ERROR! Can not create contact group '%1' ! %2").arg(ContactGroupBase::Group_Friends_Name).arg(query.lastError().text());
+    if(!query.exec(queryString)) {
+        qCritical() << QString("ERROR! Can not create contact group '%1' ! %2").arg(ContactGroupBase::Group_Friends_Name).arg(query.lastError().text());
         return false;
     }
 
@@ -1279,12 +1328,13 @@ bool ContactsManager::resetAllContactGroupInDatabase(){
 }
 
 
-bool ContactsManager::getMyInfoFormLocalDatabase(){
-    qDebug()<<"--getMyInfoFormLocalDatabase()";
+bool ContactsManager::getMyInfoFormLocalDatabase()
+{
+    qDebug() << "--getMyInfoFormLocalDatabase()";
 
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1294,35 +1344,35 @@ bool ContactsManager::getMyInfoFormLocalDatabase(){
     QSqlRecord record;
     QString statement = QString("select * from my_detailed_info where UserID='%2' ").arg(m_myself->getUserID());
 
-    
-    if(!query.exec(statement)){
+
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query user info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
-    
+
+
     //    query = queryDatabase(statement, false);
     //    if((query.lastError().type() != QSqlError::NoError)){
     //        qCritical()<<QString("Can not query data from local database! Error: %1").arg(query.lastError().text());
     //        return false;
     //    }
     query.first();
-    if(!query.isValid()){
-        qCritical()<<QString("Can not query user info! Invalid record! User ID:%1").arg(m_myself->getUserID());
-        
+    if(!query.isValid()) {
+        qCritical() << QString("Can not query user info! Invalid record! User ID:%1").arg(m_myself->getUserID());
+
         statement = QString("Insert Into my_detailed_info(UserID) Values('%1')").arg(m_myself->getUserID());
-        if(!query.exec(statement)){
-            qCritical()<<"Can not insert data! "<<query.lastError().text();
+        if(!query.exec(statement)) {
+            qCritical() << "Can not insert data! " << query.lastError().text();
         }
-        
+
         return false;
     }
-    
+
 
     record = query.record();
-    
+
 //    m_imUser->setTrueName(QVariant(query.value(record.indexOf("TrueName"))).toString());
 //    m_imUser->setNickName(QVariant(query.value(record.indexOf("NickName"))).toString());
 //    m_imUser->setGender(IMUserBase::Gender(QVariant(query.value(record.indexOf("Gender"))).toUInt()));
@@ -1333,7 +1383,7 @@ bool ContactsManager::getMyInfoFormLocalDatabase(){
 //    m_imUser->setBlacklistInfoVersion(QVariant(query.value(record.indexOf("BlacklistInfoVersion"))).toUInt());
 //    m_imUser->setPersonalSummaryInfoVersion(QVariant(query.value(record.indexOf("PersonalSummaryInfoVersion"))).toUInt());
 //    m_imUser->setPersonalDetailInfoVersion(QVariant(query.value(record.indexOf("PersonalDetailInfoVersion"))).toUInt());
-    
+
 //    m_imUser->setFriendshipApply(QVariant(query.value(record.indexOf("FriendshipApply"))).toUInt());
 //    m_imUser->setShortTalk(QVariant(query.value(record.indexOf("ShortTalk"))).toUInt());
 //    m_imUser->setUserRole(QVariant(query.value(record.indexOf("Role"))).toUInt());
@@ -1410,68 +1460,71 @@ bool ContactsManager::getMyInfoFormLocalDatabase(){
     m_myself->clearUpdatedProperties();
 
     return true;
-    
+
 
 
 }
 
-bool ContactsManager::saveMyInfoToDatabase(){
+bool ContactsManager::saveMyInfoToDatabase()
+{
 
-    qDebug()<<"--ContactsManager::saveMyInfoToDatabase()";
-    
+    qDebug() << "--ContactsManager::saveMyInfoToDatabase()";
+
     //IMUser *info = IMUser::instance();
     IMUser *info = m_myself;
     QStringList updateSQLStatements;
     QString summaryInfoStatement = info->getUpdateSQLStatement(true);
     QString detailInfoStatement = info->getUpdateSQLStatement(false);
-    if(!summaryInfoStatement.trimmed().isEmpty()){
+    if(!summaryInfoStatement.trimmed().isEmpty()) {
         updateSQLStatements.append(summaryInfoStatement);
     }
-    if(!detailInfoStatement.trimmed().isEmpty()){
+    if(!detailInfoStatement.trimmed().isEmpty()) {
         updateSQLStatements.append(detailInfoStatement);
     }
-    if(updateSQLStatements.isEmpty()){
+    if(updateSQLStatements.isEmpty()) {
         return false;
     }
-    
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
     QString statement = QString("update my_detailed_info set %1 where UserID='%2' ").arg(updateSQLStatements.join(",")).arg(info->getUserID());
-    qDebug()<<"------statement:"<<statement;
-    if(!query.exec(statement)){
+    qDebug() << "------statement:" << statement;
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save user info to database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     info->clearUpdatedProperties();
-    
+
     return true;
-    
+
 }
 
-bool ContactsManager::setContactInfoString(const QString &contactID, const QString &contactInfoString, bool summaryInfo){
+bool ContactsManager::setContactInfoString(const QString &contactID, const QString &contactInfoString, bool summaryInfo)
+{
 
-    if(contactHash.contains(contactID)){
+    if(contactHash.contains(contactID)) {
         contactHash.value(contactID)->setPersonalInfoString(contactInfoString, summaryInfo);
         return true;
     }
-    
+
     return false;
-    
+
 }
 
-bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID){
-    qWarning()<<"--getContactInfoFormLocalDatabase()";
-    
-    
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID)
+{
+    qWarning() << "--getContactInfoFormLocalDatabase()";
+
+
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1480,17 +1533,17 @@ bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID){
     QSqlRecord record;
     QString statement = QString("select * from contacts_detailed_info where UserID='%2' ").arg(contactID);
 
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not query contact's' info from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     Contact *contact = 0;
-    if(contactHash.contains(contactID)){
+    if(contactHash.contains(contactID)) {
         contact = contactHash.value(contactID);
-    }else{
+    } else {
         contact = new Contact(contactID, this);
         contactHash.insert(contactID, contact);
     }
@@ -1501,31 +1554,31 @@ bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID){
     //        return false;
     //    }
     query.first();
-    if(!query.isValid()){
-        qCritical()<<QString("Can not query contact's' info! Invalid record! Contact ID:%1").arg(contactID);
-        
+    if(!query.isValid()) {
+        qCritical() << QString("Can not query contact's' info! Invalid record! Contact ID:%1").arg(contactID);
+
         return false;
     }
-    
+
 
     record = query.record();
-    
+
 
     contact->setTrueName(QVariant(query.value(record.indexOf("TrueName"))).toString());
     contact->setNickName(QVariant(query.value(record.indexOf("NickName"))).toString());
     contact->setGender(IMUserBase::Gender(QVariant(query.value(record.indexOf("Gender"))).toUInt()));
     contact->setAge(QVariant(query.value(record.indexOf("Age"))).toUInt());
     contact->setFace(QVariant(query.value(record.indexOf("Face"))).toString());
-    
+
     //    contact->setInterestGroupID(QVariant(query.value(record.indexOf("InterestGroupID"))).toUInt());
     //    contact->setSystemGroupID(QVariant(query.value(record.indexOf("SystemGroupID"))).toUInt());
     contact->setContactGroupID(QVariant(query.value(record.indexOf("ContactGroupID"))).toUInt());
     contact->setPersonalDetailInfoVersion(QVariant(query.value(record.indexOf("PersonalInfoVersion"))).toUInt());
-    
+
     //    info->setSystemGroupInfoVersion(QVariant(query.value(record.indexOf("SystemGroupsInfoVersion"))).toUInt());
     //    info->setInterestGroupInfoVersion(QVariant(query.value(record.indexOf("PersonalInterestGroupsInfoVersion"))).toUInt());
     //    info->setPersonalContactGroupsVersion(QVariant(query.value(record.indexOf("PersonalContactGroupsInfoVersion"))).toUInt());
-    
+
     contact->setHomeAddress(QVariant(query.value(record.indexOf("HomeAddress"))).toString());
     contact->setHomePhoneNumber(QVariant(query.value(record.indexOf("HomePhoneNumber"))).toString());
     contact->setHomeZipCode(QVariant(query.value(record.indexOf("HomeZipCode"))).toString());
@@ -1538,7 +1591,7 @@ bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID){
 
     //info->setQuestionForSecurity(QVariant(query.value(record.indexOf("QuestionForSecurity"))).toString());
     //info->setAnswerForSecurity(QVariant(query.value(record.indexOf("AnswerForSecurity"))).toString());
-    
+
     contact->setCompanyName(QVariant(query.value(record.indexOf("CompanyName"))).toString());
     contact->setJobTitle(QVariant(query.value(record.indexOf("JobTitle"))).toString());
 
@@ -1558,140 +1611,71 @@ bool ContactsManager::getContactInfoFormLocalDatabase(const QString &contactID){
     contact->clearUpdatedProperties();
 
     return true;
-    
+
 
 
 }
 
-bool ContactsManager::saveContactInfoToDatabase(const QString &contactID){
+bool ContactsManager::saveContactInfoToDatabase(const QString &contactID)
+{
 
-    qDebug()<<"--ContactsManager::saveContactInfoToDatabase(...)";
-    
+    qDebug() << "--ContactsManager::saveContactInfoToDatabase(...)";
+
 
     Contact *contact = 0;
-    if(contactHash.contains(contactID)){
+    if(contactHash.contains(contactID)) {
         contact = contactHash.value(contactID);
-    }else{
-        qCritical()<<"Error! Contact '"<<contactID<<"' does not exist!";
+    } else {
+        qCritical() << "Error! Contact '" << contactID << "' does not exist!";
         return false;
     }
 
     QStringList updateSQLStatements;
     QString summaryInfoStatement = contact->getUpdateSQLStatement(true);
     QString detailInfoStatement = contact->getUpdateSQLStatement(false);
-    if(!summaryInfoStatement.trimmed().isEmpty()){
+    if(!summaryInfoStatement.trimmed().isEmpty()) {
         updateSQLStatements.append(summaryInfoStatement);
     }
-    if(!detailInfoStatement.trimmed().isEmpty()){
+    if(!detailInfoStatement.trimmed().isEmpty()) {
         updateSQLStatements.append(detailInfoStatement);
     }
-    if(updateSQLStatements.isEmpty()){
+    if(updateSQLStatements.isEmpty()) {
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
     QSqlQuery query(localUserDataDB);
 
 
-    
+
     QString statement = QString("update contacts_detailed_info set %1 where UserID='%2' ").arg(updateSQLStatements.join(",")).arg(contactID);
-    qDebug()<<"statement:"<<statement;
-    if(!query.exec(statement)){
+    qDebug() << "statement:" << statement;
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not save contact info to database! Contact ID:%1, %2 Error Type:%3 Error NO.:%4").arg(contactID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        qCritical() << msg;
         return false;
     }
-    
+
     contact->clearUpdatedProperties();
-    
-    return true;
-    
-}
-
-bool ContactsManager::getContactHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword, const QString &contactID, QStringList *messages, bool *canFetchMore){
-
-    if(!messages || !canFetchMore){
-        return false;
-    }
-
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
-            return false;
-        }
-    }
-    QSqlQuery query(localUserDataDB);
-
-    int rowCount = HISTORY_MESSAGES_PAGE_SIZE+1;
-
-    QString statement = QString("SELECT SenderID, ReceiverID, Message, DeliveryTime From contactchatmessages where (SenderID = '%1' or ReceiverID = '%1') and Message like '%%2%' and  DeliveryTime between '%3' and '%4' order by DeliveryTime %5 LIMIT %6 ").arg(contactID).arg(content).arg(startTime).arg(endTime).arg(requestBackword?"desc":"asc").arg(rowCount);
-    qDebug()<<"statement:"<<statement;
-    if(!query.exec(statement)){
-        QSqlError error = query.lastError();
-        QString msg = QString("Can not query contact chat message from database! Contact ID:%1, %2 Error Type:%3 Error NO.:%4").arg(contactID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
-        return false;
-    }
-
-    QString myID = m_myself->getUserID();
-    QString myDisplayName = m_myself->getNickName();
-
-    while (query.next()) {
-        QStringList infoList;
-
-        QString senderID = query.value(0).toString();
-        QString displayName;
-        if(senderID == myID){
-            displayName = myDisplayName;
-        }else{
-            Contact *contact = contactHash.value(senderID);
-            Q_ASSERT(contact);
-            if(!contact){
-                qCritical()<<"ERROR! Contact does not exist!";
-                continue;
-            }
-            displayName = contact->displayName();
-        }
-
-        infoList.append(senderID);
-        infoList.append(displayName);
-        infoList.append(query.value(2).toString());
-        infoList.append(query.value(3).toString());
-
-        if(requestBackword){
-            messages->prepend(infoList.join(QString(PACKET_DATA_SEPARTOR)));
-        }else{
-            messages->append(infoList.join(QString(PACKET_DATA_SEPARTOR)));
-        }
-    }
-
-    if(messages->size() == rowCount){
-        if(requestBackword){
-            messages->removeFirst();
-        }else{
-            messages->removeLast();
-        }
-
-        *canFetchMore = true;
-    }else{
-        *canFetchMore = false;
-    }
 
     return true;
+
 }
 
-bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword, quint32 groupID, QStringList *messages, bool *canFetchMore){
+bool ContactsManager::getContactHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword, const QString &contactID, QStringList *messages, bool *canFetchMore)
+{
 
-    if(!messages || !canFetchMore){
+    if(!messages || !canFetchMore) {
         return false;
     }
 
-    if(!localUserDataDB.isValid()){
-        if(!openDatabase()){
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
             return false;
         }
     }
@@ -1699,12 +1683,12 @@ bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QS
 
     int rowCount = HISTORY_MESSAGES_PAGE_SIZE + 1;
 
-    QString statement = QString("SELECT SenderID, GroupID, Message, DeliveryTime From interestgroupchatmessages where GroupID = %1 and Message like '%%2%' and DeliveryTime between '%3' and '%4' order by DeliveryTime %5 LIMIT %6 ").arg(groupID).arg(content).arg(startTime).arg(endTime).arg(requestBackword?"desc":"asc").arg(rowCount);
-    qDebug()<<"statement:"<<statement;
-    if(!query.exec(statement)){
+    QString statement = QString("SELECT SenderID, ReceiverID, Message, DeliveryTime From contactchatmessages where (SenderID = '%1' or ReceiverID = '%1') and Message like '%%2%' and  DeliveryTime between '%3' and '%4' order by DeliveryTime %5 LIMIT %6 ").arg(contactID).arg(content).arg(startTime).arg(endTime).arg(requestBackword ? "desc" : "asc").arg(rowCount);
+    qDebug() << "statement:" << statement;
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
-        QString msg = QString("Can not query group chat message from database! Group ID:%1, %2 Error Type:%3 Error NO.:%4").arg(groupID).arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
+        QString msg = QString("Can not query contact chat message from database! Contact ID:%1, %2 Error Type:%3 Error NO.:%4").arg(contactID).arg(error.text()).arg(error.type()).arg(error.number());
+        qCritical() << msg;
         return false;
     }
 
@@ -1716,13 +1700,13 @@ bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QS
 
         QString senderID = query.value(0).toString();
         QString displayName;
-        if(senderID == myID){
+        if(senderID == myID) {
             displayName = myDisplayName;
-        }else{
+        } else {
             Contact *contact = contactHash.value(senderID);
             Q_ASSERT(contact);
-            if(!contact){
-                qCritical()<<"ERROR! Contact does not exist!";
+            if(!contact) {
+                qCritical() << "ERROR! Contact does not exist!";
                 continue;
             }
             displayName = contact->displayName();
@@ -1733,22 +1717,94 @@ bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QS
         infoList.append(query.value(2).toString());
         infoList.append(query.value(3).toString());
 
-        if(requestBackword){
+        if(requestBackword) {
             messages->prepend(infoList.join(QString(PACKET_DATA_SEPARTOR)));
-        }else{
+        } else {
             messages->append(infoList.join(QString(PACKET_DATA_SEPARTOR)));
         }
     }
 
-    if(messages->size() == rowCount){
-        if(requestBackword){
+    if(messages->size() == rowCount) {
+        if(requestBackword) {
             messages->removeFirst();
-        }else{
+        } else {
             messages->removeLast();
         }
 
         *canFetchMore = true;
-    }else{
+    } else {
+        *canFetchMore = false;
+    }
+
+    return true;
+}
+
+bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QString &endTime, const QString &content, bool requestBackword, quint32 groupID, QStringList *messages, bool *canFetchMore)
+{
+
+    if(!messages || !canFetchMore) {
+        return false;
+    }
+
+    if(!localUserDataDB.isValid()) {
+        if(!openDatabase()) {
+            return false;
+        }
+    }
+    QSqlQuery query(localUserDataDB);
+
+    int rowCount = HISTORY_MESSAGES_PAGE_SIZE + 1;
+
+    QString statement = QString("SELECT SenderID, GroupID, Message, DeliveryTime From interestgroupchatmessages where GroupID = %1 and Message like '%%2%' and DeliveryTime between '%3' and '%4' order by DeliveryTime %5 LIMIT %6 ").arg(groupID).arg(content).arg(startTime).arg(endTime).arg(requestBackword ? "desc" : "asc").arg(rowCount);
+    qDebug() << "statement:" << statement;
+    if(!query.exec(statement)) {
+        QSqlError error = query.lastError();
+        QString msg = QString("Can not query group chat message from database! Group ID:%1, %2 Error Type:%3 Error NO.:%4").arg(groupID).arg(error.text()).arg(error.type()).arg(error.number());
+        qCritical() << msg;
+        return false;
+    }
+
+    QString myID = m_myself->getUserID();
+    QString myDisplayName = m_myself->getNickName();
+
+    while (query.next()) {
+        QStringList infoList;
+
+        QString senderID = query.value(0).toString();
+        QString displayName;
+        if(senderID == myID) {
+            displayName = myDisplayName;
+        } else {
+            Contact *contact = contactHash.value(senderID);
+            Q_ASSERT(contact);
+            if(!contact) {
+                qCritical() << "ERROR! Contact does not exist!";
+                continue;
+            }
+            displayName = contact->displayName();
+        }
+
+        infoList.append(senderID);
+        infoList.append(displayName);
+        infoList.append(query.value(2).toString());
+        infoList.append(query.value(3).toString());
+
+        if(requestBackword) {
+            messages->prepend(infoList.join(QString(PACKET_DATA_SEPARTOR)));
+        } else {
+            messages->append(infoList.join(QString(PACKET_DATA_SEPARTOR)));
+        }
+    }
+
+    if(messages->size() == rowCount) {
+        if(requestBackword) {
+            messages->removeFirst();
+        } else {
+            messages->removeLast();
+        }
+
+        *canFetchMore = true;
+    } else {
         *canFetchMore = false;
     }
 
@@ -1760,15 +1816,15 @@ bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QS
 
 
 //bool ContactsManager::saveContactGroupsInfoToDatabase(){
-    
+
 //    foreach (Contact *contact, contactHash.values()) {
 //        contact->setContactGroupID(0);
 //    }
-    
-    
+
+
 //    QHash<QString/*Group Name*/, QStringList/*Group Members' ID*/> personalContactGroupsHash = m_imUser->getPersonalContactGroupsHash();
 
-    
+
 //    QStringList groups = personalContactGroupsHash.keys();
 //    foreach (QString groupName, groups) {
 //        int groupID = getPersonalContactGroupID(groupName);
@@ -1788,34 +1844,35 @@ bool ContactsManager::getGrouptHistoryMessage(const QString &startTime, const QS
 //            }
 //            contact->setContactGroupID(groupID);
 //            saveContactInfoToDatabase(contactID);
-            
+
 //        }
-        
-        
+
+
 //    }
-    
+
 //    //TODO:更新联系人信息
-    
+
 //    return true;
-    
-    
+
+
 //}
 
 
-bool ContactsManager::openDatabase(bool reopen){
-    qDebug()<<"--ContactsManager::openDatabase(...)";
+bool ContactsManager::openDatabase(bool reopen)
+{
+    qDebug() << "--ContactsManager::openDatabase(...)";
 
     userPrivateDataFilePath = Settings::instance()->getCurrentUserPrivateDataFilePath();
 
     //Check Local Database
     bool needInitUserDB = false;
-    if(!QFile(userPrivateDataFilePath).exists()){
+    if(!QFile(userPrivateDataFilePath).exists()) {
         needInitUserDB = true;
     }
 
 
 
-    if(reopen){
+    if(reopen) {
         //        if(query){
         //            query->clear();
         //            delete query;
@@ -1827,7 +1884,7 @@ bool ContactsManager::openDatabase(bool reopen){
 
     //QSqlDatabase db = QSqlDatabase::database(LOCAL_USERDATA_DB_CONNECTION_NAME);
     localUserDataDB = QSqlDatabase::database(LOCAL_USERDATA_DB_CONNECTION_NAME);
-    if(!localUserDataDB.isValid()){
+    if(!localUserDataDB.isValid()) {
         QSqlError err;
         DatabaseUtility databaseUtility;
         userPrivateDataFilePath = Settings::instance()->getCurrentUserPrivateDataFilePath();
@@ -1847,8 +1904,8 @@ bool ContactsManager::openDatabase(bool reopen){
     }
 
     localUserDataDB = QSqlDatabase::database(LOCAL_USERDATA_DB_CONNECTION_NAME);
-    if(!localUserDataDB.isOpen()){
-        qCritical()<<QString("Database is not open! %1").arg(localUserDataDB.lastError().text());
+    if(!localUserDataDB.isOpen()) {
+        qCritical() << QString("Database is not open! %1").arg(localUserDataDB.lastError().text());
         return false;
     }
 
@@ -1856,8 +1913,8 @@ bool ContactsManager::openDatabase(bool reopen){
     //        query = new QSqlQuery(localUserDataDB);
     //    }
 
-    if(needInitUserDB){
-        if(!initLocalDatabase()){
+    if(needInitUserDB) {
+        if(!initLocalDatabase()) {
             return false;
         }
     }
@@ -1868,11 +1925,12 @@ bool ContactsManager::openDatabase(bool reopen){
 
 }
 
-bool ContactsManager::initLocalDatabase(QString *errorMessage){
+bool ContactsManager::initLocalDatabase(QString *errorMessage)
+{
     //qWarning()<<"--ContactsManager::initLocalDatabase(...)";
 
-    if(!localUserDataDB.isValid() || !localUserDataDB.isOpen()){
-        if(errorMessage){
+    if(!localUserDataDB.isValid() || !localUserDataDB.isOpen()) {
+        if(errorMessage) {
             *errorMessage = tr("Database Invalid Or Not Open!");
         }
         return false;
@@ -1880,9 +1938,9 @@ bool ContactsManager::initLocalDatabase(QString *errorMessage){
 
     QSqlQuery query;
     QSqlError error = DatabaseUtility::excuteSQLScriptFromFile(localUserDataDB, ":/text/resources/text/userdata.sql", "UTF-8", &query, true);
-    if(error.type() != QSqlError::NoError){
+    if(error.type() != QSqlError::NoError) {
         QString msg = error.text();
-        if(errorMessage){
+        if(errorMessage) {
             *errorMessage = msg;
         }
         return false;
@@ -1890,11 +1948,11 @@ bool ContactsManager::initLocalDatabase(QString *errorMessage){
 
 
     QString statement = QString("insert into my_detailed_info(UserID) values('%1')").arg(m_myself->getUserID());
-    if(!query.exec(statement)){
+    if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not initialize user database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
-        qCritical()<<msg;
-        if(errorMessage){
+        qCritical() << msg;
+        if(errorMessage) {
             *errorMessage = msg;
         }
         return false;
@@ -2055,7 +2113,8 @@ query.clear();
 */
 
 
-QSqlQuery ContactsManager::queryDatabase(const QString & queryString, bool localConfigDatabase) {
+QSqlQuery ContactsManager::queryDatabase(const QString &queryString, bool localConfigDatabase)
+{
 
     QSqlQuery query;
     DatabaseUtility du;
@@ -2063,7 +2122,7 @@ QSqlQuery ContactsManager::queryDatabase(const QString & queryString, bool local
 
     //                QString userPrivateDataFilePath = Settings::instance()->getUserPrivateDataFilePath(IMUser::instance()->getUserID());
 
-    if(localConfigDatabase){
+    if(localConfigDatabase) {
         query = du.queryDatabase(queryString,
                                  LOCAL_USERDATA_DB_CONNECTION_NAME,
                                  LOCAL_USERDATA_DB_DRIVER,
@@ -2073,7 +2132,7 @@ QSqlQuery ContactsManager::queryDatabase(const QString & queryString, bool local
                                  "",
                                  userPrivateDataFilePath,
                                  HEHUI::SQLITE);
-    }else{
+    } else {
         query = du.queryDatabase(queryString,
                                  REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME,
                                  REMOTE_SITOY_COMPUTERS_DB_DRIVER,
@@ -2091,9 +2150,10 @@ QSqlQuery ContactsManager::queryDatabase(const QString & queryString, bool local
 }
 
 
-QSqlQuery ContactsManager::queryDatabase(const QString & queryString, const QString &connectionName, const QString &driver,
-                                         const QString &host, int port, const QString &user, const QString &passwd,
-                                         const QString &databaseName, HEHUI::DatabaseType databaseType) {
+QSqlQuery ContactsManager::queryDatabase(const QString &queryString, const QString &connectionName, const QString &driver,
+        const QString &host, int port, const QString &user, const QString &passwd,
+        const QString &databaseName, HEHUI::DatabaseType databaseType)
+{
 
 
     QSqlQuery query;

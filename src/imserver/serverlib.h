@@ -37,11 +37,11 @@
 
 #include <QtCore/QtGlobal>
 
- #if defined(SERVERLIB_LIBRARY_EXPORT)
- #  define SERVERLIB_API Q_DECL_EXPORT
- #else
- #  define SERVERLIB_API Q_DECL_IMPORT
- #endif
+#if defined(SERVERLIB_LIBRARY_EXPORT)
+    #define SERVERLIB_API Q_DECL_EXPORT
+#else
+    #define SERVERLIB_API Q_DECL_IMPORT
+#endif
 
 
 /*

@@ -7,18 +7,19 @@
 #include "HHSharedCore/hcryptography.h"
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
-Settings::Settings(const QString fileBaseName, const QString fileDirPath, QObject* o )
+Settings::Settings(const QString fileBaseName, const QString fileDirPath, QObject *o )
     : SettingsBase(fileBaseName, fileDirPath, o )
 {
 
     //beginGroup( mProgramVersion );
-    
+
     key = QString("HEHUI@HEHUI").toUtf8();
-    
+
     m_currentUserID = "default";
-    
+
 }
 
 Settings::~Settings()
@@ -27,18 +28,20 @@ Settings::~Settings()
 
 }
 
-void Settings::setDataRootPath(const QString &dataRootPath){
+void Settings::setDataRootPath(const QString &dataRootPath)
+{
     setValue("MainWindow/DataRootPath", dataRootPath);
 
 }
 
-QString Settings::getDataRootPath() const{
+QString Settings::getDataRootPath() const
+{
     QString dataRootPath = QApplication::applicationDirPath() + "/data";
-    if(!QFile::exists(dataRootPath)){
+    if(!QFile::exists(dataRootPath)) {
         QDir dir;
         dir.mkpath(dataRootPath);
     }
-    return value("MainWindow/DataRootPath",dataRootPath).toString();
+    return value("MainWindow/DataRootPath", dataRootPath).toString();
 }
 
 
@@ -73,9 +76,10 @@ QString Settings::getDataRootPath() const{
 
 //}
 
-QString Settings::getCurrentUserPrivateDataDir() const{
+QString Settings::getCurrentUserPrivateDataDir() const
+{
     QString userPrivateDataDir = getDataRootPath() + "/" + m_currentUserID;
-    if(!QFile::exists(userPrivateDataDir)){
+    if(!QFile::exists(userPrivateDataDir)) {
         QDir dir;
         dir.mkpath(userPrivateDataDir);
     }
@@ -90,9 +94,10 @@ QString Settings::getCurrentUserPrivateDataFilePath() const
     return userPrivateDataFilePath;
 }
 
-QString Settings::getImageRootPath() const{
+QString Settings::getImageRootPath() const
+{
     QString path = getCurrentUserPrivateDataDir() + QString("/images");
-    if(!QFile::exists(path)){
+    if(!QFile::exists(path)) {
         QDir dir;
         dir.mkpath(path);
     }
@@ -100,28 +105,31 @@ QString Settings::getImageRootPath() const{
 }
 
 
-QString Settings::getImageCacheDir(){
+QString Settings::getImageCacheDir()
+{
     QString pictureCacheDir = getImageRootPath() + QString("/cache");
-    if(!QFile::exists(pictureCacheDir)){
+    if(!QFile::exists(pictureCacheDir)) {
         QDir dir;
         dir.mkpath(pictureCacheDir);
     }
     return pictureCacheDir;
 }
 
-QString Settings::getCustomFaceDir(){
+QString Settings::getCustomFaceDir()
+{
     QString pictureCacheDir = getImageRootPath() + QString("/face");
-    if(!QFile::exists(pictureCacheDir)){
+    if(!QFile::exists(pictureCacheDir)) {
         QDir dir;
         dir.mkpath(pictureCacheDir);
     }
     return pictureCacheDir;
 }
 
-QString Settings::getCustomEmoticonsDir(){
+QString Settings::getCustomEmoticonsDir()
+{
 
     QString emoticonsDir = getImageRootPath() + QString("/customemoticons");
-    if(!QFile::exists(emoticonsDir)){
+    if(!QFile::exists(emoticonsDir)) {
         QDir dir;
         dir.mkpath(emoticonsDir);
     }
@@ -134,16 +142,19 @@ QString Settings::getCustomEmoticonsDir(){
 
 
 
-void Settings::setRecentUser(const QString &userName){
+void Settings::setRecentUser(const QString &userName)
+{
     setValue("MainWindow/RecentUser", userName);
 }
 
-QString Settings::getRecentUser() const{
+QString Settings::getRecentUser() const
+{
     return value("MainWindow/RecentUser").toString();
 
 }
 
-void Settings::setRecentUserPassword(const QString &password){
+void Settings::setRecentUserPassword(const QString &password)
+{
 
     QByteArray *destination = new QByteArray();
     Cryptography cryptography;
@@ -153,10 +164,11 @@ void Settings::setRecentUserPassword(const QString &password){
 
 }
 
-QString Settings::getRecentUserPassword() const{
+QString Settings::getRecentUserPassword() const
+{
 
     QByteArray passwordArray = value("MainWindow/RecentUserPassword").toByteArray();
-    if(!passwordArray.isEmpty()){
+    if(!passwordArray.isEmpty()) {
 
         QByteArray *destination = new QByteArray();
         Cryptography cryptography;
@@ -170,22 +182,26 @@ QString Settings::getRecentUserPassword() const{
 
 }
 
-void Settings::setInvisibleLogin(bool invisible){
+void Settings::setInvisibleLogin(bool invisible)
+{
     setValue("MainWindow/InvisibleLogin", invisible);
 
 }
 
-bool Settings::getInvisibleLogin(){
+bool Settings::getInvisibleLogin()
+{
     return value("MainWindow/InvisibleLogin", false).toBool();
 
 }
 
-void Settings::setAutoLogin(bool autoLogin){
+void Settings::setAutoLogin(bool autoLogin)
+{
     setValue("MainWindow/AutoLogin", autoLogin);
 
 }
 
-bool Settings::getAutoLogin() const{
+bool Settings::getAutoLogin() const
+{
     return value("MainWindow/AutoLogin", false).toBool();
 
 }
@@ -253,7 +269,8 @@ bool Settings::getSaveConfig() const
 //----网络配置
 
 
-void Settings::setCurrentUser(const QString &userID){
+void Settings::setCurrentUser(const QString &userID)
+{
     this->m_currentUserID = userID;
 }
 

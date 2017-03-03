@@ -5,7 +5,8 @@
 #include <QHostAddress>
 
 
-namespace HEHUI {
+namespace HEHUI
+{
 
 
 class FileServer : public QObject
