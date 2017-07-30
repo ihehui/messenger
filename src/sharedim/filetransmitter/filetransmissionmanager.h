@@ -46,6 +46,8 @@ signals:
 
 
 public slots:
+    virtual void processFileTransferPacket(const FileTransferPacket &packet);
+
 
     void requestUploadFilesToPeer(int socketID, const QString &peerID, const QString &localBaseDir, const QStringList &localFiles, const QString &remoteDir);
     void cancelUploadFileRequest(int socketID, const QString &peerID, const QByteArray &fileMD5Sum);

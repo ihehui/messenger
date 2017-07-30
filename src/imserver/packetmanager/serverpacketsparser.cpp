@@ -47,22 +47,26 @@ ServerPacketsParser::ServerPacketsParser(ResourcesManagerInstance *resourcesMana
 
     m_ipmcServer = resourcesManager->getIPMCServer();
     Q_ASSERT_X(m_ipmcServer, "ClientPacketsParser::ClientPacketsParser(...)", "Invalid IP MC Server!");
-    connect(m_ipmcServer, SIGNAL(signalNewUDPPacketReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
+    connect(m_ipmcServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
 
     m_rtp = resourcesManager->getRTP();
     Q_ASSERT(m_rtp);
-    connect(m_rtp, SIGNAL(disconnected(int)), this, SLOT(peerDisconnected(int)));
+    connect(m_rtp, SIGNAL(disconnected(SOCKETID)), this, SLOT(peerDisconnected(SOCKETID)));
 
-    m_udtProtocol = m_rtp->getUDTProtocol();
-    Q_ASSERT(m_udtProtocol);
-    connect(m_udtProtocol, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
-    m_udtProtocol->startWaitingForIOInOneThread(1);
-    //m_udtProtocol->startWaitingForIOInSeparateThread(100, 1000);
+//    m_udtProtocol = m_rtp->getUDTProtocol();
+//    Q_ASSERT(m_udtProtocol);
+//    connect(m_udtProtocol, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
+//    m_udtProtocol->startWaitingForIOInOneThread(1);
+//    //m_udtProtocol->startWaitingForIOInSeparateThread(100, 1000);
 
     m_tcpServer = m_rtp->getTCPServer();
     Q_ASSERT(m_tcpServer);
-    connect(m_tcpServer, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
+    connect(m_tcpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
+
+    m_enetProtocol = m_rtp->getENETProtocol();
+    Q_ASSERT(m_enetProtocol);
+    connect(m_enetProtocol, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
 
 
@@ -114,18 +118,18 @@ ServerPacketsParser::~ServerPacketsParser()
 
 
 
-void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
+void ServerPacketsParser::parseIncomingPacketData(const PacketBase &packet)
 {
 
-    //    qDebug()<<"----ServerPacketsParser::parseIncomingPacketData(Packet *packet)";
+    //    qDebug()<<"----ServerPacketsParser::parseIncomingPacketData(Packet packet)";
 
 
-    QString peerID = packet->getPeerID();
+    QString peerID = packet.getPeerID();
 
-    QHostAddress peerAddress = packet->getPeerHostAddress();
-    quint16 peerPort = packet->getPeerHostPort();
-    quint8 packetType = packet->getPacketType();
-    int socketID = packet->getSocketID();
+    QHostAddress peerAddress = packet.getPeerHostAddress();
+    quint16 peerPort = packet.getPeerHostPort();
+    quint8 packetType = packet.getPacketType();
+    int socketID = packet.getSocketID();
 
     QByteArray sessionEncryptionKey = getUserSessionEncryptionKey(peerID);
 
@@ -136,7 +140,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
 
     case quint8(IM::CMD_ServerDiscovery): {
         qDebug() << "~~ClientLookForServer";
-        ServerDiscoveryPacket p(*packet);
+        ServerDiscoveryPacket p(packet);
         sendServerDeclarePacket(peerAddress, peerPort);
         //qDebug()<<"~~ClientLookForServer--"<<" peerAddress:"<<peerAddress.toString()<<"   peerPort:"<<peerPort;
     }
@@ -151,7 +155,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
             return;
         }
 
-        DataForwardPacket p(*packet, senderInfo->getSessionEncryptionKey());
+        DataForwardPacket p(packet, senderInfo->getSessionEncryptionKey());
         if(!p.isValid()) {
             qCritical() << "ERROR! Invalid Packet!";
             return;
@@ -174,7 +178,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
 
 
     case quint8(IM::CMD_Announcement): {
-        AnnouncementPacket p(*packet, sessionEncryptionKey);
+        AnnouncementPacket p(packet, sessionEncryptionKey);
         qDebug() << "~~CMD_Announcement";
         //TODO
 
@@ -182,7 +186,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
     break;
 
     case quint8(IM::CMD_Rgeistration): {
-        RgeistrationPacket p(*packet, sessionEncryptionKey);
+        RgeistrationPacket p(packet, sessionEncryptionKey);
         qDebug() << "~~CMD_Rgeistration";
         //TODO
         processRgeistrationPacket(p);
@@ -190,7 +194,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
     break;
 
     case quint8(IM::CMD_UpdatePassword): {
-        UpdatePasswordPacket p(*packet, sessionEncryptionKey);
+        UpdatePasswordPacket p(packet, sessionEncryptionKey);
         p.AuthInfo.authMode = UsersManager::passwordUpdateAuthMode();
 
         processUpdatePasswordPacket(p);
@@ -199,14 +203,14 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
     break;
 
     case quint8(IM::CMD_Login): {
-        LoginPacket p(*packet, sessionEncryptionKey);
+        LoginPacket p(packet, sessionEncryptionKey);
         processLoginPacket(p);
         qDebug() << "~~CMD_Login";
     }
     break;
 
     case quint8(IM::CMD_OnlineStateChanged): {
-        OnlineStateChangedPacket p(*packet, sessionEncryptionKey);
+        OnlineStateChangedPacket p(packet, sessionEncryptionKey);
         quint8 stateCode = p.stateCode;
         processUserOnlineStatusChanged(peerID, IM::OnlineState(stateCode), peerAddress.toString(), peerPort);
         qDebug() << "~~CMD_OnlineStateChanged";
@@ -214,35 +218,35 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
     break;
 
     case quint8(IM::CMD_ContactGroupsInfo): {
-        ContactGroupsInfoPacket p(*packet, sessionEncryptionKey);
+        ContactGroupsInfoPacket p(packet, sessionEncryptionKey);
         processContactGroupsInfoPacket(p);
         qDebug() << "~~CMD_ContactGroupsInfo";
     }
     break;
 
     case quint8(IM::CMD_InterestGroupsInfo): {
-        InterestGroupsInfoPacket p(*packet, sessionEncryptionKey);
+        InterestGroupsInfoPacket p(packet, sessionEncryptionKey);
         processInterestGroupsInfoPacket(p);
         qDebug() << "~~CMD_InterestGroupsInfo";
     }
     break;
 
     case quint8(IM::CMD_ContactInfo): {
-        ContactInfoPacket p(*packet, sessionEncryptionKey);
+        ContactInfoPacket p(packet, sessionEncryptionKey);
         processContactInfoPacket(p);
         qDebug() << "~~CMD_ContactInfo";
     }
     break;
 
     case quint8(IM::CMD_SearchInfo): {
-        SearchInfoPacket p(*packet, sessionEncryptionKey);
+        SearchInfoPacket p(packet, sessionEncryptionKey);
         processSearchInfoPacket(p);
         qDebug() << "~~CMD_SearchInfo";
     }
     break;
 
     case quint8(IM::CMD_Captcha): {
-        CaptchaInfoPacket p(*packet, sessionEncryptionKey);
+        CaptchaInfoPacket p(packet, sessionEncryptionKey);
         processCaptchaInfoPacket(p);
         qDebug() << "~~CMD_Captcha";
     }
@@ -250,7 +254,7 @@ void ServerPacketsParser::parseIncomingPacketData(PacketBase *packet)
 
     //File TX
     case quint8(IM::CMD_FileTransfer): {
-        FileTransferPacket p(*packet, sessionEncryptionKey);
+        FileTransferPacket p(packet, sessionEncryptionKey);
         processFileTransferPacket(p);
         qDebug() << "~~CMD_FileTransfer";
     }
@@ -362,7 +366,7 @@ QByteArray ServerPacketsParser::getUserSessionEncryptionKey(const QString &userI
     return info->getSessionEncryptionKey();
 }
 
-void ServerPacketsParser::peerDisconnected(int socketID)
+void ServerPacketsParser::peerDisconnected(SOCKETID socketID)
 {
     //qDebug()<<"--ServerPacketsParser::peerDisconnected(...) "<<" socketID:"<<socketID;
 

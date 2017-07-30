@@ -12,9 +12,14 @@
 
 #include "resourcesmanager.h"
 
+#include "impackets.h"
 
 #include "HHSharedNetwork/hnetworkutilities.h"
 //#include "HHSharedNetwork/hpacketstreamoperator.h"
+
+
+
+
 
 
 namespace HEHUI
@@ -24,6 +29,37 @@ namespace HEHUI
 ResourcesManager::ResourcesManager(QObject *parent)
     : QObject(parent)
 {
+
+
+    //注册自定义类型，必须重载“<<”和“>>”, 见"packetstreamoperator.h"
+    //if(!QMetaType::isRegistered(QMetaType::type("HEHUI::Packet"))){
+    //    qRegisterMetaTypeStreamOperators<HEHUI::Packet>("HEHUI::Packet");
+    //}
+
+
+
+
+    qRegisterMetaType<QHostAddress>("QHostAddress");
+
+    qRegisterMetaType<SOCKETID>("SOCKETID");
+
+    qRegisterMetaType<PacketBase>("PacketBase");
+    qRegisterMetaType<ServerDiscoveryPacket>("ServerDiscoveryPacket");
+    qRegisterMetaType<DataForwardPacket>("DataForwardPacket");
+    qRegisterMetaType<AnnouncementPacket>("AnnouncementPacket");
+    qRegisterMetaType<RgeistrationPacket>("RgeistrationPacket");
+    qRegisterMetaType<UpdatePasswordPacket>("UpdatePasswordPacket");
+    qRegisterMetaType<LoginPacket>("LoginPacket");
+    qRegisterMetaType<OnlineStateChangedPacket>("OnlineStateChangedPacket");
+    qRegisterMetaType<OnlineContacts>("OnlineContacts");
+    qRegisterMetaType<ContactGroupsInfoPacket>("ContactGroupsInfoPacket");
+    qRegisterMetaType<InterestGroupsInfoPacket>("InterestGroupsInfoPacket");
+    qRegisterMetaType<ContactInfoPacket>("ContactInfoPacket");
+    qRegisterMetaType<SearchInfoPacket>("SearchInfoPacket");
+    qRegisterMetaType<ChatMessagePacket>("ChatMessagePacket");
+    qRegisterMetaType<CaptchaInfoPacket>("CaptchaInfoPacket");
+    qRegisterMetaType<FileTransferPacket>("FileTransferPacket");
+
 
 
     networkType = LAN;
@@ -38,14 +74,6 @@ ResourcesManager::ResourcesManager(QObject *parent)
 
     m_fileManager = 0;
 
-
-
-    //注册自定义类型，必须重载“<<”和“>>”, 见"packetstreamoperator.h"
-    //if(!QMetaType::isRegistered(QMetaType::type("HEHUI::Packet"))){
-    //    qRegisterMetaTypeStreamOperators<HEHUI::Packet>("HEHUI::Packet");
-    //}
-
-    qRegisterMetaType<QHostAddress>("QHostAddress");
 
 }
 

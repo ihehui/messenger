@@ -64,7 +64,7 @@ void Settings::setDBDriver(const QString &driverName)
 }
 QString Settings::getDBDriver() const
 {
-    return value("Database/Driver", REMOTE_SITOY_COMPUTERS_DB_DRIVER).toString();
+    return value("Database/Driver", REMOTE_IM_DB_DRIVER).toString();
 }
 
 void Settings::setDBServerHost(const QString &host)
@@ -73,7 +73,7 @@ void Settings::setDBServerHost(const QString &host)
 }
 QString Settings::getDBServerHost() const
 {
-    return value("Database/Host", REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST).toString();
+    return value("Database/Host", REMOTE_IM_DB_SERVER_HOST).toString();
 }
 
 void Settings::setDBServerPort(quint16 port)
@@ -82,7 +82,7 @@ void Settings::setDBServerPort(quint16 port)
 }
 quint16 Settings::getDBServerPort()
 {
-    return value("Database/Port", REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT).toUInt();
+    return value("Database/Port", REMOTE_IM_DB_SERVER_PORT).toUInt();
 }
 
 void Settings::setDBServerUserName(const QString &userName)
@@ -98,7 +98,7 @@ QString Settings::getDBServerUserName() const
     QString userName = "";
     QByteArray userNameArray = value("Database/UserName").toByteArray();
     if(userNameArray.isEmpty()) {
-        userName = REMOTE_SITOY_COMPUTERS_DB_USER_NAME;
+        userName = REMOTE_IM_DB_USER_NAME;
     } else {
         QByteArray *destination = new QByteArray();
         Cryptography cryptography;
@@ -123,7 +123,7 @@ QString Settings::getDBServerUserPassword() const
     QString password = "";
     QByteArray passwordArray = value("Database/Password").toByteArray();
     if(passwordArray.isEmpty()) {
-        password = REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD;
+        password = REMOTE_IM_DB_USER_PASSWORD;
     } else {
         QByteArray *destination = new QByteArray();
         Cryptography cryptography;

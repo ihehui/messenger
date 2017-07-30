@@ -13,6 +13,7 @@ namespace HEHUI
 class SHAREDIMLIB_API IMPacket : public Packet
 {
 public:
+    IMPacket();
     IMPacket(quint8 packetType, const QByteArray &sessionEncryptionKey);
     IMPacket(const PacketBase &base, quint8 packetType, const QByteArray &sessionEncryptionKey);
     ~IMPacket();
@@ -21,7 +22,7 @@ public:
     void setSessionEncryptionKey(const QByteArray &key);
 
 private:
-    void init();
+    virtual void init();
     void parsePacketBody(QByteArray &packetBody) = 0;
     QByteArray packBodyData() = 0;
 
@@ -42,7 +43,8 @@ private:
 class SHAREDIMLIB_API ServerDiscoveryPacket : public IMPacket
 {
 public:
-    ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey = QByteArray());
+    ServerDiscoveryPacket();
+    ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey);
     ServerDiscoveryPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey = QByteArray());
     ~ServerDiscoveryPacket();
 
@@ -66,6 +68,7 @@ public:
 class SHAREDIMLIB_API DataForwardPacket : public IMPacket
 {
 public:
+    DataForwardPacket();
     DataForwardPacket(const QByteArray &sessionEncryptionKey);
     DataForwardPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~DataForwardPacket();
@@ -88,6 +91,7 @@ public:
 class SHAREDIMLIB_API AnnouncementPacket : public IMPacket
 {
 public:
+    AnnouncementPacket();
     AnnouncementPacket(const QByteArray &sessionEncryptionKey);
     AnnouncementPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~AnnouncementPacket();
@@ -173,6 +177,7 @@ public:
 class SHAREDIMLIB_API RgeistrationPacket : public IMPacket
 {
 public:
+    RgeistrationPacket();
     RgeistrationPacket(const QByteArray &sessionEncryptionKey);
     RgeistrationPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~RgeistrationPacket();
@@ -235,6 +240,7 @@ public:
 class SHAREDIMLIB_API UpdatePasswordPacket : public IMPacket
 {
 public:
+    UpdatePasswordPacket();
     UpdatePasswordPacket(const QByteArray &sessionEncryptionKey);
     UpdatePasswordPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~UpdatePasswordPacket();
@@ -295,6 +301,7 @@ public:
 class SHAREDIMLIB_API LoginPacket : public IMPacket
 {
 public:
+    LoginPacket();
     LoginPacket(const QByteArray &sessionEncryptionKey);
     LoginPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~LoginPacket();
@@ -361,6 +368,7 @@ public:
 class SHAREDIMLIB_API OnlineStateChangedPacket : public IMPacket
 {
 public:
+    OnlineStateChangedPacket();
     OnlineStateChangedPacket(const QByteArray &sessionEncryptionKey);
     OnlineStateChangedPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~OnlineStateChangedPacket();
@@ -384,6 +392,7 @@ public:
 class SHAREDIMLIB_API OnlineContacts : public IMPacket
 {
 public:
+    OnlineContacts();
     OnlineContacts(const QByteArray &sessionEncryptionKey);
     OnlineContacts(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~OnlineContacts();
@@ -405,6 +414,7 @@ public:
 class SHAREDIMLIB_API ContactGroupsInfoPacket : public IMPacket
 {
 public:
+    ContactGroupsInfoPacket();
     ContactGroupsInfoPacket(const QByteArray &sessionEncryptionKey);
     ContactGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~ContactGroupsInfoPacket();
@@ -467,6 +477,7 @@ public:
 class SHAREDIMLIB_API InterestGroupsInfoPacket : public IMPacket
 {
 public:
+    InterestGroupsInfoPacket();
     InterestGroupsInfoPacket(const QByteArray &sessionEncryptionKey);
     InterestGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~InterestGroupsInfoPacket();
@@ -557,6 +568,7 @@ public:
 class SHAREDIMLIB_API ContactInfoPacket : public IMPacket
 {
 public:
+    ContactInfoPacket();
     ContactInfoPacket(const QByteArray &sessionEncryptionKey);
     ContactInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~ContactInfoPacket();
@@ -634,6 +646,7 @@ public:
 class SHAREDIMLIB_API SearchInfoPacket : public IMPacket
 {
 public:
+    SearchInfoPacket();
     SearchInfoPacket(const QByteArray &sessionEncryptionKey);
     SearchInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~SearchInfoPacket();
@@ -695,6 +708,7 @@ public:
 class SHAREDIMLIB_API ChatMessagePacket : public IMPacket
 {
 public:
+    ChatMessagePacket();
     ChatMessagePacket(const QByteArray &sessionEncryptionKey);
     ChatMessagePacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~ChatMessagePacket();
@@ -781,6 +795,7 @@ public:
 class SHAREDIMLIB_API CaptchaInfoPacket : public IMPacket
 {
 public:
+    CaptchaInfoPacket();
     CaptchaInfoPacket(const QByteArray &sessionEncryptionKey);
     CaptchaInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~CaptchaInfoPacket();
@@ -820,6 +835,7 @@ public:
 class SHAREDIMLIB_API FileTransferPacket : public IMPacket
 {
 public:
+    FileTransferPacket();
     FileTransferPacket(const QByteArray &sessionEncryptionKey);
     FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
 

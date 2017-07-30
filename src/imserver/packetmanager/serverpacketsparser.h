@@ -65,7 +65,7 @@ public:
 
 
 public slots:
-    void parseIncomingPacketData(PacketBase *packet);
+    void parseIncomingPacketData(const PacketBase &packet);
 
 
     bool sendServerDeclarePacket(const QHostAddress peerAddress, quint16 peerPort)
@@ -679,7 +679,7 @@ private slots:
 
     //    void slotCheckIMUsersOnlineStatus();
 
-    void peerDisconnected(int socketID);
+    void peerDisconnected(SOCKETID socketID);
 
     void sendInterestGroupChatMessageToMembers(quint32 interestGroupID, UserInfo *sender, const QString &message, const QString &imageNames);
 
@@ -720,8 +720,10 @@ private:
 
     UDPServer *m_ipmcServer;
     RTP *m_rtp;
-    UDTProtocol *m_udtProtocol;
+//    UDTProtocol *m_udtProtocol;
     TCPServer *m_tcpServer;
+    ENETProtocol *m_enetProtocol;
+
     QHash<int /*Socket ID*/, UserInfo * /*UserInfo*/> m_userSocketsHash;
     QMultiHash<QString/*Image Name*/, UserInfo * /*UserInfo*/> imageDownloadingRequestHash;
 

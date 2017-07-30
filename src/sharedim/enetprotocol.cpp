@@ -11,28 +11,19 @@ namespace HEHUI
 ENETProtocol::ENETProtocol(QObject *parent) :
     ENETProtocolBase(parent)
 {
-
-
     //注册自定义类型，必须重载“<<”和“>>”
     //qRegisterMetaTypeStreamOperators<HEHUI::Packet>("HEHUI::Packet");
     PacketBase::registerMetaTypeStreamOperators();
-
 }
-
-
-
 
 void ENETProtocol::processReceivedData(quint32 peerID, QByteArray data)
 {
     //qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
-
     convertDataToPacket(peerID, &data);
-
 }
 
 inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data)
 {
-
     QString ip = "";
     quint16 port = 0;
     getPeerAddressInfo(peerID, &ip, &port);

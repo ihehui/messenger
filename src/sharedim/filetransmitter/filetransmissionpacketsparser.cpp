@@ -58,29 +58,32 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
         qCritical() << errorMessage;
     }
     //connect(m_rtp, SIGNAL(connected(int, const QString &, quint16)), this, SLOT(peerConnected(int, const QString &, quint16)));
-    connect(m_rtp, SIGNAL(disconnected(int)), this, SLOT(peerDisconnected(int)));
+    connect(m_rtp, SIGNAL(disconnected(SOCKETID)), this, SLOT(peerDisconnected(SOCKETID)));
 
 
 
     //m_udpServer = m_resourcesManager->getUDPServer();
     Q_ASSERT_X(m_udpServer, "IMClientPacketsParser::IMClientPacketsParser(...)", "Invalid UDPServer!");
-    connect(m_udpServer, SIGNAL(signalNewUDPPacketReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
+    connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
     //m_rtp = m_resourcesManager->getRTP();
     Q_ASSERT(m_rtp);
 
-    m_udtProtocol = m_rtp->getUDTProtocol();
-    Q_ASSERT(m_udtProtocol);
-    m_udtProtocol->startWaitingForIOInOneThread(20);
-    //m_udtProtocol->startWaitingForIOInSeparateThread(100, 1000);
-    connect(m_udtProtocol, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
+//    m_udtProtocol = m_rtp->getUDTProtocol();
+//    Q_ASSERT(m_udtProtocol);
+//    m_udtProtocol->startWaitingForIOInOneThread(20);
+//    //m_udtProtocol->startWaitingForIOInSeparateThread(100, 1000);
+//    connect(m_udtProtocol, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
     m_tcpServer = m_rtp->getTCPServer();
     Q_ASSERT(m_tcpServer);
-    connect(m_tcpServer, SIGNAL(packetReceived(Packet *)), this, SLOT(parseIncomingPacketData(Packet *)), Qt::QueuedConnection);
+    connect(m_tcpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
 //    m_socketConnectedToServer = INVALID_SOCK_ID;
 
+    m_enetProtocol = m_rtp->getENETProtocol();
+    Q_ASSERT(m_enetProtocol);
+    connect(m_enetProtocol, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
 
 
@@ -121,22 +124,22 @@ FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase()
 
 
 
-void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *packet)
+void FileTransmissionPacketsParserBase::parseIncomingPacketData(const PacketBase &packet)
 {
-    //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet *packet)";
+    //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet packet)";
 
-    quint8 packetType = packet->getPacketType();
-    QString peerID = packet->getPeerID();
+    quint8 packetType = packet.getPacketType();
+    QString peerID = packet.getPeerID();
 
-    QHostAddress peerAddress = packet->getPeerHostAddress();
-    quint16 peerPort = packet->getPeerHostPort();
-    SOCKETID socketID = packet->getSocketID();
+    QHostAddress peerAddress = packet.getPeerHostAddress();
+    quint16 peerPort = packet.getPeerHostPort();
+    SOCKETID socketID = packet.getSocketID();
 
 
 
     switch(packetType) {
     case quint8(IM::CMD_DataForward): {
-        DataForwardPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
+        DataForwardPacket p(packet, sessionEncryptionKeyWithPeerHash.value(peerID));
         QByteArray data = p.data;
 
         if(p.isRequest) {
@@ -146,7 +149,7 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *pack
             PacketBase packet2;
             if(packet2.fromByteArray(&data)) {
                 packet2.setSocketID(socketID);
-                parseIncomingPacketData(&packet2);
+                parseIncomingPacketData(packet2);
             } else {
                 qWarning() << "ERROR! Can not convert data to Packet!";
             }
@@ -158,7 +161,7 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *pack
 
     ////////////////////////////////////////////
     case quint8(IM::CMD_FileTransfer): {
-        FileTransferPacket p(*packet, sessionEncryptionKeyWithPeerHash.value(peerID));
+        FileTransferPacket p(packet, sessionEncryptionKeyWithPeerHash.value(peerID));
         emit signalFileTransferPacketReceived(p);
         //qDebug()<<"~~CMD_FileTransfer";
     }
@@ -177,7 +180,7 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(PacketBase *pack
 
 }
 
-void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(PacketBase *packet)
+void FileTransmissionPacketsParserBase::parseOtherIncomingPacketData(const PacketBase &packet)
 {
     //TODO
 }
@@ -219,7 +222,7 @@ void FileTransmissionPacketsParserBase::setPeerSessionEncryptionKey(const QStrin
     sessionEncryptionKeyWithPeerHash[peerID] = encryptionKey;
 }
 
-void FileTransmissionPacketsParserBase::peerDisconnected(int socketID)
+void FileTransmissionPacketsParserBase::peerDisconnected(SOCKETID socketID)
 {
     QString peerID = peerSocketHash.key(socketID);
     peerSocketHash.remove(peerID);

@@ -2134,13 +2134,13 @@ QSqlQuery ContactsManager::queryDatabase(const QString &queryString, bool localC
                                  HEHUI::SQLITE);
     } else {
         query = du.queryDatabase(queryString,
-                                 REMOTE_SITOY_COMPUTERS_DB_CONNECTION_NAME,
-                                 REMOTE_SITOY_COMPUTERS_DB_DRIVER,
-                                 REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST,
-                                 REMOTE_SITOY_COMPUTERS_DB_SERVER_PORT,
-                                 REMOTE_SITOY_COMPUTERS_DB_USER_NAME,
-                                 REMOTE_SITOY_COMPUTERS_DB_USER_PASSWORD,
-                                 REMOTE_SITOY_COMPUTERS_DB_NAME,
+                                 REMOTE_IM_DB_CONNECTION_NAME,
+                                 REMOTE_IM_DB_DRIVER,
+                                 REMOTE_IM_DB_SERVER_HOST,
+                                 REMOTE_IM_DB_SERVER_PORT,
+                                 REMOTE_IM_DB_USER_NAME,
+                                 REMOTE_IM_DB_USER_PASSWORD,
+                                 REMOTE_IM_DB_NAME,
                                  HEHUI::MYSQL);
     }
 

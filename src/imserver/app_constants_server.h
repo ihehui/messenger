@@ -13,7 +13,7 @@
 
 
 #ifndef SETTINGS_FILE_NAME
-    #define SETTINGS_FILE_NAME	"server"
+    #define SETTINGS_FILE_NAME	"imserver"
 #endif
 
 #ifndef APP_NAME

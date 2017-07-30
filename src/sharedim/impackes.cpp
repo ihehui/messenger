@@ -10,6 +10,13 @@ namespace HEHUI
 
 
 ////////////////////////////////////////////////////////////////////////
+
+IMPacket::IMPacket()
+    : Packet()
+{
+    init();
+}
+
 IMPacket::IMPacket(quint8 packetType, const QByteArray &sessionEncryptionKey)
     : Packet(packetType)
 {
@@ -76,6 +83,12 @@ QByteArray IMPacket::decrypt(const QByteArray &encryptedData)
 
 
 ////////////////////////////////////////////////////////////////////////
+ServerDiscoveryPacket::ServerDiscoveryPacket()
+    : IMPacket(quint8(IM::CMD_ServerDiscovery), QByteArray())
+{
+
+}
+
 ServerDiscoveryPacket::ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_ServerDiscovery), sessionEncryptionKey)
 {
@@ -136,6 +149,12 @@ QByteArray ServerDiscoveryPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+DataForwardPacket::DataForwardPacket()
+    : IMPacket(quint8(IM::CMD_DataForward), QByteArray())
+{
+
+}
+
 DataForwardPacket::DataForwardPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_DataForward), sessionEncryptionKey)
 {
@@ -181,6 +200,12 @@ QByteArray DataForwardPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+AnnouncementPacket::AnnouncementPacket()
+    : IMPacket(quint8(IM::CMD_Announcement), QByteArray())
+{
+
+}
+
 AnnouncementPacket::AnnouncementPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_Announcement), sessionEncryptionKey)
 {
@@ -342,6 +367,12 @@ QByteArray AnnouncementPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+RgeistrationPacket::RgeistrationPacket()
+    : IMPacket(quint8(IM::CMD_Rgeistration), QByteArray())
+{
+
+}
+
 RgeistrationPacket::RgeistrationPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_Rgeistration), sessionEncryptionKey)
 {
@@ -463,6 +494,12 @@ QByteArray RgeistrationPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+UpdatePasswordPacket::UpdatePasswordPacket()
+    : IMPacket(quint8(IM::CMD_UpdatePassword), QByteArray())
+{
+
+}
+
 UpdatePasswordPacket::UpdatePasswordPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_UpdatePassword), sessionEncryptionKey)
 {
@@ -545,6 +582,12 @@ QByteArray UpdatePasswordPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+LoginPacket::LoginPacket()
+    : IMPacket(quint8(IM::CMD_Login), QByteArray())
+{
+
+}
+
 LoginPacket::LoginPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_Login), sessionEncryptionKey)
 {
@@ -689,6 +732,12 @@ QByteArray LoginPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+OnlineStateChangedPacket::OnlineStateChangedPacket()
+    : IMPacket(quint8(IM::CMD_OnlineStateChanged), QByteArray())
+{
+
+}
+
 OnlineStateChangedPacket::OnlineStateChangedPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_OnlineStateChanged), sessionEncryptionKey)
 {
@@ -736,6 +785,11 @@ QByteArray OnlineStateChangedPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+OnlineContacts::OnlineContacts()
+    : IMPacket(quint8(IM::CMD_OnlineContacts), QByteArray())
+{
+}
+
 OnlineContacts::OnlineContacts(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_OnlineContacts), sessionEncryptionKey)
 {
@@ -777,6 +831,11 @@ QByteArray OnlineContacts::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+ContactGroupsInfoPacket::ContactGroupsInfoPacket()
+    : IMPacket(quint8(IM::CMD_ContactGroupsInfo), QByteArray())
+{
+}
+
 ContactGroupsInfoPacket::ContactGroupsInfoPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_ContactGroupsInfo), sessionEncryptionKey)
 {
@@ -903,6 +962,12 @@ QByteArray ContactGroupsInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+InterestGroupsInfoPacket::InterestGroupsInfoPacket()
+    : IMPacket(quint8(IM::CMD_InterestGroupsInfo), QByteArray())
+{
+
+}
+
 InterestGroupsInfoPacket::InterestGroupsInfoPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_InterestGroupsInfo), sessionEncryptionKey)
 {
@@ -1079,6 +1144,11 @@ QByteArray InterestGroupsInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+ContactInfoPacket::ContactInfoPacket()
+    : IMPacket(quint8(IM::CMD_ContactInfo), QByteArray())
+{
+}
+
 ContactInfoPacket::ContactInfoPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_ContactInfo), sessionEncryptionKey)
 {
@@ -1217,6 +1287,11 @@ QByteArray ContactInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+SearchInfoPacket::SearchInfoPacket()
+    : IMPacket(quint8(IM::CMD_SearchInfo), QByteArray())
+{
+}
+
 SearchInfoPacket::SearchInfoPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_SearchInfo), sessionEncryptionKey)
 {
@@ -1344,8 +1419,13 @@ QByteArray SearchInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+ChatMessagePacket::ChatMessagePacket()
+    : IMPacket(quint8(IM::CMD_ChatMessage), QByteArray())
+{
+}
+
 ChatMessagePacket::ChatMessagePacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_ChatMessage), sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_ChatMessage),sessionEncryptionKey)
 {
 }
 
@@ -1504,6 +1584,11 @@ QByteArray ChatMessagePacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+CaptchaInfoPacket::CaptchaInfoPacket()
+    : IMPacket(quint8(IM::CMD_Captcha), QByteArray())
+{
+}
+
 CaptchaInfoPacket::CaptchaInfoPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_Captcha), sessionEncryptionKey)
 {
@@ -1606,6 +1691,12 @@ QByteArray CaptchaInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
+FileTransferPacket::FileTransferPacket()
+    : IMPacket(quint8(IM::CMD_FileTransfer), QByteArray())
+{
+
+}
+
 FileTransferPacket::FileTransferPacket(const QByteArray &sessionEncryptionKey)
     : IMPacket(quint8(IM::CMD_FileTransfer), sessionEncryptionKey)
 {

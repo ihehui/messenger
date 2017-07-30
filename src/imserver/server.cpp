@@ -299,7 +299,7 @@ bool IMServer::openDatabase(bool reopen)
                                             settings.getDBName(),
                                             settings.getDBType());
         if (err.type() != QSqlError::NoError) {
-            qCritical() << QString("An error occurred when opening the database on '%1'! %2").arg(REMOTE_SITOY_COMPUTERS_DB_SERVER_HOST).arg(err.text());
+            qCritical() << QString("An error occurred when opening the database on '%1'! %2").arg(settings.getDBServerHost()).arg(err.text());
             return false;
         }
 

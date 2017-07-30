@@ -99,7 +99,6 @@ private slots:
     void slotRequestDeleteContact(const QString &contactID, bool deleteMeFromOpposition = false, bool addToBlacklist = false);
     void slotDeleteContactResultReceived(const QString &contactID, bool deleted = quint8(IM::ERROR_NoError), bool addToBlacklist = false);
 
-    void slotProcessUpdatePasswordResult(quint8 errorTypeCode, const QString &message);
 
     void slotProcessLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName);
     void slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage);
@@ -156,6 +155,7 @@ private slots:
     void processCaptchaInfoPacket(const CaptchaInfoPacket &packet);
     void processFileTransferPacket(const FileTransferPacket &packet);
 
+    void slotProcessUpdatePasswordResult(const UpdatePasswordPacket &packet);
 
 
 
@@ -214,7 +214,7 @@ private slots:
     void peerConnected(int socketID, const QString &peerAddress, quint16 peerPort);
     void signalConnectToPeerTimeout(const QHostAddress &peerAddress, quint16 peerPort);
     void peerDisconnected(const QHostAddress &peerAddress, quint16 peerPort, bool normalClose);
-    void peerDisconnected(int socketID);
+    void peerDisconnected(SOCKETID socketID);
 
 //////////////////////////////
     //FILE TX

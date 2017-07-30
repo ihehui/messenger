@@ -47,29 +47,31 @@ FileTransmissionManagerBase::FileTransmissionManagerBase(const QString &myID, Fi
     if(!m_fileTransmissionPacketsParser) {
         m_fileTransmissionPacketsParser = new FileTransmissionPacketsParserBase(myID, this);
     }
+    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
+
 
     m_idleTimer = 0;
 
     m_resourcesManager = 0;
     m_fileManager = 0;
 
-    //File TX
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerRequestUploadFile(int, const QString &, const QByteArray &, const QString &, quint64, const QString &)), this, SLOT(processPeerRequestUploadFilePacket(int, const QString &, const QByteArray &, const QString &, quint64, const QString &)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerCanceledUploadFileRequest(int, const QString &, const QByteArray &)), this, SLOT(processPeerCanceledUploadFileRequestPacket(int, const QString &, const QByteArray &)), Qt::QueuedConnection);
+//    //File TX
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerRequestUploadFile(int, const QString &, const QByteArray &, const QString &, quint64, const QString &)), this, SLOT(processPeerRequestUploadFilePacket(int, const QString &, const QByteArray &, const QString &, quint64, const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerCanceledUploadFileRequest(int, const QString &, const QByteArray &)), this, SLOT(processPeerCanceledUploadFileRequestPacket(int, const QString &, const QByteArray &)), Qt::QueuedConnection);
 
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalContactRequestDownloadFile(int, const QString &, const QString &)), this, SLOT(processPeerRequestDownloadFilePacket(int, const QString &, const QString &)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerCanceledDownloadFileRequest(int, const QString &, const QString &)), this, SLOT(processPeerCanceledDownloadFileRequestPacket(int, const QString &, const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalContactRequestDownloadFile(int, const QString &, const QString &)), this, SLOT(processPeerRequestDownloadFilePacket(int, const QString &, const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerCanceledDownloadFileRequest(int, const QString &, const QString &)), this, SLOT(processPeerCanceledDownloadFileRequestPacket(int, const QString &, const QString &)), Qt::QueuedConnection);
 
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDownloadRequestAccepted(int, const QString &, const QString &, const QByteArray &, quint64)), this, SLOT(fileDownloadRequestAccepted(int, const QString &, const QString &, const QByteArray &, quint64)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDownloadRequestDenied(int, const QString &, const QString &, const QString &)), this, SLOT(fileDownloadRequestDenied(int, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileUploadRequestResponsed(int, const QString &, const QByteArray &, bool, const QString &)), this, SLOT(fileUploadRequestResponsed(int, const QString &, const QByteArray &, bool, const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDownloadRequestAccepted(int, const QString &, const QString &, const QByteArray &, quint64)), this, SLOT(fileDownloadRequestAccepted(int, const QString &, const QString &, const QByteArray &, quint64)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDownloadRequestDenied(int, const QString &, const QString &, const QString &)), this, SLOT(fileDownloadRequestDenied(int, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileUploadRequestResponsed(int, const QString &, const QByteArray &, bool, const QString &)), this, SLOT(fileUploadRequestResponsed(int, const QString &, const QByteArray &, bool, const QString &)), Qt::QueuedConnection);
 
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDataRequested(int, const QString &, const QByteArray &, int, int )), this, SLOT(processFileDataRequestPacket(int, const QString &, const QByteArray &, int, int )), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDataReceived(int, const QString &, const QByteArray &, int, const QByteArray &, const QByteArray &)), this, SLOT(processFileDataReceivedPacket(int, const QString &, const QByteArray &, int, const QByteArray &, const QByteArray &)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTXStatusChanged(int, const QString &, const QByteArray &, quint8)), this, SLOT(processFileTXStatusChangedPacket(int, const QString &, const QByteArray &, quint8)), Qt::QueuedConnection);
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTXError(int, const QString &, const QByteArray &, quint8 , const QString &)), this, SLOT(processFileTXErrorFromPeer(int, const QString &, const QByteArray &, quint8 , const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDataRequested(int, const QString &, const QByteArray &, int, int )), this, SLOT(processFileDataRequestPacket(int, const QString &, const QByteArray &, int, int )), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileDataReceived(int, const QString &, const QByteArray &, int, const QByteArray &, const QByteArray &)), this, SLOT(processFileDataReceivedPacket(int, const QString &, const QByteArray &, int, const QByteArray &, const QByteArray &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTXStatusChanged(int, const QString &, const QByteArray &, quint8)), this, SLOT(processFileTXStatusChangedPacket(int, const QString &, const QByteArray &, quint8)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTXError(int, const QString &, const QByteArray &, quint8 , const QString &)), this, SLOT(processFileTXErrorFromPeer(int, const QString &, const QByteArray &, quint8 , const QString &)), Qt::QueuedConnection);
 
-    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerDisconnected(const QString &)), this, SLOT(peerDisconnected(const QString &)), Qt::QueuedConnection);
+//    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerDisconnected(const QString &)), this, SLOT(peerDisconnected(const QString &)), Qt::QueuedConnection);
 
 
 }
@@ -131,6 +133,95 @@ bool FileTransmissionManagerBase::queryFileTransmissionInfo(const QString &peerI
 void FileTransmissionManagerBase::setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey)
 {
     m_fileTransmissionPacketsParser->setPeerSessionEncryptionKey(peerID, encryptionKey);
+}
+
+void FileTransmissionManagerBase::processFileTransferPacket(const FileTransferPacket &packet)
+{
+    FileTransferPacket::PacketInfoType infoType = packet.InfoType;
+    switch (infoType) {
+    case FileTransferPacket::FT_FILE_SERVER_INFO: {
+        QString address = packet.FileServerInfo.address;
+        quint16 port = packet.FileServerInfo.port;
+        //TODO
+
+    }
+    break;
+
+    case FileTransferPacket::FT_FileSystemInfoRequest: {
+        //in >> FileSystemInfoRequest.parentDirPath;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileSystemInfoResponse: {
+        //in >> FileSystemInfoResponse.baseDirPath >> FileSystemInfoResponse.fileSystemInfoData;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDeletingRequest: {
+        //in >> FileDeletingRequest.baseDirPath >> FileDeletingRequest.files;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDeletingResponse: {
+        //in >> FileDeletingResponse.baseDirPath >> FileDeletingResponse.failedFiles;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileRenamingRequest: {
+        //in >> FileRenamingRequest.baseDirPath >> FileRenamingRequest.oldFileName >> FileRenamingRequest.newFileName;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileRenamingResponse: {
+        //in >> FileRenamingResponse.baseDirPath >> FileRenamingResponse.oldFileName >> FileRenamingResponse.renamed >> FileRenamingResponse.message;
+    }
+    break;
+
+    case FileTransferPacket::FileTransferPacket::FT_FileDownloadingRequest: {
+        //in >> FileDownloadingRequest.baseDir >> FileDownloadingRequest.fileName >> FileDownloadingRequest.dirToSaveFile;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDownloadingResponse: {
+        //in >> FileDownloadingResponse.accepted >> FileDownloadingResponse.baseDir >> FileDownloadingResponse.fileName >> FileDownloadingResponse.fileMD5Sum >> FileDownloadingResponse.size >> FileDownloadingResponse.errorCode;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileUploadingRequest: {
+        //in >> FileUploadingRequest.fileName >> FileUploadingRequest.fileMD5Sum >> FileUploadingRequest.size >> FileUploadingRequest.fileSaveDir;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileUploadingResponse: {
+        //in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDataRequest: {
+        //in >> FileDataRequest.fileMD5 >> FileDataRequest.startPieceIndex >> FileDataRequest.endPieceIndex;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileData: {
+        //in >> FileDataResponse.fileMD5 >> FileDataResponse.pieceIndex >> FileDataResponse.data >> FileDataResponse.pieceMD5;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileTXStatus: {
+        //in >> FileTXStatus.fileMD5 >> FileTXStatus.status;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileTXError: {
+        //in >> FileTXError.fileName >> FileTXError.fileMD5 >> FileTXError.errorCode >> FileTXError.message;
+    }
+    break;
+
+    default:
+        break;
+    }
+
+
 }
 
 void FileTransmissionManagerBase::requestUploadFilesToPeer(int socketID, const QString &peerID, const QString &localBaseDir, const QStringList &localFiles, const QString &remoteDir)

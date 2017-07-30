@@ -67,7 +67,7 @@ public:
     //    void stopHeartbeat();
 
 public slots:
-    void parseIncomingPacketData(PacketBase *packet);
+    void parseIncomingPacketData(const PacketBase &packet);
 
 
     bool sendClientLookForServerPacket(const QString &targetAddress = QString(IM_SERVER_IPMC_ADDRESS), quint16 targetPort = IM_SERVER_IPMC_LISTENING_PORT)
@@ -614,6 +614,15 @@ signals:
 
     void signalRegistrationPacketReceived(const RgeistrationPacket &packet);
     void signalUpdatePasswordResultReceived(const UpdatePasswordPacket &packet);
+
+    void signalLoginResultReceived(quint8 errorType, const QString &errorMessage = "");
+    void signalLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName);
+    void signalClientLastLoginInfoPacketReceived(const QString &extIPAddress, const QString &loginTime, const QString &LogoutTime, const QString &deviceInfo);
+
+    void signalContactStateChangedPacketReceived(const QString &contactID, quint8 onlineState, const QString &contactHostAddress, quint16 contactHostPort);
+    void signalContactsOnlineInfoPacketReceived(const QString &contactsOnlineInfoString);
+
+
     void signalContactGroupsInfoPacketReceived(const ContactGroupsInfoPacket &packet);
     void signalInterestGroupsInfoPacketReceived(const InterestGroupsInfoPacket &packet);
     void signalContactInfoPacketReceived(const ContactInfoPacket &packet);
@@ -622,8 +631,6 @@ signals:
     void signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &packet);
     void signalFileTransferPacketReceived(const FileTransferPacket &packet);
 
-    void signalLoginResultReceived(quint8 errorType, const QString &errorMessage = "");
-    void signalLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName);
 
 
 
@@ -633,10 +640,13 @@ signals:
 
 
 
-    void signalClientLastLoginInfoPacketReceived(const QString &extIPAddress, const QString &loginTime, const QString &LogoutTime, const QString &deviceInfo);
+
+
+
+
+
+
     //void signalContactStateChangedPacketReceived(const QString &contactID, IM::OnlineState onlineState, const QString &contactHostAddress, quint16 contactHostPort);
-    void signalContactStateChangedPacketReceived(quint8 onlineState, const QString &contactID, const QString &contactHostAddress, quint16 contactHostPort);
-    void signalContactsOnlineInfoPacketReceived(const QString &contactsOnlineInfoString);
 
 
     void signalCreateOrDeleteContactGroupResultPacketReceived(quint32 groupID, const QString &groupName, bool createGroup, bool result);
@@ -721,8 +731,9 @@ private:
 
     UDPServer *m_udpServer;
     RTP *m_rtp;
-    UDTProtocol *m_udtProtocol;
+//    UDTProtocol *m_udtProtocol;
     TCPServer *m_tcpServer;
+    ENETProtocol *m_enetProtocol;
 
 
 

@@ -351,7 +351,7 @@ void MainWindow::startNetwork()
         QMessageBox::critical(this, tr("Error"), errorMessage);
     }
     //connect(m_rtp, SIGNAL(connected(int, const QString &, quint16)), this, SLOT(peerConnected(int, const QString &, quint16)));
-    connect(m_rtp, SIGNAL(disconnected(int)), this, SLOT(peerDisconnected(int)));
+    connect(m_rtp, SIGNAL(disconnected(SOCKETID)), this, SLOT(peerDisconnected(SOCKETID)));
 
 
 
@@ -361,11 +361,13 @@ void MainWindow::startNetwork()
     connect(clientPacketsParser, SIGNAL(signalContactGroupsInfoPacketReceived(const ContactGroupsInfoPacket &)), this, SLOT(processContactGroupsInfoPacket(const ContactGroupsInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalInterestGroupsInfoPacketReceived(const InterestGroupsInfoPacket &)), this, SLOT(processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalContactInfoPacketReceived(const ContactInfoPacket &)), this, SLOT(processContactInfoPacket(const ContactInfoPacket &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const SearchInfoPacket &)), this, SLOT(processSearchInfoPacket(const ContactInfoPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const SearchInfoPacket &)), this, SLOT(processSearchInfoPacket(const SearchInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalChatMessageReceivedFromContact(const ChatMessagePacket &)), this, SLOT(processChatMessagePacket(const ChatMessagePacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &)), this, SLOT(processCaptchaInfoPacket(const CaptchaInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
 
+    connect(clientPacketsParser, SIGNAL(signalLoginResultReceived(quint8, const QString &)), this, SLOT(slotProcessLoginResult(quint8, const QString &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalLoginServerRedirected(const QString &, quint16, const QString &)), this, SLOT(slotProcessLoginServerRedirected(const QString &, quint16, const QString &)), Qt::QueuedConnection);
 
 
 
@@ -377,17 +379,14 @@ void MainWindow::startNetwork()
     connect(ui.loginPage, SIGNAL(requestRegistrationServerInfo()), this, SLOT(requestRegistrationServerInfo()), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(registration()), this, SLOT(requestRegistration()), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), ui.loginPage, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString &)), ui.loginPage, SIGNAL(signalRegistrationResultReceived(quint8, quint32, const QString &)), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(signalRequestLogin(const QHostAddress &, quint16 )), this, SLOT(requestLogin(const QHostAddress &, quint16)));
     connect(ui.loginPage, SIGNAL(signalLookForServer(const QHostAddress &, quint16 )), clientPacketsParser, SLOT(sendClientLookForServerPacket(const QHostAddress &, quint16)), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(signalKickedOff()), this, SLOT(slotProcessKickedOff()));
 
     connect(this, SIGNAL(signalMyOnlineStateChanged(int, quint8)), clientPacketsParser, SLOT(changeMyOnlineState(int, quint8)), Qt::QueuedConnection);
 
-    connect(clientPacketsParser, SIGNAL(signalUpdatePasswordResultReceived(quint8, const QString &)), this, SLOT(slotProcessUpdatePasswordResult(quint8, const QString &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalUpdatePasswordResultReceived(const UpdatePasswordPacket &)), this, SLOT(slotProcessUpdatePasswordResult(const UpdatePasswordPacket &)), Qt::QueuedConnection);
 
-    connect(clientPacketsParser, SIGNAL(signalLoginServerRedirected(const QString &, quint16, const QString &)), this, SLOT(slotProcessLoginServerRedirected(const QString &, quint16, const QString &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalLoginResultReceived(quint8, const QString &)), this, SLOT(slotProcessLoginResult(quint8, const QString &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalClientLastLoginInfoPacketReceived(const QString &, const QString &, const QString &, const QString &)), this, SLOT(slotProcessClientLastLoginInfo(const QString &, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
 
     connect(clientPacketsParser, SIGNAL(signalContactStateChangedPacketReceived(const QString &, quint8, const QString &, quint16)), this, SLOT(slotProcessContactStateChanged(const QString &, quint8, const QString &, quint16)), Qt::QueuedConnection);
@@ -1879,7 +1878,7 @@ void MainWindow::slotDeleteContactResultReceived(const QString &contactID, bool 
     m_contactBox->addOrRemoveContactItem(contact, false);
 }
 
-void MainWindow::slotProcessUpdatePasswordResult(quint8 errorTypeCode, const QString &message)
+void MainWindow::slotProcessUpdatePasswordResult(const UpdatePasswordPacket &packet)
 {
 
     QMessageBox::critical(this, tr("Error"), tr("Password Update Failed!"));
@@ -1896,11 +1895,8 @@ void MainWindow::slotProcessLoginServerRedirected(const QString &serverAddress, 
 
 void MainWindow::slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage)
 {
-
     destoryLoginTimer();
     ui.loginPage->slotProcessLoginResult(errorTypeCode, errorMessage);
-
-
 }
 
 void MainWindow::slotProcessClientLastLoginInfo(const QString &extIPAddress, const QString &loginTime, const QString &LogoutTime, const QString &deviceInfo)
@@ -3872,7 +3868,7 @@ void MainWindow::peerDisconnected(const QHostAddress &peerAddress, quint16 peerP
 
 }
 
-void MainWindow::peerDisconnected(int socketID)
+void MainWindow::peerDisconnected(SOCKETID socketID)
 {
     qWarning() << "Peer Disconnected! Socket ID:" << socketID;
 

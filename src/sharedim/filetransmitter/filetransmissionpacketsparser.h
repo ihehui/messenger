@@ -61,9 +61,9 @@ public:
     virtual ~FileTransmissionPacketsParserBase();
 
 public slots:
-    void parseIncomingPacketData(PacketBase *packet);
+    void parseIncomingPacketData(const PacketBase &packet);
 
-    virtual void parseOtherIncomingPacketData(PacketBase *packet);
+    virtual void parseOtherIncomingPacketData(const PacketBase &packet);
 
     int connectToPeer(const QHostAddress &peerAddress, quint16 peerPort)
     {
@@ -341,7 +341,7 @@ public:
     void setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey);
 
 private slots:
-    void peerDisconnected(int socketID);
+    void peerDisconnected(SOCKETID socketID);
 
     QByteArray getSessionEncryptionKey(SOCKETID socketID);
 
@@ -362,8 +362,11 @@ private:
 
     UDPServer *m_udpServer;
     RTP *m_rtp;
-    UDTProtocol *m_udtProtocol;
+//    UDTProtocol *m_udtProtocol;
     TCPServer *m_tcpServer;
+
+    ENETProtocol *m_enetProtocol;
+
 
 
 //    int m_socketConnectedToServer;

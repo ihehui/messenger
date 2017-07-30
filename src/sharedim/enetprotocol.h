@@ -18,18 +18,11 @@ signals:
     void packetReceived(const PacketBase &packet);
     //void dataReceived(const QString &peerAddress, quint16 peerPort, const QByteArray &data);
 
-public slots:
-
-
 private:
     void processReceivedData(quint32 peerID, QByteArray data);
-
     void convertDataToPacket(quint32 peerID, QByteArray *data);
 
-
 private:
-
-
 
 
 };
