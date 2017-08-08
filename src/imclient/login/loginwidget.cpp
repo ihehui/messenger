@@ -329,7 +329,7 @@ void LoginWidget::slotCheckAutoLogin()
     if(autoLogin) {
 
         IMUser::instance()->setUserID(Settings::instance()->getRecentUser());
-        IMUser::instance()->setPassword(Settings::instance()->getRecentUserPassword());
+        IMUser::instance()->setPassword(Settings::instance()->getRecentUserPassword(), true);
         IMUser::instance()->setOnlineState(invisibleLogin ? IM::ONLINESTATE_INVISIBLE : IM::ONLINESTATE_ONLINE);
         verifyUser();
 
@@ -422,32 +422,21 @@ void LoginWidget::on_loginToolButton_clicked()
 
     if (userName().isEmpty()) {
 
-        QMessageBox::critical(this, tr("Error"), tr(
-                                  "<b>ID Required!</b>"));
+        QMessageBox::critical(this, tr("Error"), tr("<b>ID Required!</b>"));
 
         ui.idComboBox->setFocus();
         return;
-
     } else if (passWord().isEmpty()) {
 
-        QMessageBox::critical(this, tr("Error"), tr(
-                                  "<b>Password Required!</b>"));
+        QMessageBox::critical(this, tr("Error"), tr("<b>Password Required!</b>"));
         ui.passwordLineEdit->setFocus();
         return;
-
     } else {
         QString userID = ui.idComboBox->currentText().trimmed();
         user->setUserID(userID);
-        //user->setPassword(ui.passwordLineEdit->text());
-
-        //从密码输入框取回明文密码,将其进行SHA-1加密
-        //Fetch the password from the 'ui.passwordLineEdit' and  encrypt it with SHA-1h
-        QByteArray password(ui.passwordLineEdit->text().toUtf8());
-        password = QCryptographicHash::hash (password, QCryptographicHash::Sha1);
-
-        user->setPassword(password.toBase64());
-        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~password:" << ui.passwordLineEdit->text();
-        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~password.toBase64():" << password.toBase64();
+        user->setPassword(ui.passwordLineEdit->text(), true);
+        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~Password Text:" << ui.passwordLineEdit->text();
+        qDebug() << "----LoginWidget::on_loginToolButton_clicked()~~Password Hash:" << user->getPassword();
 
         user->setStateAfterLoggedin(invisibleLogin ? IM::ONLINESTATE_INVISIBLE : IM::ONLINESTATE_ONLINE);
 
@@ -455,9 +444,10 @@ void LoginWidget::on_loginToolButton_clicked()
         //infoAccepted = true;
 
 
+        Settings::instance()->setCurrentUser(userID);
+
         verifyUser();
 
-        Settings::instance()->setCurrentUser(userID);
 
 
 
@@ -617,6 +607,10 @@ void LoginWidget::loginTimeout()
 //}
 
 
+void LoginWidget::serverFound(const ServerDiscoveryPacket &packet)
+{
+    emit signalServerFound(packet);
+}
 
 void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage)
 {
@@ -629,6 +623,7 @@ void LoginWidget::slotProcessLoginResult(quint8 errorTypeCode, const QString &er
             //Settings::instance()->setRecentUser(ui.idComboBox->currentText());
             Settings::instance()->setRecentUserPassword(user->getPassword());
         }
+        Settings::instance()->setCurrentUser(user->getUserID());
         Settings::instance()->setRecentUser(user->getUserID());
         Settings::instance()->setLastServer(ui.comboBoxServerIP->currentText());
 

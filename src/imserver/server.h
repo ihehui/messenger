@@ -90,7 +90,7 @@ private:
 
 private:
 
-    ResourcesManagerInstance *resourcesManager;
+    ResourcesManagerInstance *m_resourcesManager;
     ServerPacketsParser *serverPacketsParser;
 
     ServerFileTransmissionPacketsParser *m_fileTransmissionPacketsParser;

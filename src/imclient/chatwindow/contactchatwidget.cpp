@@ -97,9 +97,9 @@ void ContactChatWidget::contactOnlineStateChanged()
 
 }
 
-//QSize ContactChatWidget::sizeHint(){
-//    return QSize(640, 480);
-//}
+QSize ContactChatWidget::sizeHint(){
+    return QSize(700, 600);
+}
 
 void ContactChatWidget::closeEvent(QCloseEvent *event)
 {
@@ -177,7 +177,7 @@ void ContactChatWidget::dropEvent(QDropEvent *event)
 
 void ContactChatWidget::appendMessageReceivedFromContact(const QString &message, Contact *contact, const QString &datetime )
 {
-    ui.chatMessageWindow->appendChatMessage(message, contact, datetime);
+    ui.chatMessageWindow->appendChatMessage(message, contact, datetime, true);
 }
 
 void ContactChatWidget::processContactHistoryMessage(const QStringList &messages, bool canFetchMore)

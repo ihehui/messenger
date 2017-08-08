@@ -27,8 +27,6 @@
         <file>resources/images/group.png</file>
         <file>resources/images/closetab.png</file>
         <file>resources/images/addtab.png</file>
-        <file>resources/qml/chat.qml</file>
-        <file>resources/qml/groupchat.qml</file>
     </qresource>
     <qresource prefix="/text">
         <file>resources/text/sample.html</file>

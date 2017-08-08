@@ -3,17 +3,23 @@ PACKAGE_PWD = $$PWD
 
 #SOURCE_TREE = $$PWD/../
 SOURCE_TREE = $$PWD
+BUILD_OUTPUT = $$OUT_PWD/../../
 
 CONFIG( debug, debug|release ) {
-        BIN_PATH = $${SOURCE_TREE}/bin/debug
+    BIN_PATH = $${SOURCE_TREE}/bin/debug
 } else {
-        BIN_PATH = $${SOURCE_TREE}/bin/release
+    BIN_PATH = $${SOURCE_TREE}/bin/release
 }
 LIB_PATH = $${SOURCE_TREE}/lib
 PLUGIN_PATH = $${BIN_PATH}/plugins/hehui
 DLL_PATH = $${BIN_PATH}
 HEADERS_PATH = $${SOURCE_TREE}/include
 
+unix{
+    BIN_PATH = $$system(echo $HOME/bin)
+    LIB_PATH = $$system(echo $HOME/lib)
+    PLUGIN_PATH = $$system(echo $HOME/plugins/hehui)
+}
 
 ##config for application
 contains(TEMPLATE, app){
@@ -44,7 +50,7 @@ PACKAGE_DESTDIR	= $${PACKAGE_PWD}/bin
 
 # temporary path for building
 #PACKAGE_BUILD_PATH	= $${PACKAGE_PWD}/tmp/$${TARGET}
-PACKAGE_BUILD_PATH	= $${SOURCE_TREE}/temp/$${TARGET}
+PACKAGE_BUILD_PATH	= $${BUILD_OUTPUT}/temp/$${TARGET}
 
 # build mode
 #CONFIG	+= qt warn_on thread x11 windows release

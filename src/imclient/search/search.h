@@ -29,7 +29,10 @@ public:
     Search(QWidget *parent = 0);
 
 signals:
-    void signalSearchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly = true, bool searchWebcamUsersOnly = false, int startIndex = 0);
+    void signalSearchContact(const QString &keyword, quint8 searchOnlineUsersOnly,
+                             quint8 searchWebcamUsersOnly, quint16 location, quint16 hometown,
+                             quint8 gender, quint8 age, bool matchExactly, int startIndex);
+
     void signalAddContact(const QString &userID, const QString &verificationMessage);
     void signalSearchInterestGroup(const QString &keyword, int startIndex = 0);
     void signalJoinInterestGroup(quint32 groupID, const QString &verificationMessage);
@@ -54,9 +57,7 @@ private slots:
     void on_tabWidget_currentChanged( int index );
 
     void on_pushButtonSearchContact_clicked();
-
-    void on_radioButtonUsersMatchWildcard_clicked();
-    void on_radioButtonUsersMatchExactly_clicked();
+    void searchContact(int pageIndex);
 
     void on_pushButtonUserDetails_clicked();
     void on_pushButtonAddAsContact_clicked();
@@ -81,7 +82,6 @@ private:
     Ui::SearchClass ui;
 
 
-    QString contactProperties;
     bool matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly;
 
     QString groupKeyword;

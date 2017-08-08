@@ -151,7 +151,7 @@ void IMClientPacketsParser::parseIncomingPacketData(const PacketBase &packet)
     break;
 
     case quint8(IM::CMD_Rgeistration): {
-        RgeistrationPacket p(packet, sessionEncryptionKey);
+        RgeistrationPacket p(packet, RgeistrationPacket::getLocalID().toUtf8());
         emit signalRegistrationPacketReceived(p);
         qDebug() << "~~CMD_Rgeistration";
     }
@@ -165,7 +165,31 @@ void IMClientPacketsParser::parseIncomingPacketData(const PacketBase &packet)
     break;
 
     case quint8(IM::CMD_Login): {
-        LoginPacket p(packet, sessionEncryptionKey);
+        QByteArray key;
+        LoginPacket::PacketInfoType type = LoginPacket::PacketInfoType(packet.getPacketSubType());
+        switch (type) {
+        case LoginPacket::INFO_TYPE_LOGIN_SUCCEEDED:
+        {
+            key = myself->encryptedPassword();
+        }
+            break;
+        case LoginPacket::INFO_TYPE_LOGIN_FAILED:
+        {
+            key = QByteArray();
+        }
+            break;
+
+        case LoginPacket::INFO_TYPE_PREVIOUS_LOGIN_INFO:
+        {
+            key = sessionEncryptionKey;
+        }
+            break;
+
+        default:
+            return;
+        }
+
+        LoginPacket p(packet, key);
         processLoginPacket(p);
         qDebug() << "--CMD_Login";
     }
@@ -308,26 +332,28 @@ void IMClientPacketsParser::setSessionEncryptionKeyWithContact(const QString &co
 void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet)
 {
 
-    LoginPacket::PacketInfoType infoType = packet.InfoType;
+    LoginPacket::PacketInfoType infoType = LoginPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
-    case LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO: {
-        QString serverAddress = packet.LoginServerInfo.serverAddress;
-        quint16 serverPort = packet.LoginServerInfo.serverPort;
-        if( serverPort == 0 || ((serverAddress == packet.getPeerHostAddress().toString()) && (serverPort == packet.getPeerHostPort())) ) {
-            if(!login(packet.getSocketID())) {
-                emit signalLoginResultReceived(quint8(IM::ERROR_UnKnownError));
-            }
-        } else {
-            emit signalLoginServerRedirected(serverAddress, serverPort, packet.getPeerID());
-        }
-    }
-    break;
+//    case LoginPacket::INFO_TYPE_LOGIN_SERVER_INFO: {
+//        QString serverAddress = packet.LoginServerInfo.serverAddress;
+//        quint16 serverPort = packet.LoginServerInfo.serverPort;
+//        if( serverPort == 0 || ((serverAddress == packet.getPeerHostAddress().toString()) && (serverPort == packet.getPeerHostPort())) ) {
+//            if(!login(packet.getSocketID())) {
+//                emit signalLoginResultReceived(quint8(IM::ERROR_UnKnownError));
+//            }
+//        } else {
+//            emit signalLoginServerRedirected(serverAddress, serverPort, packet.getPeerID());
+//        }
+//    }
+//    break;
 
     case LoginPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT: {
     }
     break;
 
-    case LoginPacket::INFO_TYPE_LOGIN_RESULT: {
+    case LoginPacket::INFO_TYPE_LOGIN_SUCCEEDED:
+    case LoginPacket::INFO_TYPE_LOGIN_FAILED:
+    {
         quint8 loggedin = packet.AuthResultInfo.loggedin;
         quint8 errorTypeCode = packet.AuthResultInfo.errorType;
         QString errorMessage = "";
@@ -340,7 +366,8 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet)
             Q_ASSERT(serverTime);
             ServerTime::instance()->startSync(serverTime);
 
-            myself->setSessionEncryptionKey(packet.AuthResultInfo.sessionEncryptionKey);
+            sessionEncryptionKey = packet.AuthResultInfo.sessionEncryptionKey;
+            myself->setSessionEncryptionKey(sessionEncryptionKey);
             //TODO:
             myself->loadMyInfoFromLocalDatabase();
 
@@ -357,7 +384,9 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet)
             if(personalDetailInfoVersionOnServer != myself->getPersonalDetailInfoVersion()) {
                 requestContactInfo(m_socketConnectedToServer, m_myUserID, false);
             }
-//            if(personalContactGroupsInfoVersionOnServer != user->getPersonalContactGroupsVersion()){requestPersonalContactGroupsInfo(socketID);}
+//            if(personalContactGroupsInfoVersionOnServer != user->getPersonalContactGroupsVersion()){
+//                requestPersonalContactGroupsInfo(m_socketConnectedToServer);
+//            }
             if(interestGroupsInfoVersionOnServer != myself->getInterestGroupInfoVersion()) {
                 requestInterestGroupsList(m_socketConnectedToServer);
             }

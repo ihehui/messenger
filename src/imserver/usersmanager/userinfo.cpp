@@ -212,6 +212,9 @@ void UserInfo::setOffline()
 
     setLastLoginExternalHostPort(0);
 
+    setSessionEncryptionKey(encryptedPassword());
+
+
 }
 
 QString UserInfo::databaseColumnName(IM::PropertyIDOfUser propertyID) const

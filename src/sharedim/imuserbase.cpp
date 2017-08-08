@@ -139,7 +139,7 @@ void IMUserBase::init()
     userRole = 0;
     accountState = AS_Normal;
 
-    sessionEncryptionKey = encryptedPassword();
+    sessionEncryptionKey = QByteArray();
 
     updatedPropertiesMutex = new QMutex();
 

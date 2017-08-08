@@ -13,18 +13,23 @@ namespace HEHUI
 class SHAREDIMLIB_API IMPacket : public Packet
 {
 public:
-    IMPacket();
-    IMPacket(quint8 packetType, const QByteArray &sessionEncryptionKey);
-    IMPacket(const PacketBase &base, quint8 packetType, const QByteArray &sessionEncryptionKey);
+    IMPacket(const QByteArray &sessionEncryptionKey = QByteArray());
+    IMPacket(quint8 packetType, quint8 packetSubType, const QByteArray &sessionEncryptionKey);
+//    IMPacket(const PacketBase &base, quint8 packetType, const QByteArray &sessionEncryptionKey);
     ~IMPacket();
 
 public:
     void setSessionEncryptionKey(const QByteArray &key);
+    QByteArray getSessionEncryptionKey() const;
+
+    bool decryptionSucceeded() const;
 
 private:
-    virtual void init();
-    void parsePacketBody(QByteArray &packetBody) = 0;
-    QByteArray packBodyData() = 0;
+//    virtual void init(); //Overwride Required
+//    virtual void parsePacketBody(QByteArray &packetBody); //Overwride Required
+    virtual QByteArray packBodyData() = 0;
+
+
 
 protected:
     QByteArray encrypt(const QByteArray &data);
@@ -32,6 +37,8 @@ protected:
 
 private:
     QByteArray sessionEncryptionKey;
+    bool m_decryptionSucceeded;
+
 };
 ////////////////////////////////////////////////////////////////////////
 
@@ -43,8 +50,18 @@ private:
 class SHAREDIMLIB_API ServerDiscoveryPacket : public IMPacket
 {
 public:
-    ServerDiscoveryPacket();
-    ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey);
+    enum ServerType{
+        SERVER_GATE = UserDefinedPacket + 1,
+        SERVER_LOGIN,
+        SERVER_CHAT,
+        SERVER_IMAGE,
+        SERVER_FILE,
+
+        SERVER_ALL_IN_ONE = 255
+    };
+
+    ServerDiscoveryPacket(ServerType packetSubType = SERVER_ALL_IN_ONE);
+    ServerDiscoveryPacket(ServerType packetSubType, const QByteArray &sessionEncryptionKey);
     ServerDiscoveryPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey = QByteArray());
     ~ServerDiscoveryPacket();
 
@@ -54,12 +71,17 @@ private:
     QByteArray packBodyData();
 
 public:
-    quint8 responseFromServer;
+
+
+    quint8 serverAnnouncement;
+
     QString version;
+    quint32 ip;
     quint16 udpPort;
     quint16 rtpPort;
     quint16 tcpPort;
     int serverInstanceID;
+
 };
 ////////////////////////////////////////////////////////////////////////
 
@@ -91,8 +113,18 @@ public:
 class SHAREDIMLIB_API AnnouncementPacket : public IMPacket
 {
 public:
-    AnnouncementPacket();
-    AnnouncementPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        ANNOUNCEMENT_UNKNOWN = UserDefinedPacket + 1,
+        ANNOUNCEMENT_QUERY,
+        ANNOUNCEMENT_CREATE,
+        ANNOUNCEMENT_UPDATE,
+        ANNOUNCEMENT_REPLY,
+        ANNOUNCEMENT_QUERY_TARGETS,
+        ANNOUNCEMENT_INFO
+    };
+
+    AnnouncementPacket(PacketInfoType packetSubType = ANNOUNCEMENT_UNKNOWN);
+    AnnouncementPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     AnnouncementPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~AnnouncementPacket();
 
@@ -108,16 +140,6 @@ public:
         ANNOUNCEMENT_TARGET_ALL = 255
     };
 
-    enum PacketInfoType {
-        ANNOUNCEMENT_UNKNOWN = 0,
-        ANNOUNCEMENT_QUERY,
-        ANNOUNCEMENT_CREATE,
-        ANNOUNCEMENT_UPDATE,
-        ANNOUNCEMENT_REPLY,
-        ANNOUNCEMENT_QUERY_TARGETS,
-        ANNOUNCEMENT_INFO
-    };
-    PacketInfoType InfoType;
     quint32 JobID;
 
     struct QueryInfoStruct {
@@ -177,8 +199,15 @@ public:
 class SHAREDIMLIB_API RgeistrationPacket : public IMPacket
 {
 public:
-    RgeistrationPacket();
-    RgeistrationPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        REGISTRATION_UNKNOWN = UserDefinedPacket + 1,
+        REGISTRATION_SERVER_INFO,
+        REGISTRATION_INFO,
+        REGISTRATION_RESULT
+    };
+
+    RgeistrationPacket(PacketInfoType packetSubType = REGISTRATION_UNKNOWN);
+    RgeistrationPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     RgeistrationPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~RgeistrationPacket();
 
@@ -197,13 +226,7 @@ public:
         REG_MODE_CLOSED
     };
     enum ActivtionMode {ACT_MODE_AUTO, ACT_MODE_MANUAL, ACT_MODE_EMAIL};
-    enum PacketInfoType {
-        REGISTRATION_UNKNOWN = 0,
-        REGISTRATION_SERVER_INFO,
-        REGISTRATION_INFO,
-        REGISTRATION_RESULT
-    };
-    PacketInfoType InfoType;
+
     quint32 JobID;
 
     struct ServerInfoStruct {
@@ -240,8 +263,21 @@ public:
 class SHAREDIMLIB_API UpdatePasswordPacket : public IMPacket
 {
 public:
-    UpdatePasswordPacket();
-    UpdatePasswordPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        INFO_TYPE_UNKNOWN = UserDefinedPacket + 1,
+        INFO_TYPE_INIT_REQUEST,
+
+        INFO_TYPE_CAPTCHA_REQUEST,
+        INFO_TYPE_CAPTCHA_IMAGE,
+
+        INFO_TYPE_AUTH_INFO_FROM_SERVER,
+        INFO_TYPE_AUTH_INFO_FROM_CLIENT,
+        INFO_TYPE_AUTH_RESULT,
+        INFO_TYPE_UPDATE_RESULT
+    };
+
+    UpdatePasswordPacket(PacketInfoType packetSubType = INFO_TYPE_UNKNOWN);
+    UpdatePasswordPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     UpdatePasswordPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~UpdatePasswordPacket();
 
@@ -258,19 +294,7 @@ public:
         AUTH_SMS,
         AUTH_HTTP
     };
-    enum PacketInfoType {
-        INFO_TYPE_UNKNOWN = 0,
-        INFO_TYPE_INIT_REQUEST,
 
-        INFO_TYPE_CAPTCHA_REQUEST,
-        INFO_TYPE_CAPTCHA_IMAGE,
-
-        INFO_TYPE_AUTH_INFO_FROM_SERVER,
-        INFO_TYPE_AUTH_INFO_FROM_CLIENT,
-        INFO_TYPE_AUTH_RESULT,
-        INFO_TYPE_UPDATE_RESULT
-    };
-    PacketInfoType InfoType;
     quint32 JobID;
 
     struct AuthInfoStruct {
@@ -301,8 +325,21 @@ public:
 class SHAREDIMLIB_API LoginPacket : public IMPacket
 {
 public:
-    LoginPacket();
-    LoginPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        INFO_TYPE_UNKNOWN = UserDefinedPacket + 1,
+
+//        INFO_TYPE_LOGIN_SERVER_INFO,
+
+        INFO_TYPE_AUTH_INFO_FROM_CLIENT,
+
+        INFO_TYPE_LOGIN_SUCCEEDED,
+        INFO_TYPE_LOGIN_FAILED,
+
+        INFO_TYPE_PREVIOUS_LOGIN_INFO
+    };
+
+    LoginPacket(PacketInfoType packetSubType = INFO_TYPE_UNKNOWN);
+    LoginPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     LoginPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~LoginPacket();
 
@@ -313,17 +350,6 @@ private:
 
 public:
 
-    enum PacketInfoType {
-        INFO_TYPE_UNKNOWN = 0,
-
-        INFO_TYPE_LOGIN_SERVER_INFO,
-
-        INFO_TYPE_AUTH_INFO_FROM_CLIENT,
-        INFO_TYPE_LOGIN_RESULT,
-
-        INFO_TYPE_PREVIOUS_LOGIN_INFO
-    };
-    PacketInfoType InfoType;
     quint32 JobID;
 
     struct LoginServerInfoStruct {
@@ -414,20 +440,8 @@ public:
 class SHAREDIMLIB_API ContactGroupsInfoPacket : public IMPacket
 {
 public:
-    ContactGroupsInfoPacket();
-    ContactGroupsInfoPacket(const QByteArray &sessionEncryptionKey);
-    ContactGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~ContactGroupsInfoPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-
     enum PacketInfoType {
-        PIT_UNKNOWN = 0,
+        PIT_UNKNOWN = UserDefinedPacket + 1,
 
         PIT_GROUPS_LIST,
 
@@ -437,7 +451,18 @@ public:
         PIT_GROUP_RENAMING,
 
     };
-    PacketInfoType InfoType;
+
+    ContactGroupsInfoPacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    ContactGroupsInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    ContactGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~ContactGroupsInfoPacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
     quint32 JobID;
 
     struct GroupsListStruct {
@@ -477,20 +502,8 @@ public:
 class SHAREDIMLIB_API InterestGroupsInfoPacket : public IMPacket
 {
 public:
-    InterestGroupsInfoPacket();
-    InterestGroupsInfoPacket(const QByteArray &sessionEncryptionKey);
-    InterestGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~InterestGroupsInfoPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-
     enum PacketInfoType {
-        PIT_UNKNOWN = 0,
+        PIT_UNKNOWN = UserDefinedPacket + 1,
 
         PIT_GROUPS_LIST,
         PIT_GROUP_INFO,
@@ -504,7 +517,18 @@ public:
         PIT_GROUP_MEMBER_DELETION,
         PIT_GROUP_MEMBER_PROMOTION
     };
-    PacketInfoType InfoType;
+
+    InterestGroupsInfoPacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    InterestGroupsInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    InterestGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~InterestGroupsInfoPacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
     quint32 JobID;
     quint32 GroupID;
 
@@ -568,20 +592,8 @@ public:
 class SHAREDIMLIB_API ContactInfoPacket : public IMPacket
 {
 public:
-    ContactInfoPacket();
-    ContactInfoPacket(const QByteArray &sessionEncryptionKey);
-    ContactInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~ContactInfoPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-
     enum PacketInfoType {
-        PIT_UNKNOWN = 0,
+        PIT_UNKNOWN = UserDefinedPacket + 1,
 
         PIT_CONTACT_INFO,
 
@@ -592,7 +604,18 @@ public:
         PIT_CONTACT_DELETION,
         PIT_CONTACT_REMARK,
     };
-    PacketInfoType InfoType;
+
+    ContactInfoPacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    ContactInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    ContactInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~ContactInfoPacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
     quint32 JobID;
     QString ContactID;
 
@@ -646,8 +669,19 @@ public:
 class SHAREDIMLIB_API SearchInfoPacket : public IMPacket
 {
 public:
-    SearchInfoPacket();
-    SearchInfoPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        PIT_UNKNOWN = UserDefinedPacket + 1,
+
+        PIT_SEARCH_CONTACT_CONDITIONS,
+        PIT_SEARCH_CONTACT_RESULT,
+
+        PIT_SEARCH_INTEREST_GROUP_CONDITIONS,
+        PIT_SEARCH_INTEREST_GROUP_RESULT,
+
+    };
+
+    SearchInfoPacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    SearchInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     SearchInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~SearchInfoPacket();
 
@@ -657,18 +691,6 @@ private:
     QByteArray packBodyData();
 
 public:
-
-    enum PacketInfoType {
-        PIT_UNKNOWN = 0,
-
-        PIT_SEARCH_CONTACT_CONDITIONS,
-        PIT_SEARCH_CONTACT_RESULT,
-
-        PIT_SEARCH_INTEREST_GROUP_CONDITIONS,
-        PIT_SEARCH_INTEREST_GROUP_RESULT,
-
-    };
-    PacketInfoType InfoType;
     quint32 JobID;
 
     struct SearchContactConditionsStruct {
@@ -708,20 +730,8 @@ public:
 class SHAREDIMLIB_API ChatMessagePacket : public IMPacket
 {
 public:
-    ChatMessagePacket();
-    ChatMessagePacket(const QByteArray &sessionEncryptionKey);
-    ChatMessagePacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~ChatMessagePacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-
     enum PacketInfoType {
-        PIT_UNKNOWN = 0,
+        PIT_UNKNOWN = UserDefinedPacket + 1,
 
         PIT_CONTACT_CHAT_MESSAGE,
         PIT_CONTACT_CHAT_MESSAGES_CACHED_ON_SERVER,
@@ -736,7 +746,18 @@ public:
         PIT_SESSION_ENCRYPTION_KEY_WITH_CONTACT
 
     };
-    PacketInfoType InfoType;
+
+    ChatMessagePacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    ChatMessagePacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    ChatMessagePacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~ChatMessagePacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
     quint32 JobID;
 
     struct ContactChatMessageStruct {
@@ -795,20 +816,8 @@ public:
 class SHAREDIMLIB_API CaptchaInfoPacket : public IMPacket
 {
 public:
-    CaptchaInfoPacket();
-    CaptchaInfoPacket(const QByteArray &sessionEncryptionKey);
-    CaptchaInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-    ~CaptchaInfoPacket();
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
-
     enum PacketInfoType {
-        PIT_UNKNOWN = 0,
+        PIT_UNKNOWN = UserDefinedPacket + 1,
 
         CAPTCHA_REQUEST,
         CAPTCHA_IMAGE,
@@ -817,7 +826,18 @@ public:
         CAPTCHA_AUTH_RESULT,
 
     };
-    PacketInfoType InfoType;
+
+    CaptchaInfoPacket(PacketInfoType packetSubType = PIT_UNKNOWN);
+    CaptchaInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    CaptchaInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+    ~CaptchaInfoPacket();
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public: 
     quint32 JobID;
 
     quint8 captchaID;
@@ -835,18 +855,8 @@ public:
 class SHAREDIMLIB_API FileTransferPacket : public IMPacket
 {
 public:
-    FileTransferPacket();
-    FileTransferPacket(const QByteArray &sessionEncryptionKey);
-    FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
-
-private:
-    void init();
-    void parsePacketBody(QByteArray &packetBody);
-    QByteArray packBodyData();
-
-public:
     enum PacketInfoType {
-        FT_UNKNOWN = 0,
+        FT_UNKNOWN = UserDefinedPacket + 1,
 
         FT_FILE_SERVER_INFO,
 
@@ -873,7 +883,17 @@ public:
 
         FT_FileTXStop
     };
-    PacketInfoType InfoType;
+
+    FileTransferPacket(PacketInfoType packetSubType = FT_UNKNOWN);
+    FileTransferPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
+    FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
+
+private:
+    void init();
+    void parsePacketBody(QByteArray &packetBody);
+    QByteArray packBodyData();
+
+public:
     QString ContactID;
 
     struct FileServerInfoStruct {
@@ -1012,7 +1032,14 @@ public:
 class SHAREDIMLIB_API AdminLoginPacket : public IMPacket
 {
 public:
-    AdminLoginPacket(const QByteArray &sessionEncryptionKey);
+    enum PacketInfoType {
+        LOGIN_UNKNOWN = UserDefinedPacket + 1,
+        LOGIN_REQUEST,
+        LOGIN_RESULT
+    };
+
+
+    AdminLoginPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey);
     AdminLoginPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey);
     ~AdminLoginPacket();
 
@@ -1022,10 +1049,6 @@ private:
     QByteArray packBodyData();
 
 public:
-    enum PacketInfoType {LOGIN_UNKNOWN = 0, LOGIN_REQUEST, LOGIN_RESULT};
-
-    PacketInfoType InfoType;
-
     struct LoginInfoStruct {
         QString adminID;
         QString password;

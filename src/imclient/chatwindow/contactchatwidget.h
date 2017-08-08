@@ -30,7 +30,7 @@ public:
 
     void contactOnlineStateChanged();
 
-//    QSize sizeHint();
+    QSize sizeHint();
 
 protected:
     void closeEvent(QCloseEvent *event);

@@ -46,7 +46,7 @@ IMServer::IMServer(QObject *parent)
     : QObject(parent)
 {
 
-    resourcesManager = 0;
+    m_resourcesManager = 0;
 
     serverPacketsParser = 0;
 
@@ -74,14 +74,18 @@ IMServer::~IMServer()
 {
     qDebug() << "Server::~Server()";
 
+    if(serverPacketsParser){
+        delete serverPacketsParser;
+        serverPacketsParser = 0;
+    }
 
-    delete serverPacketsParser;
-    serverPacketsParser = 0;
+    if(m_resourcesManager){
+        //TODO:释放资源
+        ResourcesManagerInstance::cleanInstance();
+        delete m_resourcesManager;
+        m_resourcesManager = 0;
+    }
 
-    //TODO:释放资源
-    ResourcesManagerInstance::cleanInstance();
-    delete resourcesManager;
-    resourcesManager = 0;
 
     QList<UserInfo *> clientInfoList = userInfoHash.values();
     userInfoHash.clear();
@@ -90,18 +94,23 @@ IMServer::~IMServer()
         info = 0;
     }
 
-//TODO
-    delete m_fileTransmissionManager;
-    delete m_fileTransmissionPacketsParser;
+    if(m_fileTransmissionManager){
+        delete m_fileTransmissionManager;
+    }
 
-    delete databaseUtility;
-    databaseUtility = 0;
-    delete query;
-    query = 0;
+    if(m_fileTransmissionPacketsParser){
+        delete m_fileTransmissionPacketsParser;
+    }
+
+    if(databaseUtility){
+        delete databaseUtility;
+        databaseUtility = 0;
+        delete query;
+        query = 0;
+    }
 
 
     mainServiceStarted = false;
-
 
 }
 
@@ -116,7 +125,7 @@ bool IMServer::startMainService()
 
 
     //TODO
-    if(openDatabase()) {
+    if(!openDatabase()) {
         qApp->exit();
     }
 
@@ -337,10 +346,10 @@ bool IMServer::openDatabase(bool reopen)
 void IMServer::start()
 {
 
-    qDebug() << "----Server::start()";
+    //qDebug() << "--IMServer::start()";
 
 
-    resourcesManager = ResourcesManagerInstance::instance();
+    m_resourcesManager = ResourcesManagerInstance::instance();
     serverPacketsParser = 0;
 
     databaseUtility = new DatabaseUtility(this);
@@ -349,10 +358,6 @@ void IMServer::start()
 
 
     startMainService();
-
-
-
-
 
 
 }
@@ -395,18 +400,23 @@ bool IMServer::startIMServer()
     if(!serverPacketsParser) {
 
         QString errorMessage = "";
-        m_udpServer = resourcesManager->startIPMCServer(QHostAddress(IM_SERVER_IPMC_ADDRESS), quint16(IM_SERVER_IPMC_LISTENING_PORT), &errorMessage);
+        m_udpServer = m_resourcesManager->startIPMCServer(QHostAddress(IM_SERVER_IPMC_ADDRESS), quint16(IM_SERVER_IPMC_LISTENING_PORT), &errorMessage);
         if(!m_udpServer) {
             qCritical() << QString("Can not start IP Multicast listening on address '%1', port %2! %3").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT).arg(errorMessage);
-            m_udpServer = resourcesManager->startUDPServer(QHostAddress::AnyIPv4, quint16(IM_SERVER_IPMC_LISTENING_PORT), true, &errorMessage);
+            m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::AnyIPv4, quint16(IM_SERVER_IPMC_LISTENING_PORT), true, &errorMessage);
+            if(!m_udpServer) {
+                qCritical()<< QString("Can not start UDP listening! %1").arg(errorMessage);
+            } else {
+                qWarning() << QString("UDP listening on port %1!").arg(m_udpServer->localPort());
+            }
         } else {
             qWarning() << QString("IP Multicast listening on address '%1', port %2!").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT);
         }
 
-        m_rtp = resourcesManager->startRTP(QHostAddress::Any, IM_SERVER_RTP_LISTENING_PORT, true, &errorMessage);
+        m_rtp = m_resourcesManager->startRTP(QHostAddress::Any, IM_SERVER_RTP_LISTENING_PORT, true, &errorMessage);
         //connect(m_rtp, SIGNAL(disconnected(int)), this, SLOT(peerDisconnected(int)));
 
-        serverPacketsParser = new ServerPacketsParser(resourcesManager, this);
+        serverPacketsParser = new ServerPacketsParser(m_resourcesManager, this);
 
 
         //Single Process Thread

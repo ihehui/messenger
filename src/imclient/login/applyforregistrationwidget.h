@@ -69,11 +69,14 @@ public slots:
 
 private slots:
     void on_pushButtonRegister_clicked();
+    void on_pushButtonOK_clicked();
+
     bool isUserIDValid();
     bool isPasswordValid();
 
     void requestRegistrationServerInfoTimeout();
     void registrationTimeout();
+
 
 
 private:
@@ -85,6 +88,7 @@ private:
 
     bool m_registrationModeInfoResponseReceived;
     bool m_registrationResultReceived;
+    bool m_registered;
 
 
 };

@@ -269,6 +269,8 @@ enum ErrorType {
 
     //registration
     ERROR_IDEXISTED,
+    ERROR_IDINVALID,
+    ERROR_PASSWORDINVALID,
     ERROR_EMAILEXISTED,
 
 

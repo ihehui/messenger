@@ -105,13 +105,14 @@ void ChatMessageWindow::initUI()
     ui.setupUi(this);
 
 
-    m_messageView = new MessageView(this);
+    m_messageView = new MessageView((m_chatMessageWindowType == CMWT_Contact), this);
     m_messageView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     connect(m_messageView, SIGNAL(signalRequestDownloadImage(const QString &, const QString &)), this, SLOT(requestDownloadImage(const QString &, const QString &)));
     connect(m_messageView, SIGNAL(signalTipLastUnACKedMessageFromContact(const QString &)), this, SLOT(tipLastUnACKedMessageFromContact(const QString &)) );
 
 
-    ui.verticalLayoutMessageView->insertWidget(0, m_messageView);
+    ui.verticalLayoutView->insertWidget(0, m_messageView);
+    m_messageView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     static QString htmlForMessagesView = "";
     if(htmlForMessagesView.isEmpty()) {
@@ -138,7 +139,13 @@ void ChatMessageWindow::initUI()
 //    m_mainWebFrame = page->mainFrame();
 //    connect(m_mainWebFrame, SIGNAL(contentsSizeChanged(const QSize &)), this, SLOT(scrollWebFrame(const QSize &)));
 
-    ui.mainSplitter->setStretchFactor(1, 1);
+    ui.splitter->setStretchFactor(0, 3);
+    ui.splitter->setStretchFactor(1, 0);
+
+    int editorSize = 200;
+    int viewSize = height() - editorSize - 10;
+    ui.splitter->setSizes(QList<int>()<<viewSize<<editorSize);
+    updateGeometry();
 
 
     m_myself = IMUser::instance();
@@ -258,44 +265,56 @@ bool ChatMessageWindow::isDownloadingImage(const QString &imageName)
     return m_imagesDownloading.contains(imageName);
 }
 
-void ChatMessageWindow::appendChatMessage(const QString &message, IMUserBase *sender, const QString &datetime, bool richTextMessage)
+void ChatMessageWindow::appendChatMessage(const QString &message, IMUserBase *sender, const QString &datetime, bool fromContact)
 {
     qDebug() << "--ChatMessageWindow::appendChatMessage(...)";
 
-    QString userID = "", nickName = "";
+
+    QString userID = "", nickName = "", icon = "";
     if(!sender) {
         userID = m_contact->getUserID();
-        nickName = m_contact->getNickName();
+        //nickName = m_contact->getNickName();
+        //icon = m_contact->getFace();
     } else {
         userID = sender->getUserID();
-        nickName = sender->getNickName();
+        //nickName = sender->getNickName();
+        //icon = sender->getFace();
     }
 
-    if(userID != myUserID) {
-        Contact *contact = qobject_cast<Contact *>(sender);
-        if(contact) {
-            QString remarkName = contact->getRemarkName();
-            if(!remarkName.trimmed().isEmpty()) {
-                nickName = remarkName;
-            }
-        }
-    }
-
-    m_messageView->appendChatMessage(userID, nickName, message, datetime, richTextMessage);
-
-
-
-//    QString timeString = datetime;
-//    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
-//    if(dt.date() == ServerTime::instance()->time().date() ){
-//        timeString = dt.toString("hh:mm:ss");
+//    if(userID != myUserID) {
+//        Contact *contact = qobject_cast<Contact *>(sender);
+//        if(contact) {
+//            QString remarkName = contact->getRemarkName();
+//            if(!remarkName.trimmed().isEmpty()) {
+//                nickName = remarkName;
+//                //icon = m_myself->getFace();
+//            }
+//        }
 //    }
+
+
+
+
+    QString timeString = datetime;
+    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
+    if(dt.date() == ServerTime::instance()->time().date() ){
+        timeString = dt.toString("hh:mm:ss");
+    }
+
+    QString msg;
+    if(userID != myUserID){
+        QString richMessage = simpleTextToRichTextMessage(message);
+        msg += richMessage;
+    }else{
+        msg += message;
+    }
+
+    m_messageView->appendChatMessage(userID, timeString, msg);
+
+
 
 //    //URL: contact://contactid
 //    QString msg = QString("<span>%1(<a title=\"%2\" href=\"%3://%2\">%2</a>) %4</span>").arg(nickName).arg(userID).arg(URLScheme_Contact).arg(timeString);
-
-
-
 
 //    if(userID != myUserID){
 //        QString richMessage = simpleTextToRichTextMessage(message);
@@ -529,74 +548,74 @@ QString ChatMessageWindow::myRichTextToSimpleTextMessage(const QString &richText
 
 }
 
-//QString ChatMessageWindow::simpleTextToRichTextMessage(const QString &simpleTextMessage){
+QString ChatMessageWindow::simpleTextToRichTextMessage(const QString &simpleTextMessage){
 
-//    QString msg = simpleTextMessage;
-//    if(msg.trimmed().isEmpty()){
-//        msg = "<p></p>";
-//        return msg;
-//    }
+    QString msg = simpleTextMessage;
+    if(msg.trimmed().isEmpty()){
+        msg = "<p></p>";
+        return msg;
+    }
 
-//    int separateIndex = msg.indexOf(QChar('|'));
-//    if(separateIndex == -1){return "<p></p>";}
-//    QString styleTag = msg.left(separateIndex);
-//    msg.remove(0, separateIndex+1);
+    int separateIndex = msg.indexOf(QChar('|'));
+    if(separateIndex == -1){return "<p></p>";}
+    QString styleTag = msg.left(separateIndex);
+    msg.remove(0, separateIndex+1);
 
-////    QStringList list = msg.split(QChar('|'));
-////    if(list.size() != 2){return "<p></p>";}
-////    QString styleTag = list.at(0);
-////    msg = list.at(1);
-
-
-//    msg = "<p>" + msg + "</p>";
-//    msg.replace("\\r\\n", "</br>");
-
-//    msg.replace("\\n", "</p><p>");
-
-//    QString divStyle = simpleStyleTagToStyleString(styleTag);
-
-//    if(divStyle.trimmed().isEmpty()){
-//        msg = QString("<div>") + msg;
-//    }else{
-//        msg = QString("<div style=\"%1\">").arg(divStyle) + msg;
-//    }
-//    msg += QString("</div>");
-
-//    return msg;
-
-//}
-
-//QString ChatMessageWindow::contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage){
+//    QStringList list = msg.split(QChar('|'));
+//    if(list.size() != 2){return "<p></p>";}
+//    QString styleTag = list.at(0);
+//    msg = list.at(1);
 
 
-//    QString msg = simpleTextMessage;
-//    if(msg.trimmed().isEmpty()){
-//        return "";
-//    }
+    msg = "<p>" + msg + "</p>";
+    msg.replace("\\r\\n", "</br>");
 
-//    int separateIndex = msg.indexOf(QChar('|'));
-//    if(separateIndex == -1){return "<p></p>";}
-//    msg.remove(0, separateIndex+1);
+    msg.replace("\\n", "</p><p>");
 
-//    msg.replace("\\r\\n", " ");
-//    msg.replace("\\n", " ");
+    QString divStyle = simpleStyleTagToStyleString(styleTag);
 
-//    QRegExp regExp("<img.*/>");
-//    regExp.setCaseSensitivity(Qt::CaseInsensitive);
-//    regExp.setMinimal(true);
-//    int pos = 0;
-//    QStringList list;
-//    while ((pos = regExp.indexIn(msg, pos)) != -1) {
-//        list << regExp.cap(0);
-//        pos += regExp.matchedLength();
-//    }
-//    foreach (QString str, list) {
-//        msg.replace(str, tr("[Image]"));
-//    }
+    if(divStyle.trimmed().isEmpty()){
+        msg = QString("<div>") + msg;
+    }else{
+        msg = QString("<div style=\"%1\">").arg(divStyle) + msg;
+    }
+    msg += QString("</div>");
 
-//    return msg;
+    return msg;
 
-//}
+}
+
+QString ChatMessageWindow::contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage){
+
+
+    QString msg = simpleTextMessage;
+    if(msg.trimmed().isEmpty()){
+        return "";
+    }
+
+    int separateIndex = msg.indexOf(QChar('|'));
+    if(separateIndex == -1){return "<p></p>";}
+    msg.remove(0, separateIndex+1);
+
+    msg.replace("\\r\\n", " ");
+    msg.replace("\\n", " ");
+
+    QRegExp regExp("<img.*/>");
+    regExp.setCaseSensitivity(Qt::CaseInsensitive);
+    regExp.setMinimal(true);
+    int pos = 0;
+    QStringList list;
+    while ((pos = regExp.indexIn(msg, pos)) != -1) {
+        list << regExp.cap(0);
+        pos += regExp.matchedLength();
+    }
+    foreach (QString str, list) {
+        msg.replace(str, tr("[Image]"));
+    }
+
+    return msg;
+
+}
 
 
 void ChatMessageWindow::requestDownloadImage(const QString &contactID, const QString &imageName)
@@ -664,8 +683,7 @@ void ChatMessageWindow::emitSendMsgSignal()
         richMessage = QString("<div style=\"%1\">").arg(m_styleString) + richMessage;
     }
     richMessage += QString("</div>");
-    appendChatMessage(richMessage, m_myself, ServerTime::instance()->timeString(), true);
-
+    appendChatMessage(richMessage, m_myself, ServerTime::instance()->timeString(), false);
 
     ui.textEdit->clear();
     ui.textEdit->setFocus();

@@ -1,9 +1,9 @@
-import QtQuick 2.5
-import QtQuick.Window 2.0
-import Qt.labs.controls 1.0
-import QtQuick.Controls 1.4
+import QtQuick 2.6
+import QtQuick.Window 2.2
+//import Qt.labs.controls 1.0
+import QtQuick.Controls 2.2
 import QtQuick.Controls.Styles 1.4
-import QtGraphicalEffects 1.0
+//import QtGraphicalEffects 1.0
 
 
 
@@ -16,12 +16,13 @@ Rectangle {
     width : 500
     height: 400
 
-    anchors.top: titleRect.bottom
+    //anchors.top: titleRect.bottom
     color: "#F7F7F7"
     border.color: "lightgray"
 
     ListView {
-        id: chatList
+        id: chatMessagesList
+        objectName: "chatMessagesList";
         anchors.fill: parent
         anchors.margins: 5
         clip: true
@@ -36,10 +37,12 @@ Rectangle {
         property string myID: "11";
 
         property string peerNickName: "Test";
-        property string peerHeadICON: "qrc:/head/3.jpg";
-        property string myHeadICON: "qrc:/head/4.jpg";
-        property string peerBorderImage: "qrc:/img/chat_to_bg_normal.9.png";
-        property string myBorderImage: "qrc:/img/chat_from_bg_normal.9.png";
+        property string peerHeadICON: "qrc:/face/3.png";
+        property string myHeadICON: "qrc:/face/4.png";
+//        property string peerBorderImage: "qrc:/img/chat_to_bg_normal.9.png";
+//        property string myBorderImage: "qrc:/img/chat_from_bg_normal.9.png";
+        property string peerBorderImage: "qrc:/qml/chat_bg_left.png";
+        property string myBorderImage: "qrc:/qml/chat_bg_right.png";
 
 
         model: ListModel {
@@ -58,8 +61,8 @@ Rectangle {
             height: Math.max(52, 16 + borderImageContent.height)
 
 
-            property bool isPeer: userID != chatList.myID ? true : false ;
-            property bool isSystem: userID == chatList.systemID ? true : false ;
+            property bool isPeer: userID != chatMessagesList.myID ? true : false ;
+            property bool isSystem: userID == chatMessagesList.systemID ? true : false ;
 
 
 
@@ -71,12 +74,12 @@ Rectangle {
                 y: 2
 
                visible: isSystem ? false : true
-                source:isPeer ? chatList.peerHeadICON : chatList.myHeadICON
+                source:isPeer ? chatMessagesList.peerHeadICON : chatMessagesList.myHeadICON
 
             }
             BorderImage {
                 id: msgWrapper
-                source: isPeer ? chatList.peerBorderImage : chatList.myBorderImage
+                source: isPeer ? chatMessagesList.peerBorderImage : chatMessagesList.myBorderImage
                 width: borderImageContent.width + 40
                 height: borderImageContent.height + 20
                 x: isPeer ? headPortrait.x - 2 - width :
@@ -87,7 +90,7 @@ Rectangle {
                 border.bottom: 6
 
 
-                TextEdit{
+                TextArea{
                     id: borderImageContent
                     readOnly: true
                     textFormat: TextEdit.RichText
@@ -100,7 +103,7 @@ Rectangle {
                     verticalAlignment: Text.AlignVCenter
                     font.pointSize: 10
                     clip: true
-                    wrapMode: Text.WrapAnywhere
+                    //wrapMode: Text.WrapAnywhere
                     text: content
                     font.family: "微软雅黑"
 

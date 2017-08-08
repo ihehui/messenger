@@ -52,22 +52,19 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
     } else {
         qWarning() << QString("UDP listening on port %1 for file transmission!").arg(m_udpServer->localPort());
     }
+    //m_udpServer = m_resourcesManager->getUDPServer();
+    Q_ASSERT(m_udpServer);
+    connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
+
 
     m_rtp = m_resourcesManager->startRTP(QHostAddress::Any, 0, true, &errorMessage);
     if(!errorMessage.isEmpty()) {
         qCritical() << errorMessage;
     }
+    Q_ASSERT(m_rtp);
     //connect(m_rtp, SIGNAL(connected(int, const QString &, quint16)), this, SLOT(peerConnected(int, const QString &, quint16)));
     connect(m_rtp, SIGNAL(disconnected(SOCKETID)), this, SLOT(peerDisconnected(SOCKETID)));
 
-
-
-    //m_udpServer = m_resourcesManager->getUDPServer();
-    Q_ASSERT_X(m_udpServer, "IMClientPacketsParser::IMClientPacketsParser(...)", "Invalid UDPServer!");
-    connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
-
-    //m_rtp = m_resourcesManager->getRTP();
-    Q_ASSERT(m_rtp);
 
 //    m_udtProtocol = m_rtp->getUDTProtocol();
 //    Q_ASSERT(m_udtProtocol);

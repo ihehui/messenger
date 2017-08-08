@@ -6,15 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>219</height>
+    <width>454</width>
+    <height>292</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>3</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
     <number>3</number>
    </property>
    <item row="0" column="0">
@@ -33,6 +42,9 @@
          </property>
          <property name="text">
           <string>Connecting to server....</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -329,19 +341,6 @@
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QPushButton" name="pushButtonPrevious">
        <property name="text">
         <string>&amp;Previous</string>
@@ -349,7 +348,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_3">
+      <spacer name="horizontalSpacerMiddle">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -360,6 +359,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonOK">
+       <property name="text">
+        <string>&amp;OK</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonNext">
@@ -394,9 +400,12 @@
  </widget>
  <tabstops>
   <tabstop>lineEditUserID</tabstop>
+  <tabstop>lineEditPassword</tabstop>
+  <tabstop>lineEditRetypePassword</tabstop>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>lineEditRetypeEmail</tabstop>
   <tabstop>pushButtonNext</tabstop>
+  <tabstop>pushButtonRegister</tabstop>
   <tabstop>lineEditNickName</tabstop>
   <tabstop>lineEditTrueName</tabstop>
   <tabstop>comboBoxGender</tabstop>
@@ -407,7 +416,6 @@
   <tabstop>comboBox_6</tabstop>
   <tabstop>comboBox_7</tabstop>
   <tabstop>lineEdit_8</tabstop>
-  <tabstop>pushButtonRegister</tabstop>
   <tabstop>pushButtonPrevious</tabstop>
  </tabstops>
  <resources/>

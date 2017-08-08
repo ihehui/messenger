@@ -108,7 +108,7 @@ void UsersManager::setPasswordUpdateAuthMode(quint8 mode)
 UserInfo *UsersManager::getUserInfo(const QString &imUserID)
 {
 
-    if(imUserID.trimmed().isEmpty()) {
+    if(imUserID.trimmed().isEmpty() || imUserID.contains("{")) {
         return 0;
     }
 
@@ -292,6 +292,21 @@ void UsersManager::getUserLoginServer(const QString &userID, QHostAddress *serve
 //    return userInfo;
 //}
 
+void UsersManager::generateUserInfo(QString *userID, QString *password)
+{
+    //TODO
+
+    if(userID){
+        QDateTime time = QDateTime::currentDateTime();
+        qsrand(time.toTime_t());
+        *userID = QString("%1%2").arg(time.toString("yMMddhhmmsszzz")).arg(abs(qrand() % 9));
+    }
+
+    if(password){
+        *password = QUuid::createUuid().toString().mid(1, 8);
+    }
+}
+
 bool UsersManager::registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID)
 {
 
@@ -336,10 +351,10 @@ bool UsersManager::registerNewUser(const QString &userID, const QString &passwor
     }
 
     if(sysID) {
-        *sysID = query.value(0).toUInt();
+        *sysID = query.value(0).toInt();
         qDebug() << "---------------------------------sysID:" << *sysID;
-        if(*sysID == 0) {
-            *errorType = IM::ERROR_UnKnownError;
+        if(*sysID <= 0) {
+            *errorType = IM::ERROR_IDEXISTED;
             return false;
         }
     }
@@ -363,7 +378,7 @@ void UsersManager::updateUserPassword(const QString &userID, const QString &newP
         return ;
     }
 
-    userInfo->setPassword(newPassword);
+    userInfo->setPassword(newPassword, false);
     userInfo->addUpdatedPersonalInfoProperty(IM::PI_Password, "'" + newPassword + "'", true);
 
     if(saveUserInfoToDatabase(userInfo)) {
@@ -522,7 +537,7 @@ QString UsersManager::searchContact(const QString &keyword, quint8 searchOnlineU
 
     quint32 pageSize = SEARCH_RESULT_PAGE_SIZE;
 
-    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, '%6', '%7', %8, %9);").arg(matchExactly ? 1 : 0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(location).arg(startIndex).arg(pageSize);
+    QString queryString = QString("call sp_Contact_Search(%1, '%2', %3, %4, %5, %6, %7, %8, %9);").arg(matchExactly ? 1 : 0).arg(keyword).arg(startAge).arg(endAge).arg(gender).arg(hometown).arg(location).arg(startIndex).arg(pageSize);
     qDebug() << "----queryString:" << queryString;
 
     if(!db.isValid()) {
@@ -619,6 +634,9 @@ QStringList UsersManager::cachedChatMessagesForIMUser(UserInfo *userInfo)
     QSqlQuery query(db);
 
     QString imUserID = userInfo->getUserID();
+    if(!userInfo->getLastLogoutTime().isValid()){
+        return QStringList();
+    }
 
     //QString statement = QString("select SenderID, Message, TransmittingTime from cachedchatmessages where RecieverID='%1' and TransmittingTime>'%2'  ").arg(imUserID).arg(userInfo->getLastLoginTime().toString("yyyy-MM-dd hh:mm:ss"));
     //QString statement = QString("select SenderID, Message, TransmittingTime from cachedchatmessages where RecieverID='%1' ").arg(imUserID);
@@ -771,7 +789,7 @@ bool UsersManager::getUserLastLoginInfo(UserInfo *userInfo)
     }
 
     if(!query.first()) {
-        qCritical() << QString("No user login info returned from database! Error: %1").arg(query.lastError().text());
+        //qCritical() << QString("No user login info returned from database! Error: %1").arg(query.lastError().text());
         return false;
     }
 
@@ -797,6 +815,7 @@ bool UsersManager::addNewContactForUserInDB(const QString &userID, const QString
     QSqlQuery query(db);
 
     QString statement = QString("call sp_Contact_Add('%1', '%2', %3);  ").arg(userID).arg(contactID).arg(contactGroupID);
+    qDebug()<<"statement:"<<statement;
     if(!query.exec(statement)) {
         QSqlError error = query.lastError();
         QString msg = QString("Can not add contact for user from database! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
@@ -1267,7 +1286,7 @@ bool UsersManager::queryUserInfo(UserInfo *info)
 
     //UserInfo *info = new UserInfo(imUserID, this);
     info->setSysID(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_SysID)))).toUInt());
-    info->setPassword(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_Password)))).toString());
+    info->setPassword(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_Password)))).toString(), false);
     info->setTrueName(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_TrueName)))).toString());
     info->setNickName(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_NickName)))).toString());
     info->setGender(IMUserBase::Gender(QVariant(query.value(record.indexOf(info->databaseColumnName(IM::PI_Gender)))).toUInt()));
@@ -1318,6 +1337,9 @@ bool UsersManager::queryUserInfo(UserInfo *info)
 
     //    getUserInterestGroupsFromDatabase(info);
     //    getUserLastLoginInfo(info);
+
+
+    info->setSessionEncryptionKey(info->encryptedPassword());
 
     info->clearUpdatedProperties();
 

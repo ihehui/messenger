@@ -19,7 +19,7 @@ signals:
     //void dataReceived(const QString &peerAddress, quint16 peerPort, const QByteArray &data);
 
 private:
-    void processReceivedData(quint32 peerID, QByteArray data);
+    void processReceivedData(SOCKETID peerID, QByteArray data);
     void convertDataToPacket(quint32 peerID, QByteArray *data);
 
 private:

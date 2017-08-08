@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
-    <height>567</height>
+    <width>400</width>
+    <height>635</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,7 +104,7 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="passwordLineEdit">
         <property name="text">
-         <string>hehui</string>
+         <string>hehuihehui</string>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -122,7 +122,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="../../../managementsystem/clientservice/resources.qrc">
+           <iconset resource="../resources.qrc">
             <normaloff>:/resources/images/configure.png</normaloff>:/resources/images/configure.png</iconset>
           </property>
           <property name="checkable">
@@ -267,7 +267,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="labelNetworkType">
            <property name="text">
-            <string>Network &amp;Type:</string>
+            <string>&amp;Network Type:</string>
            </property>
            <property name="buddy">
             <cstring>comboBoxNetworkType</cstring>
@@ -290,7 +290,7 @@
          <item row="0" column="2">
           <widget class="QLabel" name="labelProtocol">
            <property name="text">
-            <string>&amp;Protocol:</string>
+            <string>Proto&amp;col:</string>
            </property>
            <property name="buddy">
             <cstring>comboBoxProtocol</cstring>
@@ -303,7 +303,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="labelServerIP">
            <property name="text">
-            <string>Server</string>
+            <string>Se&amp;rver</string>
            </property>
            <property name="buddy">
             <cstring>comboBoxServerIP</cstring>
@@ -443,8 +443,8 @@
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>idComboBox</tabstop>
-  <tabstop>toolButtonApplyForRegistration</tabstop>
   <tabstop>passwordLineEdit</tabstop>
+  <tabstop>toolButtonApplyForRegistration</tabstop>
   <tabstop>toolButtoRetrievePassword</tabstop>
   <tabstop>invisibleCheckBox</tabstop>
   <tabstop>autoLoginCheckBox</tabstop>
@@ -455,9 +455,10 @@
   <tabstop>comboBoxServerIP</tabstop>
   <tabstop>keyLineEdit</tabstop>
   <tabstop>unlockToolButton</tabstop>
+  <tabstop>toolButtonConfig</tabstop>
+  <tabstop>toolButtonServersManager</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../managementsystem/clientservice/resources.qrc"/>
   <include location="../resources.qrc"/>
  </resources>
  <connections/>

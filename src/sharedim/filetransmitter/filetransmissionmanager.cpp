@@ -79,18 +79,22 @@ FileTransmissionManagerBase::FileTransmissionManagerBase(const QString &myID, Fi
 FileTransmissionManagerBase::~FileTransmissionManagerBase()
 {
 
+    if(m_idleTimer){
+        m_idleTimer->stop();
+        delete m_idleTimer;
+        m_idleTimer = 0;
+    }
 
-    delete m_fileTransmissionPacketsParser;
+    if(m_resourcesManager){
+        delete m_resourcesManager;
+        m_resourcesManager = 0;
+    }
 
-    m_idleTimer->stop();
-    delete m_idleTimer;
-    m_idleTimer = 0;
+    if(m_fileManager){
+        delete m_fileManager;
+        m_fileManager = 0;
+    }
 
-    delete m_resourcesManager;
-    m_resourcesManager = 0;
-
-    delete m_fileManager;
-    m_fileManager = 0;
 
     foreach (FileTransmissionInfo *info, fileTXInfoHash.values()) {
         delete info;
@@ -137,7 +141,7 @@ void FileTransmissionManagerBase::setPeerSessionEncryptionKey(const QString &pee
 
 void FileTransmissionManagerBase::processFileTransferPacket(const FileTransferPacket &packet)
 {
-    FileTransferPacket::PacketInfoType infoType = packet.InfoType;
+    FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case FileTransferPacket::FT_FILE_SERVER_INFO: {
         QString address = packet.FileServerInfo.address;

@@ -112,7 +112,7 @@ private slots:
     void slotProcessContactGroupsInfo2(const QString &contactGroupsInfo, quint32 personalContactGroupsInfoVersionOnServer);
 
     void slotProcessContactsInfoVersion(const QString &contactsInfoVersionString);
-    void slotProcessCreateOrDeleteContactGroupResult(quint32 groupID, const QString &groupName, bool createGroup, bool result);
+    void slotProcessCreateOrDeleteContactGroupResult(quint32 groupID, const QString &groupName, bool createGroup, quint8 errorCode);
 
 
     //void slotProcessSearchContactsResult(const QString &users);
@@ -144,8 +144,7 @@ private slots:
 
 
 
-
-
+    void processServerDiscoveryPacket(const ServerDiscoveryPacket &packet);
     void processAnnouncementPacket(const AnnouncementPacket &packet);
     void processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet);
     void processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet);
@@ -291,7 +290,6 @@ private:
 
     bool autoShowSystemMessage;
     bool autoShowChatMessageFromContact;
-
 
 
     QHostAddress m_serverHostAddress;

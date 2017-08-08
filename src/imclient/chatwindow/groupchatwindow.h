@@ -27,7 +27,7 @@ public:
 
     void memberJoinedOrQuitted(const QString &memberID, bool join);
 
-//    QSize sizeHint();
+    QSize sizeHint();
 
 
 protected:

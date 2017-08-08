@@ -16,14 +16,16 @@ ENETProtocol::ENETProtocol(QObject *parent) :
     PacketBase::registerMetaTypeStreamOperators();
 }
 
-void ENETProtocol::processReceivedData(quint32 peerID, QByteArray data)
+void ENETProtocol::processReceivedData(SOCKETID peerID, QByteArray data)
 {
-    //qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
+    qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
     convertDataToPacket(peerID, &data);
 }
 
 inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data)
 {
+    qDebug()<<"--ENETProtocol::convertDataToPacket";
+
     QString ip = "";
     quint16 port = 0;
     getPeerAddressInfo(peerID, &ip, &port);

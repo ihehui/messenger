@@ -114,8 +114,7 @@ public slots:
     ///////////////////////////////////////////////
     bool requestFileServerInfo(SOCKETID socketID)
     {
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
+        FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, getSessionEncryptionKey(socketID));
         //packet.FileServerInfo.address = "";
         //packet.FileServerInfo.port = 0;
 
@@ -124,8 +123,7 @@ public slots:
     }
     bool responseFileServerInfo(SOCKETID socketID, const QString &address, quint16 port)
     {
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FILE_SERVER_INFO;
+        FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, getSessionEncryptionKey(socketID));
         packet.FileServerInfo.address = address;
         packet.FileServerInfo.port = port;
 
@@ -135,8 +133,7 @@ public slots:
 
     bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath)
     {
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileSystemInfoRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileSystemInfoRequest, getSessionEncryptionKey(socketID));
         packet.FileSystemInfoRequest.parentDirPath = parentDirPath;
 
         QByteArray ba = packet.toByteArray();
@@ -145,9 +142,7 @@ public slots:
 
     bool responseFileSystemInfo(SOCKETID socketID, const QString &baseDirPath, const QByteArray &fileSystemInfoData)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileSystemInfoResponse;
+        FileTransferPacket packet(FileTransferPacket::FT_FileSystemInfoResponse, getSessionEncryptionKey(socketID));
         packet.FileSystemInfoResponse.baseDirPath = baseDirPath;
         packet.FileSystemInfoResponse.fileSystemInfoData = fileSystemInfoData;
 
@@ -157,9 +152,7 @@ public slots:
 
     bool requestDeleteFiles(SOCKETID socketID, const QString &remoteBaseDir, const QStringList &remoteFiles)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileDeletingRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileDeletingRequest, getSessionEncryptionKey(socketID));
         packet.FileDeletingRequest.baseDirPath = remoteBaseDir;
         packet.FileDeletingRequest.files = remoteFiles;
 
@@ -169,9 +162,7 @@ public slots:
 
     bool responseDeletingFiles(SOCKETID socketID, const QString &baseDirPath, const QStringList &failedFiles)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileDeletingResponse;
+        FileTransferPacket packet(FileTransferPacket::FT_FileDeletingResponse, getSessionEncryptionKey(socketID));
         packet.FileDeletingResponse.baseDirPath = baseDirPath;
         packet.FileDeletingResponse.failedFiles = failedFiles;
 
@@ -181,9 +172,7 @@ public slots:
 
     bool requestRenameFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &oldFileName, const QString &newFileName)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileRenamingRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileRenamingRequest, getSessionEncryptionKey(socketID));
         packet.FileRenamingRequest.baseDirPath = remoteBaseDir;
         packet.FileRenamingRequest.oldFileName = oldFileName;
         packet.FileRenamingRequest.newFileName = newFileName;
@@ -194,9 +183,7 @@ public slots:
 
     bool responseRenamingFiles(SOCKETID socketID, const QString &baseDirPath, const QString &fileName, bool renamed, const QString &message)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileRenamingResponse;
+        FileTransferPacket packet(FileTransferPacket::FT_FileRenamingResponse, getSessionEncryptionKey(socketID));
         packet.FileRenamingResponse.baseDirPath = baseDirPath;
         packet.FileRenamingResponse.oldFileName = fileName;
         packet.FileRenamingResponse.renamed = renamed;
@@ -208,9 +195,7 @@ public slots:
 
     bool requestUploadFile(SOCKETID socketID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &remoteFileSaveDir = "")
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileUploadingRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileUploadingRequest, getSessionEncryptionKey(socketID));
         packet.FileUploadingRequest.fileName = fileName;
         packet.FileUploadingRequest.fileMD5Sum = fileMD5Sum;
         packet.FileUploadingRequest.size = size;
@@ -222,9 +207,7 @@ public slots:
 
     bool requestDownloadFile(SOCKETID socketID, const QString &remoteBaseDir, const QString &remoteFileName, const QString &localFileSaveDir)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileDownloadingRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileDownloadingRequest, getSessionEncryptionKey(socketID));
         packet.FileDownloadingRequest.baseDir = remoteBaseDir;
         packet.FileDownloadingRequest.fileName = remoteFileName;
         packet.FileDownloadingRequest.dirToSaveFile = localFileSaveDir;
@@ -235,9 +218,7 @@ public slots:
 
     bool responseFileDownloadRequest(SOCKETID socketID, bool accepted, const QString &fileName, const QByteArray &fileMD5Sum = QByteArray(), quint64 size = 0)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileDownloadingResponse;
+        FileTransferPacket packet(FileTransferPacket::FT_FileDownloadingResponse, getSessionEncryptionKey(socketID));
         packet.FileDownloadingResponse.accepted = accepted;
         //packet.FileDownloadingResponse.baseDir = baseDir;
         packet.FileDownloadingResponse.fileName = fileName;
@@ -250,9 +231,7 @@ public slots:
 
     bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileUploadingResponse;
+        FileTransferPacket packet(FileTransferPacket::FT_FileUploadingResponse, getSessionEncryptionKey(socketID));
         packet.FileUploadingResponse.fileMD5Sum = fileMD5Sum;
         packet.FileUploadingResponse.accepted = accepted;
         packet.FileUploadingResponse.message = message;
@@ -265,8 +244,7 @@ public slots:
     {
         //qDebug()<<"--requestFileData(...) "<<" startPieceIndex:"<<startPieceIndex<<" endPieceIndex:"<<endPieceIndex;
 
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileDataRequest;
+        FileTransferPacket packet(FileTransferPacket::FT_FileDataRequest, getSessionEncryptionKey(socketID));
         packet.FileDataRequest.fileMD5 = fileMD5;
         packet.FileDataRequest.startPieceIndex = startPieceIndex;
         packet.FileDataRequest.endPieceIndex = endPieceIndex;
@@ -277,9 +255,7 @@ public slots:
 
     bool sendFileData(SOCKETID socketID, const QByteArray &fileMD5, int pieceIndex, const QByteArray *data, const QByteArray *pieceMD5)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileData;
+        FileTransferPacket packet(FileTransferPacket::FT_FileData, getSessionEncryptionKey(socketID));
         packet.FileDataResponse.fileMD5 = fileMD5;
         packet.FileDataResponse.pieceIndex = pieceIndex;
         packet.FileDataResponse.data = *data;
@@ -291,9 +267,7 @@ public slots:
 
     bool fileTXStatusChanged(SOCKETID socketID, const QByteArray &fileMD5, quint8 status)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileTXStatus;
+        FileTransferPacket packet(FileTransferPacket::FT_FileTXStatus, getSessionEncryptionKey(socketID));
         packet.FileTXStatus.fileMD5 = fileMD5;
         packet.FileTXStatus.status = status;
 
@@ -303,9 +277,7 @@ public slots:
 
     bool fileTXError(SOCKETID socketID, const QByteArray &fileMD5, quint8 errorCode, const QString &errorString)
     {
-
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileTXError;
+        FileTransferPacket packet(FileTransferPacket::FT_FileTXError, getSessionEncryptionKey(socketID));
         packet.FileTXError.fileMD5 = fileMD5;
         packet.FileTXError.errorCode = errorCode;
         packet.FileTXError.message = errorString;
@@ -316,8 +288,7 @@ public slots:
 
     bool stopFileTX(SOCKETID socketID, const QString &remoteFileName, const QByteArray &fileMD5)
     {
-        FileTransferPacket packet(getSessionEncryptionKey(socketID));
-        packet.InfoType = FileTransferPacket::FT_FileTXStop;
+        FileTransferPacket packet(FileTransferPacket::FT_FileTXStop, getSessionEncryptionKey(socketID));
         packet.FileTXError.fileName = remoteFileName;
         packet.FileTXError.fileMD5 = fileMD5;
 

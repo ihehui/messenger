@@ -156,23 +156,36 @@ void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet)
 {
 
     QString serverAddress = packet.getPeerHostAddress().toString();
+    if(packet.ip){
+        serverAddress = QHostAddress(packet.ip).toString();
+    }
     quint16 serverRTPListeningPort = packet.rtpPort;
 
-    qWarning();
-    qWarning() << "Server Found!" << " Address:" << serverAddress << " RTP Port:" << serverRTPListeningPort << " Name:" << packet.getPeerID() << " Version:" << packet.version;
-    qWarning();
+    ServerDiscoveryPacket::ServerType serverType = ServerDiscoveryPacket::ServerType(packet.getPacketSubType());
+    switch (serverType) {
+    case ServerDiscoveryPacket::SERVER_GATE:{
+        qWarning();
+        qWarning() << "Server Found!" << " Address:" << serverAddress << " RTP Port:" << serverRTPListeningPort << " Name:" << packet.getPeerID() << " Version:" << packet.version;
+        qWarning();
 
-    ServerInfo *info;
-    if(serversHash.contains(serverAddress)) {
-        info = serversHash.value(serverAddress);
-    } else {
-        info = new ServerInfo(serverAddress, serverRTPListeningPort, this);
+        ServerInfo *info;
+        if(serversHash.contains(serverAddress)) {
+            info = serversHash.value(serverAddress);
+        } else {
+            info = new ServerInfo(serverAddress, serverRTPListeningPort, this);
+        }
+
+        info->setCurState(ServerInfo::TestOK);
+        serversHash[serverAddress] = info;
+
+        updateModel();
     }
+        break;
 
-    info->setCurState(ServerInfo::TestOK);
-    serversHash[serverAddress] = info;
 
-    updateModel();
+    default:
+        break;
+    }
 
 }
 

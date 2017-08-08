@@ -57,7 +57,8 @@ ContactsManager::~ContactsManager()
     //    query = 0;
 
 
-
+    qDeleteAll(contactHash.values());
+    qDeleteAll(interestGroupsHash.values());
 
 }
 
@@ -2120,8 +2121,7 @@ QSqlQuery ContactsManager::queryDatabase(const QString &queryString, bool localC
     DatabaseUtility du;
 
 
-    //                QString userPrivateDataFilePath = Settings::instance()->getUserPrivateDataFilePath(IMUser::instance()->getUserID());
-
+    userPrivateDataFilePath = Settings::instance()->getCurrentUserPrivateDataFilePath();
     if(localConfigDatabase) {
         query = du.queryDatabase(queryString,
                                  LOCAL_USERDATA_DB_CONNECTION_NAME,

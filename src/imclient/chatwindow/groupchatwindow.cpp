@@ -135,9 +135,9 @@ void GroupChatWindow::memberJoinedOrQuitted(const QString &memberID, bool join)
 
 }
 
-//QSize GroupChatWindow::sizeHint(){
-//    return QSize(800, 600);
-//}
+QSize GroupChatWindow::sizeHint(){
+    return QSize(700, 600);
+}
 
 
 void GroupChatWindow::appendMessageReceivedFromContact(const QString &message, Contact *contact, const QString &datetime)

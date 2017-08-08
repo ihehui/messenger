@@ -39,7 +39,7 @@ Search::Search(QWidget *parent)
     //        ui.radioButtonGroupsMatchWildcard->click();
 
     ui.radioButtonUsersMatchExactly->click();
-    ui.lineEditUserID->setFocus();
+    ui.lineEditKeyword->setFocus();
 
     connect(this, SIGNAL(accepted()), this, SLOT(reset()));
     connect(this, SIGNAL(rejected()), this, SLOT(reset()));
@@ -53,7 +53,6 @@ Search::Search(QWidget *parent)
     connect(ui.tableViewGroupsResult, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(slotJoinGroup(const QModelIndex &)));
 
 
-    contactProperties = "";
     matchExactly = searchOnlineUsersOnly = true;
     searchWebcamUsersOnly = false;
 
@@ -131,16 +130,12 @@ void Search::slotSearchInterestGroupsResultPacketReceived(const QString &groupsS
 
 void Search::reset()
 {
-
-    contactProperties = "";
     matchExactly = searchOnlineUsersOnly = true;
     searchWebcamUsersOnly = false;
 
     ui.radioButtonUsersMatchExactly->click();
-    ui.lineEditUserID->setFocus();
-
-    ui.lineEditUserID->clear();
-    ui.lineEditNickname->clear();
+    ui.lineEditKeyword->setFocus();
+    ui.lineEditKeyword->clear();
 
     ui.comboBoxGender->setCurrentIndex(0);
     ui.comboBoxAge->setCurrentIndex(0);
@@ -242,12 +237,13 @@ void Search::on_tabWidget_currentChanged( int index )
 
 void Search::on_pushButtonSearchContact_clicked()
 {
+    searchContact(0);
+    usersResultPageIndex = 1;
+}
 
-    contactProperties = "";
-
-    QStringList propertiesList;
-    QString userID = ui.lineEditUserID->text().trimmed();
-    QString nickName = ui.lineEditNickname->text();
+void Search::searchContact(int pageIndex)
+{
+    QString keyword = ui.lineEditKeyword->text().simplified();
     quint8 age = IMUserBase::Age_Any;
     if(ui.comboBoxAge->currentIndex() != 0) {
         age = ui.comboBoxAge->itemData(ui.comboBoxAge->currentIndex()).toUInt();
@@ -266,31 +262,28 @@ void Search::on_pushButtonSearchContact_clicked()
 
 
     if(matchExactly) {
-        if(!userID.isEmpty()) {
-            if(userID == IMUser::instance()->getUserID()) {
-                //QMessageBox::critical(this, tr("Error"), tr("Please input a valid user id!"));
-                ui.lineEditUserID->clear();
-                return;
-            }
-            if(IMUser::instance()->isFriendContact(userID)) {
-                QMessageBox::critical(this, tr("Search"), tr("'%1' is already your contact!").arg(userID));
-                ui.lineEditUserID->clear();
-                return;
-            }
+        if(keyword.isEmpty()) {
+            QMessageBox::critical(this, tr("Search"), tr("Keyword needed!"));
+            ui.lineEditKeyword->setFocus();
+            return;
         } else {
-            if(nickName.isEmpty()) {
-                QMessageBox::critical(this, tr("Search"), tr("Keyword needed!"));
-                ui.lineEditUserID->setFocus();
+            if(keyword == IMUser::instance()->getUserID()) {
+                //QMessageBox::critical(this, tr("Error"), tr("Please input a valid user id!"));
+                ui.lineEditKeyword->clear();
+                return;
+            }
+            if(IMUser::instance()->isFriendContact(keyword)) {
+                QMessageBox::critical(this, tr("Search"), tr("'%1' is already your contact!").arg(keyword));
+                ui.lineEditKeyword->clear();
                 return;
             }
         }
         searchOnlineUsersOnly = searchWebcamUsersOnly = false;
     }
 
-    propertiesList << userID << nickName << QString::number(age) << QString::number(gender) << hometown << businessAddress;
-    contactProperties = propertiesList.join(QString(CONTACT_INFO_SEPARATOR));
+    //TODO
+    emit signalSearchContact(keyword, quint8(searchOnlineUsersOnly), quint8(searchWebcamUsersOnly), 0, 0, gender, age, quint8(matchExactly), pageIndex);
 
-    emit signalSearchContact(contactProperties, matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly, 0);
 
     searchContactTimer.start();
 
@@ -299,22 +292,7 @@ void Search::on_pushButtonSearchContact_clicked()
     ui.toolButtonPreviousUsersResultPage->setEnabled(false);
     ui.toolButtonNextUsersResultPage->setEnabled(false);
 
-    usersResultPageIndex = 1;
-
-
 }
-
-
-void Search::on_radioButtonUsersMatchWildcard_clicked()
-{
-    ui.stackedWidgetUsersSearchCondition->setCurrentWidget(ui.pageUsersSearchMatchWildcard);
-}
-
-void Search::on_radioButtonUsersMatchExactly_clicked()
-{
-    ui.stackedWidgetUsersSearchCondition->setCurrentWidget(ui.pageUsersSearchMatchExactly);
-}
-
 
 void Search::on_pushButtonUserDetails_clicked()
 {
@@ -385,34 +363,14 @@ void Search::on_pushButtonAddAsContact_clicked()
 
 void Search::on_toolButtonPreviousUsersResultPage_clicked()
 {
-
     usersResultPageIndex--;
-
-    emit signalSearchContact(contactProperties, matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly, (usersResultPageIndex - 1)*SEARCH_RESULT_PAGE_SIZE);
-
-    searchContactTimer.start();
-
-    ui.pushButtonSearchContact->setEnabled(false);
-    userInfoModel->setUsersInfoString("");
-    ui.toolButtonPreviousUsersResultPage->setEnabled( (usersResultPageIndex > 1) );
-    ui.toolButtonNextUsersResultPage->setEnabled(true);
-
+    searchContact((usersResultPageIndex - 1)*SEARCH_RESULT_PAGE_SIZE);
 }
 
 void Search::on_toolButtonNextUsersResultPage_clicked()
 {
-
     usersResultPageIndex++;
-
-    emit signalSearchContact(contactProperties, matchExactly, searchOnlineUsersOnly, searchWebcamUsersOnly, (usersResultPageIndex - 1)*SEARCH_RESULT_PAGE_SIZE);
-
-    searchContactTimer.start();
-
-    ui.pushButtonSearchContact->setEnabled(false);
-    userInfoModel->setUsersInfoString("");
-    ui.toolButtonPreviousUsersResultPage->setEnabled(true);
-    ui.toolButtonNextUsersResultPage->setEnabled(false);
-
+    searchContact((usersResultPageIndex - 1)*SEARCH_RESULT_PAGE_SIZE);
 }
 
 void Search::on_pushButtonSearchGroup_clicked()

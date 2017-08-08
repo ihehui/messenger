@@ -147,7 +147,7 @@ void AddContactDialog::on_pushButtonReject_clicked()
 
 
     if(m_requestToAddContact || (!ui.lineEditMessage->isReadOnly()) ) {
-        accept();
+        reject();
     } else {
         ui.groupBoxMessage->setTitle(tr("Reply Message"));
         ui.groupBoxMessage->show();

@@ -176,7 +176,9 @@ MainWindow::~MainWindow()
     //    delete m_userInfoTipWindow;
     //    m_userInfoTipWindow = 0;
 
-    deleteLater();
+//    deleteLater();
+
+    qApp->quit();
 
 }
 
@@ -187,10 +189,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         hide();
         event->ignore();
     } else {
-
-        aboutToQuit();
-
         event->accept();
+        aboutToQuit();
     }
 
 }
@@ -231,6 +231,8 @@ void MainWindow::changeEvent ( QEvent *event )
 
         event->accept();
         return;
+    }else if(event->type() ==QEvent::LanguageChange){
+        //retranslateUi();
     }
 
     event->ignore();
@@ -336,8 +338,6 @@ void MainWindow::startNetwork()
         return;
     }
 
-
-
     QString errorMessage = "";
     m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
     if(!m_udpServer) {
@@ -366,6 +366,7 @@ void MainWindow::startNetwork()
     connect(clientPacketsParser, SIGNAL(signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &)), this, SLOT(processCaptchaInfoPacket(const CaptchaInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
 
+
     connect(clientPacketsParser, SIGNAL(signalLoginResultReceived(quint8, const QString &)), this, SLOT(slotProcessLoginResult(quint8, const QString &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalLoginServerRedirected(const QString &, quint16, const QString &)), this, SLOT(slotProcessLoginServerRedirected(const QString &, quint16, const QString &)), Qt::QueuedConnection);
 
@@ -374,8 +375,8 @@ void MainWindow::startNetwork()
 
 
 
-
-    connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const ServerDiscoveryPacket &)), ui.loginPage, SIGNAL(signalServerFound(const ServerDiscoveryPacket &)), Qt::QueuedConnection);
+    //connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const ServerDiscoveryPacket &)), ui.loginPage, SIGNAL(signalServerFound(const ServerDiscoveryPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalServerDeclarePacketReceived(const ServerDiscoveryPacket &)), this, SLOT(processServerDiscoveryPacket(const ServerDiscoveryPacket &)), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(requestRegistrationServerInfo()), this, SLOT(requestRegistrationServerInfo()), Qt::QueuedConnection);
     connect(ui.loginPage, SIGNAL(registration()), this, SLOT(requestRegistration()), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), ui.loginPage, SIGNAL(signalRegistrationPacketReceived(const RgeistrationPacket &)), Qt::QueuedConnection);
@@ -393,7 +394,7 @@ void MainWindow::startNetwork()
     connect(clientPacketsParser, SIGNAL(signalContactsOnlineInfoPacketReceived(const QString & )), this, SLOT(slotProcessContactsOnlineInfo(const QString & )), Qt::QueuedConnection);
 
 
-    connect(clientPacketsParser, SIGNAL(signalCreateOrDeleteContactGroupResultPacketReceived(quint32, const QString &, bool, bool)), this, SLOT(slotProcessCreateOrDeleteContactGroupResult(quint32, const QString &, bool, bool)), Qt::QueuedConnection);
+//    connect(clientPacketsParser, SIGNAL(signalCreateOrDeleteContactGroupResultPacketReceived(quint32, const QString &, bool, bool)), this, SLOT(slotProcessCreateOrDeleteContactGroupResult(quint32, const QString &, bool, bool)), Qt::QueuedConnection);
 
 
 
@@ -468,9 +469,18 @@ void MainWindow::stopNetwork()
 
 
     if(clientPacketsParser) {
-        clientPacketsParser->logout(m_socketConnectedToServer);
+        if(m_myself->getOnlineState() != IM::ONLINESTATE_OFFLINE){
+            clientPacketsParser->logout(m_socketConnectedToServer);
+        }
         //QTimer::singleShot(1000, clientPacketsParser, SLOT(aboutToQuit()));
-        Utilities::msleep(1000);
+
+        QElapsedTimer timer;
+        timer.start();
+        while (timer.elapsed() < 1000) {
+            qApp->processEvents();
+        }
+        //Utilities::msleep(1000);
+
         delete clientPacketsParser;
         clientPacketsParser = 0;
     }
@@ -489,6 +499,7 @@ void MainWindow::stopNetwork()
     delete m_resourcesManager;
     m_resourcesManager = 0;
 
+    m_socketConnectedToServer = INVALID_SOCK_ID;
 
     m_verified = false;
 
@@ -1015,8 +1026,12 @@ void MainWindow::slotQuit()
 
     aboutToQuit();
 
-    QTimer::singleShot(1000, qApp, SLOT(quit()));
-    //qApp->quit();
+    qApp->setQuitOnLastWindowClosed(true);
+    hide();
+
+
+    //QTimer::singleShot(1000, qApp, SLOT(quit()));
+    qApp->quit();
 
 }
 
@@ -1035,19 +1050,23 @@ void MainWindow::aboutToQuit()
 {
     qDebug() << "----MainWindow::aboutToQuit()";
 
+    //TODO
+    m_chatWindowManager->close();
+    m_chatWindowManager->hide();
 
-    if(m_myself->getOnlineState() != IM::ONLINESTATE_OFFLINE && m_myself->getOnlineState() != IM::ONLINESTATE_INVISIBLE) {
-        m_myself->setOnlineState(IM::ONLINESTATE_OFFLINE);
-        emit signalMyOnlineStateChanged(m_socketConnectedToServer, quint8(IM::ONLINESTATE_OFFLINE));
-        qDebug() << "----MainWindow::doWorkbeforeQuit()~~IMUser::OFFLINE";
+    if(!m_myself->getSessionEncryptionKey().isEmpty()){
+        if(m_myself->getOnlineState() != IM::ONLINESTATE_OFFLINE && m_myself->getOnlineState() != IM::ONLINESTATE_INVISIBLE) {
+            m_myself->setOnlineState(IM::ONLINESTATE_OFFLINE);
+            emit signalMyOnlineStateChanged(m_socketConnectedToServer, quint8(IM::ONLINESTATE_OFFLINE));
+            qDebug() << "----MainWindow::doWorkbeforeQuit()~~IMUser::OFFLINE";
+        }
+
+        m_myself->saveMyInfoToLocalDatabase();
     }
-
-    m_myself->saveMyInfoToLocalDatabase();
 
     if(Settings::instance()->getRestoreWindowStateOnStartup()) {
         Settings::instance()->saveState(this);
     }
-
 
 
     //关闭所有的数据库连接
@@ -1059,6 +1078,20 @@ void MainWindow::aboutToQuit()
     stopNetwork();
 
     //TODO:清理
+
+    delete m_contactsManager;
+    m_contactsManager = 0;
+    delete m_myself;
+    m_myself = 0;
+
+    if(search){
+        delete search;
+        search = 0;
+    }
+
+    if(m_loginTimer){
+        m_loginTimer->stop();
+    }
 
 
 }
@@ -1890,7 +1923,6 @@ void MainWindow::slotProcessLoginServerRedirected(const QString &serverAddress, 
     QMessageBox::information(this, tr("Redirected"), tr("Redirected to %1:%2").arg(serverAddress).arg(serverPort));
 
     requestLogin(QHostAddress(serverAddress), serverPort);
-
 }
 
 void MainWindow::slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage)
@@ -2217,14 +2249,14 @@ void MainWindow::slotProcessContactsInfoVersion(const QString &contactsInfoVersi
 
 }
 
-void MainWindow::slotProcessCreateOrDeleteContactGroupResult(quint32 groupID, const QString &groupName, bool createGroup, bool result)
+void MainWindow::slotProcessCreateOrDeleteContactGroupResult(quint32 groupID, const QString &groupName, bool createGroup, quint8 errorCode)
 {
 
-    qDebug() << "--MainWindow::slotProcessCreateOrDeleteContactGroupResult(...)" << " groupID:" << groupID << " groupName:" << groupName << " createGroup:" << createGroup << " result:" << result;
+    qDebug() << "--MainWindow::slotProcessCreateOrDeleteContactGroupResult(...)" << " groupID:" << groupID << " groupName:" << groupName << " createGroup:" << createGroup << " result:" << errorCode;
 
     hideProgressDialog();
 
-    if(result) {
+    if(quint8(IM::ERROR_NoError) == errorCode) {
         bool ok = false;
         if(createGroup) {
             ok = m_contactsManager->slotAddNewContactGroupToDatabase(groupID, groupName);
@@ -2355,7 +2387,7 @@ void MainWindow::slotSearch()
 {
     if(!search) {
         search = new Search();
-        connect(search, SIGNAL(signalSearchContact(const QString &, bool, bool, bool, int)), this, SLOT(searchContact(const QString &, bool, bool, bool, int)), Qt::QueuedConnection);
+        connect(search, SIGNAL(signalSearchContact(const QString &, quint8, quint8, quint16, quint16, quint8, quint8, bool, int)), this, SLOT(searchContact(const QString &, quint8, quint8, quint16, quint16, quint8, quint8, bool, int)), Qt::QueuedConnection);
         connect(search, SIGNAL(signalSearchInterestGroup(const QString &, int)), this, SLOT(searchInterestGroup(const QString &, int)));
 
         connect(search, SIGNAL(signalAddContact(const QString &, const QString &)), this, SLOT(addContact(const QString &, const QString &)));
@@ -2750,12 +2782,37 @@ void MainWindow::slotSendChatMessageToInterestGroup(InterestGroup *interestGroup
 
 }
 
+void MainWindow::processServerDiscoveryPacket(const ServerDiscoveryPacket &packet)
+{
+
+    QHostAddress serverAddress = packet.getPeerHostAddress();
+    if(packet.ip){
+        serverAddress = QHostAddress(packet.ip);
+    }
+    quint16 serverRTPListeningPort = packet.rtpPort;
+
+    ServerDiscoveryPacket::ServerType serverType = ServerDiscoveryPacket::ServerType(packet.getPacketSubType());
+    switch (serverType) {
+    case ServerDiscoveryPacket::SERVER_GATE:{
+        ui.loginPage->serverFound(packet);
+    }
+        break;
+
+    case ServerDiscoveryPacket::SERVER_LOGIN:{
+        requestLogin(serverAddress, serverRTPListeningPort);
+    }
+        break;
 
 
+    default:
+        break;
+    }
+
+}
 
 void MainWindow::processAnnouncementPacket(const AnnouncementPacket &packet)
 {
-    AnnouncementPacket::PacketInfoType infoType = packet.InfoType;
+    AnnouncementPacket::PacketInfoType infoType = AnnouncementPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case AnnouncementPacket::ANNOUNCEMENT_QUERY: {
         //out << QueryInfo.announcementID << QueryInfo.keyword << QueryInfo.validity << QueryInfo.assetNO << QueryInfo.userName << QueryInfo.target << QueryInfo.startTime << QueryInfo.endTime;
@@ -2795,7 +2852,7 @@ void MainWindow::processAnnouncementPacket(const AnnouncementPacket &packet)
 
 void MainWindow::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet)
 {
-    ContactGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    ContactGroupsInfoPacket::PacketInfoType infoType = ContactGroupsInfoPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case ContactGroupsInfoPacket::PIT_GROUPS_LIST: {
         slotProcessContactGroupsInfo(packet.GroupsList.groupsInfo, packet.GroupsList.version, packet.GroupsList.contactInfoVersionList);
@@ -2808,7 +2865,7 @@ void MainWindow::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &p
     }
     break;
     case ContactGroupsInfoPacket::PIT_GROUP_CREATION: {
-        //out << GroupCreationInfo.name << GroupCreationInfo.parentID << GroupCreationInfo.id;
+        slotProcessCreateOrDeleteContactGroupResult(packet.GroupCreationInfo.groupID, packet.GroupCreationInfo.name, true, packet.GroupCreationInfo.errorCode);
     }
     break;
     case ContactGroupsInfoPacket::PIT_GROUP_DELETION: {
@@ -2833,7 +2890,7 @@ void MainWindow::processInterestGroupsInfoPacket(const InterestGroupsInfoPacket 
 
     quint32 groupID = packet.GroupID;
 
-    InterestGroupsInfoPacket::PacketInfoType infoType = packet.InfoType;
+    InterestGroupsInfoPacket::PacketInfoType infoType = InterestGroupsInfoPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case InterestGroupsInfoPacket::PIT_GROUPS_LIST: {
         QString groups = packet.GroupsList.groups;
@@ -2893,7 +2950,7 @@ void MainWindow::processContactInfoPacket(const ContactInfoPacket &packet)
 
     QString contactID = packet.ContactID;
 
-    ContactInfoPacket::PacketInfoType infoType = packet.InfoType;
+    ContactInfoPacket::PacketInfoType infoType = ContactInfoPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case ContactInfoPacket::PIT_CONTACT_INFO: {
 
@@ -2945,7 +3002,7 @@ void MainWindow::processContactInfoPacket(const ContactInfoPacket &packet)
 void MainWindow::processSearchInfoPacket(const SearchInfoPacket &packet)
 {
 
-    SearchInfoPacket::PacketInfoType infoType = packet.InfoType;
+    SearchInfoPacket::PacketInfoType infoType = SearchInfoPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case SearchInfoPacket::PIT_SEARCH_CONTACT_CONDITIONS: {
     }
@@ -2974,7 +3031,7 @@ void MainWindow::processSearchInfoPacket(const SearchInfoPacket &packet)
 
 void MainWindow::processChatMessagePacket(const ChatMessagePacket &packet)
 {
-    ChatMessagePacket::PacketInfoType infoType = packet.InfoType;
+    ChatMessagePacket::PacketInfoType infoType = ChatMessagePacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case ChatMessagePacket::PIT_CONTACT_CHAT_MESSAGE: {
         slotProcessChatMessageReceivedFromContact(packet.ContactChatMessage.contactID, packet.ContactChatMessage.message, packet.ContactChatMessage.imageNames);
@@ -3040,7 +3097,7 @@ void MainWindow::processChatMessagePacket(const ChatMessagePacket &packet)
 
 void MainWindow::processCaptchaInfoPacket(const CaptchaInfoPacket &packet)
 {
-    CaptchaInfoPacket::PacketInfoType infoType = packet.InfoType;
+    CaptchaInfoPacket::PacketInfoType infoType = CaptchaInfoPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case CaptchaInfoPacket::CAPTCHA_REQUEST: {
     }
@@ -3069,7 +3126,7 @@ void MainWindow::processCaptchaInfoPacket(const CaptchaInfoPacket &packet)
 
 void MainWindow::processFileTransferPacket(const FileTransferPacket &packet)
 {
-    FileTransferPacket::PacketInfoType infoType = packet.InfoType;
+    FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case FileTransferPacket::FT_FILE_SERVER_INFO: {
         QString address = packet.FileServerInfo.address;
@@ -3656,10 +3713,16 @@ void MainWindow::requestLogin(const QHostAddress &serverHostAddress, quint16 ser
 
     Q_ASSERT(m_rtp);
 
-
     QString errorMessage;
+
+    //TODO
+    if((m_serverHostAddress != serverHostAddress || (m_serverHostPort != serverPort)) && (m_socketConnectedToServer != INVALID_SOCK_ID)){
+        m_rtp->closeSocket(m_socketConnectedToServer);
+        m_socketConnectedToServer = INVALID_SOCK_ID;
+    }
+
     if(m_socketConnectedToServer == INVALID_SOCK_ID) {
-        m_socketConnectedToServer = m_rtp->connectToHost(QHostAddress(serverHostAddress), serverPort, 10000, &errorMessage);
+        m_socketConnectedToServer = m_rtp->connectToHost(serverHostAddress, serverPort, 10000, &errorMessage);
     }
     if(m_socketConnectedToServer == INVALID_SOCK_ID) {
         qCritical() << tr("Can not connect to host! %1").arg(errorMessage);
@@ -3682,7 +3745,7 @@ void MainWindow::requestLogin(const QHostAddress &serverHostAddress, quint16 ser
         m_loginTimer->setSingleShot(true);
         connect(m_loginTimer, SIGNAL(timeout()), this, SLOT(loginTimeout()));
     }
-    m_loginTimer->start(10000);
+    m_loginTimer->start(15000);
 
 }
 
@@ -3803,7 +3866,7 @@ void MainWindow::requestRegistration()
         }
     }
 
-    bool ok = clientPacketsParser->registration(socketID, m_myUserID, m_myself->getPassword());
+    bool ok = clientPacketsParser->registration(socketID, m_myself->getUserID(), m_myself->getPassword());
     if(!ok) {
         QMessageBox::critical(this, tr("Error"), tr("Failed to send registration request! <br>%1").arg(m_rtp->lastErrorString()));
     }

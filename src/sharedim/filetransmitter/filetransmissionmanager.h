@@ -21,7 +21,7 @@ class SHAREDIMLIB_API FileTransmissionManagerBase : public QObject//, public Sin
 
 public:
     explicit FileTransmissionManagerBase(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent = 0);
-    ~FileTransmissionManagerBase();
+    virtual ~FileTransmissionManagerBase();
 
     bool queryFileTransmissionInfo(const QString &peerID, const QByteArray &fileMD5Sum, float *progress, float *speed);
     void setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey);

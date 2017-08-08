@@ -58,11 +58,15 @@ ApplyForRegistrationWidget::ApplyForRegistrationWidget(QWidget *parent) :
     ui.pushButtonPrevious->hide();
     ui.pushButtonNext->hide();
     ui.pushButtonRegister->setText(tr("&Cancel"));
+    ui.pushButtonOK->hide();
 
     user = IMUser::instance();
 
     m_registrationModeInfoResponseReceived = false;
     m_registrationResultReceived = false;
+    m_registered = false;
+
+    ui.stackedWidget->setCurrentWidget(ui.pageInfo);
 
 
     //emit requestRegistrationServerInfo();
@@ -91,7 +95,7 @@ void ApplyForRegistrationWidget::changeEvent(QEvent *e)
 void ApplyForRegistrationWidget::slotProcessRegistrationPacket(const RgeistrationPacket &packet)
 {
 
-    RgeistrationPacket::PacketInfoType InfoType = RgeistrationPacket::PacketInfoType(packet.InfoType);
+    RgeistrationPacket::PacketInfoType InfoType = RgeistrationPacket::PacketInfoType(packet.getPacketSubType());
 
     switch (InfoType) {
     case RgeistrationPacket::REGISTRATION_SERVER_INFO: {
@@ -179,6 +183,8 @@ void ApplyForRegistrationWidget::slotProcessRegistrationServerInfo(quint8 regMod
     ui.pushButtonNext->show();
     ui.pushButtonRegister->setText(tr("&Register"));
 
+    ui.lineEditUserID->setFocus();
+
 }
 
 void ApplyForRegistrationWidget::slotProcessRegistrationResult(quint8 errorTypeCode, quint32 sysID, const QString &message)
@@ -191,13 +197,24 @@ void ApplyForRegistrationWidget::slotProcessRegistrationResult(quint8 errorTypeC
     QString errorMessage = "";
 
     if(errorType == IM::ERROR_NoError && sysID != 0) {
+        m_registered = true;
+
         QString msg = tr("<p><font color='red'>Registration Successful!</font></p>%1<p>System ID:%2</p><p>User ID:%3</p>").arg(message).arg(sysID).arg(user->getUserID());
         ui.labelInfo->setText(msg);
+
+        ui.pushButtonOK->show();
+        ui.pushButtonRegister->hide();
+        ui.pushButtonPrevious->hide();
+        ui.pushButtonNext->hide();
+
+        ui.stackedWidget->setCurrentWidget(ui.pageInfo);
+
 
         //errorMessage = tr("Registration Successful!");
         //ui.labelInfo->setText(errorMessage);
         //QMessageBox::information(this, tr("Registration Successful"), errorMessage + QString("\n%1").arg(message));
     } else {
+        m_registered = false;
 
         switch(errorType) {
         case IM::ERROR_SoftwareVersionExpired: {
@@ -225,6 +242,14 @@ void ApplyForRegistrationWidget::slotProcessRegistrationResult(quint8 errorTypeC
             errorMessage = tr("ID Already Exists!");
         }
         break;
+        case IM::ERROR_IDINVALID: {
+            errorMessage = tr("ID Is Invalid!");
+        }
+        break;
+        case IM::ERROR_PASSWORDINVALID: {
+            errorMessage = tr("Password Is Invalid!");
+        }
+        break;
         case IM::ERROR_EMAILEXISTED: {
             errorMessage = tr("Email Address Already Exists!");
         }
@@ -237,19 +262,26 @@ void ApplyForRegistrationWidget::slotProcessRegistrationResult(quint8 errorTypeC
 
         }
 
-        QMessageBox::critical(this, tr("Registration Failed"), errorMessage + QString("\n%1").arg(message));
+        ui.labelInfo->setText(errorMessage);
 
         ui.pushButtonRegister->setEnabled(true);
+        ui.pushButtonPrevious->setEnabled(true);
+        ui.pushButtonNext->setEnabled(true);
+
+        QMessageBox::critical(this, tr("Registration Failed"), errorMessage + QString("\n%1").arg(message));
+
+        ui.pageRequiredInfo->setEnabled(true);
+        ui.stackedWidget->setCurrentWidget(ui.pageRequiredInfo);
+        ui.lineEditUserID->setFocus();
 
     }
 
-    ui.labelInfo->show();
-    ui.labelInfo->setText(errorMessage);
 
 }
 
 void ApplyForRegistrationWidget::on_pushButtonRegister_clicked()
 {
+    m_registered = false;
 
     if(!m_registrationModeInfoResponseReceived) {
         emit canceled();
@@ -273,11 +305,8 @@ void ApplyForRegistrationWidget::on_pushButtonRegister_clicked()
         return;
     }
 
-    QByteArray password(ui.lineEditPassword->text().toUtf8());
-    password = QCryptographicHash::hash (password, QCryptographicHash::Sha1);
-
     user->setUserID(ui.lineEditUserID->text());
-    user->setPassword(password.toBase64());
+    user->setPassword(ui.lineEditPassword->text(), true);
 
     //emit registration(ui.lineEditUserID->text(), password.toBase64(), ui.lineEditEmail->text().trimmed());
     emit registration();
@@ -285,12 +314,28 @@ void ApplyForRegistrationWidget::on_pushButtonRegister_clicked()
     m_registrationResultReceived = false;
     QTimer::singleShot(5000, this, SLOT(registrationTimeout()));
 
-    ui.labelInfo->show();
+
     ui.labelInfo->setText(tr("Registering..."));
+    ui.stackedWidget->setCurrentWidget(ui.pageInfo);
 
+    ui.pageRequiredInfo->setEnabled(false);
     ui.pushButtonRegister->setEnabled(false);
+    ui.pushButtonPrevious->setEnabled(false);
+    ui.pushButtonNext->setEnabled(false);
 
 
+}
+
+void ApplyForRegistrationWidget::on_pushButtonOK_clicked(){
+    if(m_registered){
+        emit canceled();
+    }else{
+        ui.pushButtonOK->hide();
+        ui.pageRequiredInfo->setEnabled(true);
+        ui.pushButtonNext->show();
+        ui.pushButtonRegister->show();
+        ui.stackedWidget->setCurrentWidget(ui.pageRequiredInfo);
+    }
 }
 
 bool ApplyForRegistrationWidget::isUserIDValid()

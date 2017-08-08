@@ -137,7 +137,7 @@ quint16 RTP::getUDTServerPort()
 
 TCPServer *RTP::startTCPServer(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage)
 {
-    qDebug() << "--RTP::startTCPServer(...)";
+    //qDebug() << "--RTP::startTCPServer(...)";
 
     if(!m_tcpServer) {
         m_tcpServer = new TCPServer(this);
@@ -197,7 +197,7 @@ ENETProtocol *RTP::startENETProtocol(const QHostAddress &address, quint16 port, 
         m_enetProtocol = 0;
     }
 
-    m_enetProtocol->startWaitingForIOInAnotherThread(50);
+    m_enetProtocol->startWaitingForIOInAnotherThread(10);
 
 
     quint16 listeningPort = port;
@@ -244,7 +244,7 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
         }
         socketID = m_tcpServer->connectToHost(hostAddress, port, waitMsecs);
         if(!m_tcpServer->isConnected(socketID) ) {
-            err += tr("\nCan not connect to host %1:%2 via TCP! %3").arg(hostAddress.toString()).arg(port).arg(m_tcpServer->socketErrorString(socketID));
+            err += tr("Can not connect to host %1:%2 via TCP! %3").arg(hostAddress.toString()).arg(port).arg(m_tcpServer->socketErrorString(socketID));
             qCritical() << err;
             m_tcpServer->abort(socketID);
             socketID = INVALID_SOCK_ID;
@@ -259,7 +259,7 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
             break;
         }
         if(!m_enetProtocol->connectToHost(hostAddress, port, &socketID, waitMsecs)) {
-            err += tr("\nCan not connect to host %1:%2 via ENET! %3").arg(hostAddress.toString()).arg(port).arg(m_enetProtocol->errorString());
+            err += tr("Can not connect to host %1:%2 via ENET! %3").arg(hostAddress.toString()).arg(port).arg(m_enetProtocol->errorString());
             qCritical() << err;
         } else {
             connected = true;
@@ -288,7 +288,7 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
     }
 
     if(errorMessage) {
-        *errorMessage = err;
+        *errorMessage += err;
     }
 
     if(connected) {

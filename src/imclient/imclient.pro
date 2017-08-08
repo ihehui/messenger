@@ -7,7 +7,8 @@ QT += core \
     sql \
     network \
     xml \
-    quick
+    quick \
+    qml
 
 qtHaveModule(printsupport): QT += printsupport
 
@@ -147,7 +148,8 @@ RESOURCES += resources/images/emoticons/emoticons.qrc \
     resources/images/face/face.qrc \
     resources/images/chatmessagewindow/chatmessagewindow.qrc \
     resources/images/imageviewer/imageviewer.qrc \
-    resources.qrc
+    resources.qrc \
+    resources/qml/qml.qrc
 
 
 INCLUDEPATH += chatwindow

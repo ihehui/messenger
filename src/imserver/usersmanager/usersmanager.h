@@ -71,11 +71,11 @@ public:
     void userOnline(UserInfo *userInfo);
     void userOffline(UserInfo *userInfo);
 
-
     bool canUserLogin(const QString &userID, const QString &clientVersion, IM::ErrorType *errorType);
     void getUserLoginServer(const QString &userID, QHostAddress *serverAddress, quint16 *serverPort);
 //    UserInfo* logUserIn(const QString &userID, const QByteArray &encryptedPassword, IM::OnlineState loginState, IM::ErrorType *errorType);
 
+    void generateUserInfo(QString *userID, QString *password);
     bool registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID);
     void updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
 
@@ -113,7 +113,7 @@ public:
 
 
 
-/////////////////////////// Group Manager ////////////////////////////////////////
+/////////////////////////// Group Manager ///////////////////////////////////////
     InterestGroup *getInterestGroup(quint32 groupID);
     quint32 createNewInterestGroup(UserInfo *creatorInfo, const QString &groupName, quint8 type);
     bool disbandInterestGroup(UserInfo *creatorInfo, quint32 groupID);
@@ -135,8 +135,7 @@ public:
     IM::ErrorType createOrDeleteContactGroupInDB(UserInfo *info, quint32 *groupID, const QString &groupName, bool createGroup, quint32 parentGroupID = 0);
     bool updateContactGroupNameInDB(UserInfo *info, quint32 groupID, const QString &newGroupName);
 
-
-/////////////////////////// ---Group Manager--- ////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
 
 protected:
@@ -147,7 +146,7 @@ protected:
     bool getUserLastLoginInfo(UserInfo *userInfo);
 
 
-/////////////////////////// Group Manager ////////////////////////////////////////
+/////////////////////////// Group Manager ///////////////////////////////////////
 
     InterestGroup *queryInterestGroup(quint32 groupID);
     bool queryInterestGroup(InterestGroup *info);
@@ -156,8 +155,7 @@ protected:
 
     bool getUserAllContactGroupsInfoFromDatabase(UserInfo *info);
 
-
-/////////////////////////// ---Group Manager--- ////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
 
     bool openDatabase(bool reopen = false);

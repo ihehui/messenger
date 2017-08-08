@@ -109,7 +109,7 @@ void MessageHistoryView::appendHistoryChatMessages(const QStringList &messages, 
             displayName = info.at(1);
             message = info.at(2);
             datetime = info.at(3);
-            m_messageView->appendChatMessage(userID, displayName, message, datetime, false);
+            m_messageView->appendChatMessage(userID, datetime, message,  false);
 
             if(m_startTime.isEmpty()) {
                 m_startTime = datetime;

@@ -11,28 +11,32 @@ namespace HEHUI
 
 ////////////////////////////////////////////////////////////////////////
 
-IMPacket::IMPacket()
+IMPacket::IMPacket(const QByteArray &sessionEncryptionKey)
     : Packet()
 {
-    init();
+    this->sessionEncryptionKey = sessionEncryptionKey;
+    m_decryptionSucceeded = true;
+
+//    init();
 }
 
-IMPacket::IMPacket(quint8 packetType, const QByteArray &sessionEncryptionKey)
-    : Packet(packetType)
+IMPacket::IMPacket(quint8 packetType, quint8 packetSubType, const QByteArray &sessionEncryptionKey)
+    : Packet(packetType, packetSubType)
 {
     this->sessionEncryptionKey = sessionEncryptionKey;
+    m_decryptionSucceeded = true;
 
-    init();
+//    init();
 }
 
-IMPacket::IMPacket(const PacketBase &base, quint8 packetType, const QByteArray &sessionEncryptionKey)
-    : Packet(packetType)
-{
-    this->sessionEncryptionKey = sessionEncryptionKey;
+//IMPacket::IMPacket(const PacketBase &base, quint8 packetType, const QByteArray &sessionEncryptionKey)
+//    : Packet(packetType)
+//{
+//    this->sessionEncryptionKey = sessionEncryptionKey;
+//    m_decryptSucceeded = true;
 
-    init();
-    convert(base);
-}
+////    init();
+//}
 
 IMPacket::~IMPacket()
 {
@@ -44,10 +48,25 @@ void IMPacket::setSessionEncryptionKey(const QByteArray &key)
     sessionEncryptionKey = key;
 }
 
-void IMPacket::init()
+QByteArray IMPacket::getSessionEncryptionKey() const
 {
-
+    return sessionEncryptionKey;
 }
+
+bool IMPacket::decryptionSucceeded() const
+{
+    return m_decryptionSucceeded;
+}
+
+//void IMPacket::init()
+//{
+//    //Overwride Required
+//}
+
+//void IMPacket::parsePacketBody(QByteArray &packetBody)
+//{
+//    //Overwride Required
+//}
 
 QByteArray IMPacket::encrypt(const QByteArray &data)
 {
@@ -69,7 +88,8 @@ QByteArray IMPacket::decrypt(const QByteArray &encryptedData)
     }
     Cryptography cryptography;
     QByteArray decryptedData;
-    if(cryptography.teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false)) {
+    m_decryptionSucceeded = cryptography.teaCrypto(&decryptedData, encryptedData, sessionEncryptionKey, false);
+    if(m_decryptionSucceeded) {
         return decryptedData;
     }
     return QByteArray();
@@ -83,21 +103,26 @@ QByteArray IMPacket::decrypt(const QByteArray &encryptedData)
 
 
 ////////////////////////////////////////////////////////////////////////
-ServerDiscoveryPacket::ServerDiscoveryPacket()
-    : IMPacket(quint8(IM::CMD_ServerDiscovery), QByteArray())
+ServerDiscoveryPacket::ServerDiscoveryPacket(ServerType packetSubType)
+    : IMPacket(quint8(IM::CMD_ServerDiscovery), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-ServerDiscoveryPacket::ServerDiscoveryPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_ServerDiscovery), sessionEncryptionKey)
+ServerDiscoveryPacket::ServerDiscoveryPacket(ServerType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_ServerDiscovery), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 ServerDiscoveryPacket::ServerDiscoveryPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_ServerDiscovery), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
+
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_ServerDiscovery));
 
 }
 
@@ -108,8 +133,9 @@ ServerDiscoveryPacket::~ServerDiscoveryPacket()
 
 void ServerDiscoveryPacket::init()
 {
-    responseFromServer = 0;
+    serverAnnouncement = 0;
     version = "";
+    ip = 0;
     udpPort = 0;
     rtpPort = 0;
     tcpPort = 0;
@@ -121,9 +147,9 @@ void ServerDiscoveryPacket::parsePacketBody(QByteArray &packetBody)
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
 
-    in >> responseFromServer >> version;
-    if(responseFromServer) {
-        in >>  rtpPort >> tcpPort >> serverInstanceID;
+    in >> serverAnnouncement >> version;
+    if(serverAnnouncement) {
+        in >> ip >> rtpPort >> tcpPort >> serverInstanceID;
     } else {
         in >> udpPort;
     }
@@ -136,9 +162,9 @@ QByteArray ServerDiscoveryPacket::packBodyData()
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
 
-    out << responseFromServer << version;
-    if(responseFromServer) {
-        out << rtpPort << tcpPort << serverInstanceID;
+    out << serverAnnouncement << version;
+    if(serverAnnouncement) {
+        out << ip << rtpPort << tcpPort << serverInstanceID;
     } else {
         out << udpPort;
     }
@@ -150,20 +176,24 @@ QByteArray ServerDiscoveryPacket::packBodyData()
 
 ////////////////////////////////////////////////////////////////////////
 DataForwardPacket::DataForwardPacket()
-    : IMPacket(quint8(IM::CMD_DataForward), QByteArray())
+    : IMPacket(quint8(IM::CMD_DataForward), quint8(UnKnownPacket), QByteArray())
 {
-
+    init();
 }
 
 DataForwardPacket::DataForwardPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_DataForward), sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_DataForward), quint8(UnKnownPacket), sessionEncryptionKey)
 {
-
+    init();
 }
 
 DataForwardPacket::DataForwardPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_DataForward), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_DataForward));
 
 }
 
@@ -200,21 +230,25 @@ QByteArray DataForwardPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-AnnouncementPacket::AnnouncementPacket()
-    : IMPacket(quint8(IM::CMD_Announcement), QByteArray())
+AnnouncementPacket::AnnouncementPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_Announcement), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-AnnouncementPacket::AnnouncementPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_Announcement), sessionEncryptionKey)
+AnnouncementPacket::AnnouncementPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_Announcement), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 AnnouncementPacket::AnnouncementPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_Announcement), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_Announcement));
 
 }
 
@@ -225,7 +259,6 @@ AnnouncementPacket::~AnnouncementPacket()
 
 void AnnouncementPacket::init()
 {
-    InfoType = ANNOUNCEMENT_UNKNOWN;
     JobID = 0;
 
     QueryInfo.announcementID = "";
@@ -271,13 +304,10 @@ void AnnouncementPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(ANNOUNCEMENT_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
-
-    switch (InfoType) {
+    PacketInfoType infoType = PacketInfoType(getPacketSubType());
+    switch (infoType) {
     case ANNOUNCEMENT_QUERY: {
         in >> QueryInfo.announcementID >> QueryInfo.keyword >> QueryInfo.validity >> QueryInfo.assetNO >> QueryInfo.userName >> QueryInfo.target >> QueryInfo.startTime >> QueryInfo.endTime;
     }
@@ -289,7 +319,7 @@ void AnnouncementPacket::parsePacketBody(QByteArray &packetBody)
     break;
 
     case ANNOUNCEMENT_UPDATE: {
-        in << UpdateInfo.adminName << UpdateInfo.announcementID << UpdateInfo.targetType << UpdateInfo.active << UpdateInfo.addedTargets << UpdateInfo.deletedTargets;
+        in >> UpdateInfo.adminName >> UpdateInfo.announcementID >> UpdateInfo.targetType >> UpdateInfo.active >> UpdateInfo.addedTargets >> UpdateInfo.deletedTargets;
     }
     break;
 
@@ -316,6 +346,8 @@ void AnnouncementPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray AnnouncementPacket::packBodyData()
 {
+
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == ANNOUNCEMENT_UNKNOWN) {
         return QByteArray();
     }
@@ -324,7 +356,7 @@ QByteArray AnnouncementPacket::packBodyData()
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
 
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
     case ANNOUNCEMENT_QUERY: {
@@ -367,21 +399,25 @@ QByteArray AnnouncementPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-RgeistrationPacket::RgeistrationPacket()
-    : IMPacket(quint8(IM::CMD_Rgeistration), QByteArray())
+RgeistrationPacket::RgeistrationPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_Rgeistration), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-RgeistrationPacket::RgeistrationPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_Rgeistration), sessionEncryptionKey)
+RgeistrationPacket::RgeistrationPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_Rgeistration), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 RgeistrationPacket::RgeistrationPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_Rgeistration), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_Rgeistration));
 
 }
 
@@ -392,7 +428,6 @@ RgeistrationPacket::~RgeistrationPacket()
 
 void RgeistrationPacket::init()
 {
-    InfoType = REGISTRATION_UNKNOWN;
     JobID = 0;
 
     ServerInfo.requestServerInfo = 0;
@@ -421,11 +456,9 @@ void RgeistrationPacket::parsePacketBody(QByteArray &packetBody)
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
 
+    in >> JobID;
 
-    quint8 type = quint8(REGISTRATION_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case REGISTRATION_SERVER_INFO: {
         in >> ServerInfo.requestServerInfo >> ServerInfo.version ;
@@ -454,6 +487,7 @@ void RgeistrationPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray RgeistrationPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == REGISTRATION_UNKNOWN) {
         return QByteArray();
     }
@@ -462,7 +496,7 @@ QByteArray RgeistrationPacket::packBodyData()
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
 
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
     case REGISTRATION_SERVER_INFO: {
@@ -494,21 +528,25 @@ QByteArray RgeistrationPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-UpdatePasswordPacket::UpdatePasswordPacket()
-    : IMPacket(quint8(IM::CMD_UpdatePassword), QByteArray())
+UpdatePasswordPacket::UpdatePasswordPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_UpdatePassword), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-UpdatePasswordPacket::UpdatePasswordPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_UpdatePassword), sessionEncryptionKey)
+UpdatePasswordPacket::UpdatePasswordPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_UpdatePassword), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 UpdatePasswordPacket::UpdatePasswordPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_UpdatePassword), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_UpdatePassword));
 
 }
 
@@ -519,7 +557,6 @@ UpdatePasswordPacket::~UpdatePasswordPacket()
 
 void UpdatePasswordPacket::init()
 {
-    InfoType = INFO_TYPE_UNKNOWN;
     JobID = 0;
 
     AuthInfo.authMode = quint8(AUTH_OLD_PWD_ONLY);
@@ -544,11 +581,10 @@ void UpdatePasswordPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(INFO_TYPE_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
+    //TODO
 
     in >> AuthInfo.authMode >> AuthInfo.captchaImage >> AuthInfo.captcha >> AuthInfo.userID;
     in >> AuthInfo.oldPassword >> AuthInfo.newPassword >> AuthInfo.securityQuestion >> AuthInfo.securityAnswer;
@@ -559,6 +595,7 @@ void UpdatePasswordPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray UpdatePasswordPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == INFO_TYPE_UNKNOWN) {
         return QByteArray();
     }
@@ -567,7 +604,7 @@ QByteArray UpdatePasswordPacket::packBodyData()
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
 
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     out << AuthInfo.authMode << AuthInfo.captchaImage << AuthInfo.captcha << AuthInfo.userID;
     out << AuthInfo.oldPassword << AuthInfo.newPassword << AuthInfo.securityQuestion << AuthInfo.securityAnswer;
@@ -582,21 +619,25 @@ QByteArray UpdatePasswordPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-LoginPacket::LoginPacket()
-    : IMPacket(quint8(IM::CMD_Login), QByteArray())
+LoginPacket::LoginPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_Login), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-LoginPacket::LoginPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_Login), sessionEncryptionKey)
+LoginPacket::LoginPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_Login), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 LoginPacket::LoginPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_Login), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_Login));
 
 }
 
@@ -607,7 +648,6 @@ LoginPacket::~LoginPacket()
 
 void LoginPacket::init()
 {
-    InfoType = INFO_TYPE_UNKNOWN;
     JobID = 0;
 
     LoginServerInfo.version = APP_VERSION;
@@ -640,25 +680,24 @@ void LoginPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(INFO_TYPE_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
 
     switch (InfoType) {
-    case INFO_TYPE_LOGIN_SERVER_INFO: {
-        in >> LoginServerInfo.version >> LoginServerInfo.serverAddress >> LoginServerInfo.serverPort;
-    }
-    break;
+//    case INFO_TYPE_LOGIN_SERVER_INFO: {
+//        in >> LoginServerInfo.version >> LoginServerInfo.serverAddress >> LoginServerInfo.serverPort;
+//    }
+//    break;
 
     case INFO_TYPE_AUTH_INFO_FROM_CLIENT: {
         in >> AuthInfo.password >> AuthInfo.stateAfterLoggedin >> AuthInfo.deviceInfo;
     }
     break;
 
-    case INFO_TYPE_LOGIN_RESULT: {
-        in >> AuthResultInfo.loggedin >> AuthResultInfo.errorType
+    case INFO_TYPE_LOGIN_SUCCEEDED: {
+        AuthResultInfo.loggedin = 1;
+        in >> AuthResultInfo.errorType
            >> AuthResultInfo.sessionEncryptionKey
            >> AuthResultInfo.personalSummaryInfoVersionOnServer
            >> AuthResultInfo.personalDetailInfoVersionOnServer
@@ -667,6 +706,12 @@ void LoginPacket::parsePacketBody(QByteArray &packetBody)
            >> AuthResultInfo.personalMessageInfoVersionOnServer
            >> AuthResultInfo.serverTime
            ;
+    }
+    break;
+
+    case INFO_TYPE_LOGIN_FAILED: {
+        AuthResultInfo.loggedin = 0;
+        in >> AuthResultInfo.errorType;
     }
     break;
 
@@ -683,6 +728,7 @@ void LoginPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray LoginPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == INFO_TYPE_UNKNOWN) {
         return QByteArray();
     }
@@ -691,20 +737,22 @@ QByteArray LoginPacket::packBodyData()
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
 
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
-    case INFO_TYPE_LOGIN_SERVER_INFO: {
-        out << LoginServerInfo.version << LoginServerInfo.serverAddress << LoginServerInfo.serverPort;
-    }
-    break;
+//    case INFO_TYPE_LOGIN_SERVER_INFO: {
+//        out << LoginServerInfo.version << LoginServerInfo.serverAddress << LoginServerInfo.serverPort;
+//    }
+//    break;
+
     case INFO_TYPE_AUTH_INFO_FROM_CLIENT: {
         out << AuthInfo.password << AuthInfo.stateAfterLoggedin << AuthInfo.deviceInfo;
     }
     break;
 
-    case INFO_TYPE_LOGIN_RESULT: {
-        out << AuthResultInfo.loggedin << AuthResultInfo.errorType
+    case INFO_TYPE_LOGIN_SUCCEEDED: {
+        AuthResultInfo.loggedin = 1;
+        out << AuthResultInfo.errorType
             << AuthResultInfo.sessionEncryptionKey
             << AuthResultInfo.personalSummaryInfoVersionOnServer
             << AuthResultInfo.personalDetailInfoVersionOnServer
@@ -713,6 +761,12 @@ QByteArray LoginPacket::packBodyData()
             << AuthResultInfo.personalMessageInfoVersionOnServer
             << AuthResultInfo.serverTime
             ;
+    }
+    break;
+
+    case INFO_TYPE_LOGIN_FAILED: {
+        AuthResultInfo.loggedin = 0;
+        out << AuthResultInfo.errorType;
     }
     break;
 
@@ -733,20 +787,24 @@ QByteArray LoginPacket::packBodyData()
 
 ////////////////////////////////////////////////////////////////////////
 OnlineStateChangedPacket::OnlineStateChangedPacket()
-    : IMPacket(quint8(IM::CMD_OnlineStateChanged), QByteArray())
+    : IMPacket(quint8(IM::CMD_OnlineStateChanged), quint8(UnKnownPacket), QByteArray())
 {
-
+    init();
 }
 
 OnlineStateChangedPacket::OnlineStateChangedPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_OnlineStateChanged), sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_OnlineStateChanged), quint8(UnKnownPacket), sessionEncryptionKey)
 {
-
+    init();
 }
 
 OnlineStateChangedPacket::OnlineStateChangedPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_OnlineStateChanged), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_OnlineStateChanged));
 
 }
 
@@ -786,18 +844,25 @@ QByteArray OnlineStateChangedPacket::packBodyData()
 
 ////////////////////////////////////////////////////////////////////////
 OnlineContacts::OnlineContacts()
-    : IMPacket(quint8(IM::CMD_OnlineContacts), QByteArray())
+    : IMPacket(quint8(IM::CMD_OnlineContacts), quint8(UnKnownPacket), QByteArray())
 {
+    init();
 }
 
 OnlineContacts::OnlineContacts(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_OnlineContacts), sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_OnlineContacts), quint8(UnKnownPacket), sessionEncryptionKey)
 {
+    init();
 }
 
 OnlineContacts::OnlineContacts(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_OnlineContacts), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_OnlineContacts));
+
 }
 
 OnlineContacts::~OnlineContacts()
@@ -831,19 +896,26 @@ QByteArray OnlineContacts::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-ContactGroupsInfoPacket::ContactGroupsInfoPacket()
-    : IMPacket(quint8(IM::CMD_ContactGroupsInfo), QByteArray())
+ContactGroupsInfoPacket::ContactGroupsInfoPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_ContactGroupsInfo), quint8(packetSubType), QByteArray())
 {
+    init();
 }
 
-ContactGroupsInfoPacket::ContactGroupsInfoPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_ContactGroupsInfo), sessionEncryptionKey)
+ContactGroupsInfoPacket::ContactGroupsInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_ContactGroupsInfo), quint8(packetSubType), sessionEncryptionKey)
 {
+    init();
 }
 
 ContactGroupsInfoPacket::ContactGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_ContactGroupsInfo), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_ContactGroupsInfo));
+
 }
 
 ContactGroupsInfoPacket::~ContactGroupsInfoPacket()
@@ -852,7 +924,6 @@ ContactGroupsInfoPacket::~ContactGroupsInfoPacket()
 
 void ContactGroupsInfoPacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
 
     GroupsList.groupsInfo = "";
@@ -880,12 +951,9 @@ void ContactGroupsInfoPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case PIT_GROUPS_LIST: {
         in >> GroupsList.groupsInfo >> GroupsList.version >> GroupsList.contactInfoVersionList;
@@ -917,6 +985,7 @@ void ContactGroupsInfoPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray ContactGroupsInfoPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -924,12 +993,11 @@ QByteArray ContactGroupsInfoPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
     case PIT_GROUPS_LIST: {
-        out << GroupsList.groupsInfo << GroupsList.version >> GroupsList.contactInfoVersionList;
+        out << GroupsList.groupsInfo << GroupsList.version << GroupsList.contactInfoVersionList;
     }
     break;
     case PIT_GROUP_CHANGE_PARENT: {
@@ -962,21 +1030,25 @@ QByteArray ContactGroupsInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-InterestGroupsInfoPacket::InterestGroupsInfoPacket()
-    : IMPacket(quint8(IM::CMD_InterestGroupsInfo), QByteArray())
+InterestGroupsInfoPacket::InterestGroupsInfoPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_InterestGroupsInfo), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-InterestGroupsInfoPacket::InterestGroupsInfoPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_InterestGroupsInfo), sessionEncryptionKey)
+InterestGroupsInfoPacket::InterestGroupsInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_InterestGroupsInfo), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 InterestGroupsInfoPacket::InterestGroupsInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_InterestGroupsInfo), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_InterestGroupsInfo));
 
 }
 
@@ -987,7 +1059,6 @@ InterestGroupsInfoPacket::~InterestGroupsInfoPacket()
 
 void InterestGroupsInfoPacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
     GroupID = 0;
 
@@ -1030,12 +1101,9 @@ void InterestGroupsInfoPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID >> GroupID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID >> GroupID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case PIT_GROUPS_LIST: {
         in >> GroupsList.groups >> GroupsList.version;
@@ -1083,6 +1151,7 @@ void InterestGroupsInfoPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray InterestGroupsInfoPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -1090,8 +1159,7 @@ QByteArray InterestGroupsInfoPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID << GroupID;
+    out << JobID << GroupID;
 
     switch (InfoType) {
     case PIT_GROUPS_LIST: {
@@ -1144,19 +1212,26 @@ QByteArray InterestGroupsInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-ContactInfoPacket::ContactInfoPacket()
-    : IMPacket(quint8(IM::CMD_ContactInfo), QByteArray())
+ContactInfoPacket::ContactInfoPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_ContactInfo), quint8(packetSubType), QByteArray())
 {
+    init();
 }
 
-ContactInfoPacket::ContactInfoPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_ContactInfo), sessionEncryptionKey)
+ContactInfoPacket::ContactInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_ContactInfo), quint8(packetSubType), sessionEncryptionKey)
 {
+    init();
 }
 
 ContactInfoPacket::ContactInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_ContactInfo), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_ContactInfo));
+
 }
 
 ContactInfoPacket::~ContactInfoPacket()
@@ -1165,7 +1240,6 @@ ContactInfoPacket::~ContactInfoPacket()
 
 void ContactInfoPacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
     ContactID = "";
 
@@ -1195,12 +1269,9 @@ void ContactInfoPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID >> ContactID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID >> ContactID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case PIT_CONTACT_INFO: {
         in >> info.isSummaryInfo >> info.infoString;
@@ -1236,6 +1307,7 @@ void ContactInfoPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray ContactInfoPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -1243,8 +1315,7 @@ QByteArray ContactInfoPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID << ContactID;
+    out << JobID << ContactID;
 
     switch (InfoType) {
     case PIT_CONTACT_INFO: {
@@ -1257,7 +1328,7 @@ QByteArray ContactInfoPacket::packBodyData()
     break;
 
     case PIT_FRIENDING_REQUEST: {
-        out << ContactFriendingRequest.nickName << ContactFriendingRequest.userFace << ContactFriendingRequest.message >> ContactFriendingRequest.groupID;
+        out << ContactFriendingRequest.nickName << ContactFriendingRequest.userFace << ContactFriendingRequest.message << ContactFriendingRequest.groupID;
     }
     break;
     case PIT_FRIENDING_RESULT: {
@@ -1287,19 +1358,26 @@ QByteArray ContactInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-SearchInfoPacket::SearchInfoPacket()
-    : IMPacket(quint8(IM::CMD_SearchInfo), QByteArray())
+SearchInfoPacket::SearchInfoPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_SearchInfo), quint8(packetSubType), QByteArray())
 {
+    init();
 }
 
-SearchInfoPacket::SearchInfoPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_SearchInfo), sessionEncryptionKey)
+SearchInfoPacket::SearchInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_SearchInfo), quint8(packetSubType), sessionEncryptionKey)
 {
+    init();
 }
 
 SearchInfoPacket::SearchInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_SearchInfo), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_SearchInfo));
+
 }
 
 SearchInfoPacket::~SearchInfoPacket()
@@ -1308,7 +1386,6 @@ SearchInfoPacket::~SearchInfoPacket()
 
 void SearchInfoPacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
 
     SearchContactConditions.keyword = "";
@@ -1334,12 +1411,9 @@ void SearchInfoPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case PIT_SEARCH_CONTACT_CONDITIONS: {
         in >> SearchContactConditions.keyword >> SearchContactConditions.isOnline
@@ -1372,6 +1446,7 @@ void SearchInfoPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray SearchInfoPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -1379,8 +1454,7 @@ QByteArray SearchInfoPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
     case PIT_SEARCH_CONTACT_CONDITIONS: {
@@ -1419,19 +1493,26 @@ QByteArray SearchInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-ChatMessagePacket::ChatMessagePacket()
-    : IMPacket(quint8(IM::CMD_ChatMessage), QByteArray())
+ChatMessagePacket::ChatMessagePacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_ChatMessage), quint8(packetSubType), QByteArray())
 {
+    init();
 }
 
-ChatMessagePacket::ChatMessagePacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_ChatMessage),sessionEncryptionKey)
+ChatMessagePacket::ChatMessagePacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_ChatMessage), quint8(packetSubType), sessionEncryptionKey)
 {
+    init();
 }
 
 ChatMessagePacket::ChatMessagePacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_ChatMessage), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_ChatMessage));
+
 }
 
 ChatMessagePacket::~ChatMessagePacket()
@@ -1440,7 +1521,6 @@ ChatMessagePacket::~ChatMessagePacket()
 
 void ChatMessagePacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
 
     ContactChatMessage.contactID = "";
@@ -1478,12 +1558,9 @@ void ChatMessagePacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID;
-    InfoType = PacketInfoType(type);
-
+     PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case PIT_CONTACT_CHAT_MESSAGE: {
         in >> ContactChatMessage.contactID >> ContactChatMessage.message >> ContactChatMessage.imageNames;
@@ -1528,6 +1605,7 @@ void ChatMessagePacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray ChatMessagePacket::packBodyData()
 {
+   PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -1535,8 +1613,7 @@ QByteArray ChatMessagePacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID;
+    out << JobID;
 
     switch (InfoType) {
     case PIT_CONTACT_CHAT_MESSAGE: {
@@ -1584,19 +1661,26 @@ QByteArray ChatMessagePacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-CaptchaInfoPacket::CaptchaInfoPacket()
-    : IMPacket(quint8(IM::CMD_Captcha), QByteArray())
+CaptchaInfoPacket::CaptchaInfoPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_Captcha), quint8(packetSubType), QByteArray())
 {
+    init();
 }
 
-CaptchaInfoPacket::CaptchaInfoPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_Captcha), sessionEncryptionKey)
+CaptchaInfoPacket::CaptchaInfoPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_Captcha), quint8(packetSubType), sessionEncryptionKey)
 {
+    init();
 }
 
 CaptchaInfoPacket::CaptchaInfoPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_Captcha), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
+
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_Captcha));
+
 }
 
 CaptchaInfoPacket::~CaptchaInfoPacket()
@@ -1605,7 +1689,6 @@ CaptchaInfoPacket::~CaptchaInfoPacket()
 
 void CaptchaInfoPacket::init()
 {
-    InfoType = PIT_UNKNOWN;
     JobID = 0;
 
     captchaID = 0;
@@ -1619,12 +1702,9 @@ void CaptchaInfoPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> JobID >> captchaID;
 
-
-    quint8 type = quint8(PIT_UNKNOWN);
-    in >> type >> JobID >> captchaID;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case CAPTCHA_REQUEST: {
     }
@@ -1651,6 +1731,7 @@ void CaptchaInfoPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray CaptchaInfoPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == PIT_UNKNOWN) {
         return QByteArray();
     }
@@ -1658,8 +1739,7 @@ QByteArray CaptchaInfoPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType) << JobID << captchaID;
+    out << JobID << captchaID;
 
     switch (InfoType) {
     case CAPTCHA_REQUEST: {
@@ -1691,28 +1771,30 @@ QByteArray CaptchaInfoPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-FileTransferPacket::FileTransferPacket()
-    : IMPacket(quint8(IM::CMD_FileTransfer), QByteArray())
+FileTransferPacket::FileTransferPacket(PacketInfoType packetSubType)
+    : IMPacket(quint8(IM::CMD_FileTransfer), quint8(packetSubType), QByteArray())
 {
-
+    init();
 }
 
-FileTransferPacket::FileTransferPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_FileTransfer), sessionEncryptionKey)
+FileTransferPacket::FileTransferPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_FileTransfer), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 FileTransferPacket::FileTransferPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_FileTransfer), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
 
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_FileTransfer));
 
 }
 
 void FileTransferPacket::init()
 {
-    InfoType = FT_UNKNOWN;
     ContactID = "";
 
     FileServerInfo.address = "";
@@ -1780,14 +1862,11 @@ void FileTransferPacket::init()
 
 void FileTransferPacket::parsePacketBody(QByteArray &packetBody)
 {
-
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
+    in >> ContactID;
 
-    quint8 type = quint8(FT_UNKNOWN);
-    in >> type >> ContactID;
-
-    InfoType = PacketInfoType(type);
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case FT_FILE_SERVER_INFO: {
         in >> FileServerInfo.address >> FileServerInfo.port;
@@ -1872,6 +1951,7 @@ void FileTransferPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray FileTransferPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == FT_UNKNOWN) {
         return QByteArray();
     }
@@ -1879,7 +1959,7 @@ QByteArray FileTransferPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-    out << quint8(InfoType) << ContactID;
+    out << ContactID;
 
     switch (InfoType) {
     case FT_FILE_SERVER_INFO: {
@@ -1996,15 +2076,18 @@ QByteArray FileTransferPacket::packBodyData()
 
 ////////////////////////////////////////////////////////////////////////
 JobProgressPacket::JobProgressPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_JobProgress), sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_JobProgress), quint8(UnKnownPacket), sessionEncryptionKey)
 {
-
+    init();
 }
 
 JobProgressPacket::JobProgressPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_JobProgress), sessionEncryptionKey)
+    : IMPacket(quint8(UnKnownPacket), quint8(UnKnownPacket), sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
 
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_JobProgress));
 
 }
 
@@ -2042,16 +2125,19 @@ QByteArray JobProgressPacket::packBodyData()
 
 
 ////////////////////////////////////////////////////////////////////////
-AdminLoginPacket::AdminLoginPacket(const QByteArray &sessionEncryptionKey)
-    : IMPacket(quint8(IM::CMD_AdminLogin), sessionEncryptionKey)
+AdminLoginPacket::AdminLoginPacket(PacketInfoType packetSubType, const QByteArray &sessionEncryptionKey)
+    : IMPacket(quint8(IM::CMD_AdminLogin), quint8(packetSubType), sessionEncryptionKey)
 {
-
+    init();
 }
 
 AdminLoginPacket::AdminLoginPacket(const PacketBase &base, const QByteArray &sessionEncryptionKey)
-    : IMPacket(base, quint8(IM::CMD_AdminLogin), sessionEncryptionKey)
+    : IMPacket(sessionEncryptionKey)
 {
+    init();
+    fromPacket(base);
 
+    Q_ASSERT(base.getPacketType() == quint8(IM::CMD_AdminLogin));
 
 }
 
@@ -2062,8 +2148,6 @@ AdminLoginPacket::~AdminLoginPacket()
 
 void AdminLoginPacket::init()
 {
-    InfoType = LOGIN_REQUEST;
-
     LoginInfo.adminID = "";
     LoginInfo.password = "";
     LoginInfo.computerName = "";
@@ -2078,10 +2162,7 @@ void AdminLoginPacket::parsePacketBody(QByteArray &packetBody)
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
 
-    quint8 type = quint8(LOGIN_UNKNOWN);
-    in >> type;
-    InfoType = PacketInfoType(type);
-
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case LOGIN_REQUEST: {
         in >> LoginInfo.adminID >> LoginInfo.password >> LoginInfo.computerName;
@@ -2101,6 +2182,7 @@ void AdminLoginPacket::parsePacketBody(QByteArray &packetBody)
 
 QByteArray AdminLoginPacket::packBodyData()
 {
+    PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     if(InfoType == LOGIN_UNKNOWN) {
         return QByteArray();
     }
@@ -2108,8 +2190,6 @@ QByteArray AdminLoginPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
-    out << quint8(InfoType);
 
     switch (InfoType) {
     case LOGIN_REQUEST: {

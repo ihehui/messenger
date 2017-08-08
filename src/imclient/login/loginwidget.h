@@ -79,6 +79,7 @@ signals:
     void signalKickedOff();
 
 public slots:
+    void serverFound(const ServerDiscoveryPacket &packet);
 
     //        void serverFound(const QString &serverAddress, quint16 serverUDPListeningPort, quint16 serverTCPListeningPort, const QString &serverName, const QString &version);
     void slotProcessLoginResult(quint8 errorTypeCode, const QString &errorMessage = "");

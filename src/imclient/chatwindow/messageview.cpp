@@ -41,10 +41,94 @@
 #include "../settings.h"
 #include "../imageviewer/imageviewer.h"
 
+#include <QtQml>
+
 
 
 namespace HEHUI
 {
+
+
+
+ConversationModel::ConversationModel(QObject *parent) :
+    QAbstractListModel(parent)
+{
+
+}
+
+QString ConversationModel::recipient() const
+{
+    return m_recipient;
+}
+
+void ConversationModel::setRecipient(const QString &recipient)
+{
+
+}
+
+int ConversationModel::rowCount(const QModelIndex &parent ) const
+{
+    return m_messages.count();
+}
+
+int ConversationModel::columnCount(const QModelIndex &parent) const
+{
+    return 4;
+}
+
+QVariant ConversationModel::data(const QModelIndex &index, int role) const
+{
+    if(index.row() >= m_messages.size()){
+     return QVariant();
+    }
+
+    Message msg = m_messages.at(index.row());
+    switch (role) {
+    case Qt::UserRole:
+        return msg.author;
+
+    case Qt::UserRole + 1:
+        return msg.recipient;
+
+    case Qt::UserRole + 2:
+        return msg.timestamp;
+
+    case Qt::UserRole + 3:
+        return msg.message;
+
+    default:
+        break;
+    }
+
+    return QVariant();
+
+}
+
+QHash<int, QByteArray> ConversationModel::roleNames() const
+{
+    QHash<int, QByteArray> names;
+    names[Qt::UserRole] = "author";
+    names[Qt::UserRole + 1] = "recipient";
+    names[Qt::UserRole + 2] = "timestamp";
+    names[Qt::UserRole + 3] = "message";
+    return names;
+}
+
+void ConversationModel::appendMessage(const QString &author, const QString &recipient, uint time, const QString &message)
+{
+    Message msg(author, recipient, time, message);
+    m_messages.append(msg);
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 const QString URLScheme_Contact = "contact"; //contact://contact_id
 const QString URLScheme_Image = "image"; //image://image_name
@@ -59,12 +143,20 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 {
 
 
+    qmlRegisterType<ConversationModel>("qml.hehui.ConversationModel", 1, 0, "ConversationModel");
+
+
+//    m_conversationModel = new ConversationModel(this);
+//    m_conversationModel->appendMessage("userID", myUserID, 0, "TEST Message");
+//    m_quickView->rootContext()->setContextProperty("model", m_conversationModel);
+
+
     m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
     connect(m_quickView, &QQuickView::statusChanged, this, &MessageView::quickViewStatusChanged);
     connect(m_quickView, &QQuickWindow::sceneGraphError, this, &MessageView::sceneGraphError);
-    QString qmlFileName = "qrc:/resources/qml/chat.qml";
+    QString qmlFileName = "qrc:/qml/chat.qml";
     if(isGroupChat) {
-        qmlFileName = "qrc:/resources/qml/groupchat.qml";
+        qmlFileName = "qrc:/qml/groupchat.qml";
     }
     m_quickView->setSource(QUrl(qmlFileName));
 
@@ -79,9 +171,10 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
     m_myself = IMUser::instance();
     myUserID = m_myself->getUserID();
 
+
     messagesListViewer = 0;
     QQuickItem *rootItem = m_quickView->rootObject();
-    messagesListViewer = rootItem->findChild<QObject *>("chatMessagesList");
+    messagesListViewer = rootItem->findChild<QQuickItem *>("chatMessagesList");
     if(messagesListViewer) {
         //connect(this, SIGNAL(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)), messagesListViewer, SLOT(appendMessage(const QString &, const QString &, const QString &, const QString &, uint)));
 
@@ -89,7 +182,6 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 
         messagesListViewer->setProperty("myID", myUserID);
     }
-
 
 
     imageCachePath = Settings::instance()->getImageCacheDir();
@@ -104,13 +196,18 @@ MessageView::MessageView(bool isGroupChat, QWidget *parent)
 
 }
 
+MessageView::~MessageView()
+{
+    delete m_quickView;
+}
+
 //QSize MessageView::sizeHint(){
 //    return QSize(540, 300);
 //}
 
-void MessageView::appendChatMessage(const QString &userID, const QString &displayName, const QString &headICON, const QString &message, uint timestamp)
+void MessageView::appendChatMessage(const QString &userID, const QString &time, const QString &message, bool richtext)
 {
-    qDebug() << "----MessageView::appendChatMessage(...) contactID:" << userID << " Time:" << timestamp << " Msg:" << message;;
+    qDebug() << "----MessageView::appendChatMessage(...) contactID:" << userID << " Time:" << time << " Msg:" << message;;
 
 //    QString timeString = datetime;
 //    QDateTime dt = QDateTime::fromString(datetime, "yyyy-MM-dd hh:mm:ss");
@@ -123,14 +220,14 @@ void MessageView::appendChatMessage(const QString &userID, const QString &displa
 
 
 //    emit appendMessage(userID, displayName, headICON, message, timestamp);
+
     if(messagesListViewer) {
         QMetaObject::invokeMethod(messagesListViewer, "appendMessage",
-                                  Q_ARG(QString, userID),
-                                  Q_ARG(QString, displayName),
-                                  Q_ARG(QString, headICON),
-                                  Q_ARG(QString, message),
-                                  Q_ARG(uint, timestamp)
+                                  Q_ARG(QVariant, userID),
+                                  Q_ARG(QVariant, time),
+                                  Q_ARG(QVariant, message)
                                  );
+
     }
 
 }

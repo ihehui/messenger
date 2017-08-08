@@ -59,7 +59,7 @@ public:
     bool isDownloadingImage(const QString &imageName);
     void processImageDownloadResult(const QString &imageName, bool downloaded);
 
-    void appendChatMessage(const QString &message, IMUserBase *sender, const QString &datetime, bool richTextMessage = false);
+    void appendChatMessage(const QString &message, IMUserBase *sender, const QString &datetime, bool fromContact = false);
     void appendSystemMessage(const QString &message, bool richTextMessage = false);
 
 //    QSize minimumSizeHint();
@@ -125,8 +125,8 @@ private:
     QString getRichMessageBlock();
 
     QString myRichTextToSimpleTextMessage(const QString &richTextMessage);
-//    QString simpleTextToRichTextMessage(const QString &simpleTextMessage);
-//    QString contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage);
+    QString simpleTextToRichTextMessage(const QString &simpleTextMessage);
+    QString contactsSimpleTextToPlainTipTextMessage(const QString &simpleTextMessage);
 
 
 
