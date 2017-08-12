@@ -66,6 +66,9 @@ public:
     //    void startHeartbeat(int interval = HEARTBEAT_TIMER_INTERVAL);
     //    void stopHeartbeat();
 
+
+    int socketConnectedToServer();
+
 public slots:
     void parseIncomingPacketData(const PacketBase &packet);
 
@@ -149,26 +152,24 @@ public slots:
     {
         qDebug() << "--requestUpdatePassword(...)";
 
-        UpdatePasswordPacket packet(UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST, sessionEncryptionKey);
+        UpdatePasswordPacket packet(UpdatePasswordPacket::INFO_TYPE_UPDATE_MODE_INFO, sessionEncryptionKey);
         QByteArray ba = packet.toByteArray();
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
-    bool updatePassword(int serverSocketID, const QString &captcha, const QString &userID, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &email, const QString &smsCaptcha)
+    bool updatePassword(const QString &captcha, const QString &oldPassword, const QString &newPassword, const QString &securityAnswer, const QString &smsCaptcha)
     {
         qDebug() << "--updatePassword(...)";
 
         UpdatePasswordPacket packet(UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT, sessionEncryptionKey);
-        packet.AuthInfo.captcha = captcha;
-        packet.AuthInfo.userID = userID;
         packet.AuthInfo.oldPassword = oldPassword;
         packet.AuthInfo.newPassword = newPassword;
         packet.AuthInfo.securityAnswer = securityAnswer;
-        packet.AuthInfo.email = email;
+        packet.AuthInfo.captcha = captcha;
         packet.AuthInfo.smsCaptcha = smsCaptcha;
 
         QByteArray ba = packet.toByteArray();
-        return m_rtp->sendReliableData(serverSocketID, &ba);
+        return m_rtp->sendReliableData(m_socketConnectedToServer, &ba);
     }
 
 

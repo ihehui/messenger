@@ -455,7 +455,6 @@ void RgeistrationPacket::parsePacketBody(QByteArray &packetBody)
 {
     QDataStream in(&packetBody, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_8);
-
     in >> JobID;
 
     PacketInfoType InfoType = PacketInfoType(getPacketSubType());
@@ -495,7 +494,6 @@ QByteArray RgeistrationPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
     out << JobID;
 
     switch (InfoType) {
@@ -559,21 +557,24 @@ void UpdatePasswordPacket::init()
 {
     JobID = 0;
 
-    AuthInfo.authMode = quint8(AUTH_OLD_PWD_ONLY);
-    AuthInfo.captchaImage = QByteArray();
-    AuthInfo.captcha = "";
+    UpdateModeInfo.authMode = quint8(AUTH_OLD_PWD_ONLY);
 
-    AuthInfo.userID = "";
+    AuthInfoFromServer.authMode = quint8(AUTH_OLD_PWD_ONLY);
+    AuthInfoFromServer.securityQuestion = "";
+    AuthInfoFromServer.url = "";
+
     AuthInfo.oldPassword = "";
     AuthInfo.newPassword = "";
-    AuthInfo.securityQuestion = "";
     AuthInfo.securityAnswer = "";
-    AuthInfo.email = "";
+    AuthInfo.captcha = "";
     AuthInfo.cellphoneNO = 0;
     AuthInfo.smsCaptcha = "";
-    AuthInfo.url = "";
-    AuthInfo.authResult = 0;
-    AuthInfo.updateResult = 0;
+
+    AuthResult.result = 0;
+    AuthResult.errorCode = quint8(IM::ERROR_NoError);
+
+    UpdateResult.result = 0;
+    UpdateResult.errorCode = quint8(IM::ERROR_NoError);
 
 }
 
@@ -584,12 +585,41 @@ void UpdatePasswordPacket::parsePacketBody(QByteArray &packetBody)
     in >> JobID;
 
     PacketInfoType InfoType = PacketInfoType(getPacketSubType());
-    //TODO
+    switch (InfoType) {
+    case INFO_TYPE_UPDATE_MODE_INFO:
+    {
+        in >> UpdateModeInfo.authMode;
+    }
+        break;
 
-    in >> AuthInfo.authMode >> AuthInfo.captchaImage >> AuthInfo.captcha >> AuthInfo.userID;
-    in >> AuthInfo.oldPassword >> AuthInfo.newPassword >> AuthInfo.securityQuestion >> AuthInfo.securityAnswer;
-    in >> AuthInfo.email >> AuthInfo.cellphoneNO >> AuthInfo.smsCaptcha >> AuthInfo.url;
-    in >> AuthInfo.authResult >> AuthInfo.updateResult ;
+    case INFO_TYPE_AUTH_INFO_FROM_SERVER:
+    {
+        in >> AuthInfoFromServer.authMode >> AuthInfoFromServer.securityQuestion >> AuthInfoFromServer.url;
+    }
+        break;
+
+    case INFO_TYPE_AUTH_INFO_FROM_CLIENT:
+    {
+        in >> AuthInfo.oldPassword >> AuthInfo.newPassword >> AuthInfo.securityAnswer;
+        in >> AuthInfo.captcha >> AuthInfo.cellphoneNO >> AuthInfo.smsCaptcha >> AuthInfo.url;
+    }
+        break;
+
+    case INFO_TYPE_AUTH_RESULT:
+    {
+        in >> AuthResult.result >> AuthResult.errorCode;
+    }
+        break;
+
+    case INFO_TYPE_UPDATE_RESULT:
+    {
+        in >> UpdateResult.result >> UpdateResult.errorCode;
+    }
+        break;
+
+    default:
+        break;
+    }
 
 }
 
@@ -603,15 +633,43 @@ QByteArray UpdatePasswordPacket::packBodyData()
     QByteArray ba;
     QDataStream out(&ba, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_8);
-
     out << JobID;
 
-    out << AuthInfo.authMode << AuthInfo.captchaImage << AuthInfo.captcha << AuthInfo.userID;
-    out << AuthInfo.oldPassword << AuthInfo.newPassword << AuthInfo.securityQuestion << AuthInfo.securityAnswer;
-    out << AuthInfo.email << AuthInfo.cellphoneNO << AuthInfo.smsCaptcha << AuthInfo.url;
-    out << AuthInfo.authResult << AuthInfo.updateResult ;
+    switch (InfoType) {
+    case INFO_TYPE_UPDATE_MODE_INFO:
+    {
+        out << UpdateModeInfo.authMode;
+    }
+        break;
 
+    case INFO_TYPE_AUTH_INFO_FROM_SERVER:
+    {
+        out << AuthInfoFromServer.authMode << AuthInfoFromServer.securityQuestion << AuthInfoFromServer.url;
+    }
+        break;
 
+    case INFO_TYPE_AUTH_INFO_FROM_CLIENT:
+    {
+        out << AuthInfo.oldPassword << AuthInfo.newPassword << AuthInfo.securityAnswer;
+        out << AuthInfo.captcha << AuthInfo.cellphoneNO << AuthInfo.smsCaptcha << AuthInfo.url;
+    }
+        break;
+
+    case INFO_TYPE_AUTH_RESULT:
+    {
+        out << AuthResult.result << AuthResult.errorCode;
+    }
+        break;
+
+    case INFO_TYPE_UPDATE_RESULT:
+    {
+        out << UpdateResult.result << UpdateResult.errorCode;
+    }
+        break;
+
+    default:
+        break;
+    }
 
     return ba;
 }

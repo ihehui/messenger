@@ -371,20 +371,42 @@ bool UsersManager::registerNewUser(const QString &userID, const QString &passwor
 
 }
 
-void UsersManager::updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message)
+bool UsersManager::updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message)
 {
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
-        return ;
+        return false;
     }
 
-    userInfo->setPassword(newPassword, false);
-    userInfo->addUpdatedPersonalInfoProperty(IM::PI_Password, "'" + newPassword + "'", true);
+    Q_ASSERT(errorType);
 
+//    if(!db.isValid()) {
+//        if(!openDatabase()) {
+//            return false;
+//        }
+//    }
+//    QString queryString = QString("call sp_User_UpdatePassword('%1', '%2');").arg(userID).arg(newPassword);
+//    QSqlQuery query(db);
+//    if(!query.exec(queryString)) {
+//        QSqlError error = query.lastError();
+//        QString msg = QString("Can not update user password! %1 Error Type:%2 Error NO.:%3").arg(error.text()).arg(error.type()).arg(error.number());
+//        qCritical() << msg;
+//        return false;
+//    }
+
+
+    userInfo->addUpdatedPersonalInfoProperty(IM::PI_Password, "'" + newPassword + "'", true);
     if(saveUserInfoToDatabase(userInfo)) {
-        *errorType = IM::ERROR_NoError;
+        userInfo->setPassword(newPassword, false);
+        if(errorType){
+            *errorType = IM::ERROR_NoError;
+        }
+        return true;
     } else {
-        *errorType = IM::ERROR_UnKnownError;
+        if(errorType){
+            *errorType = IM::ERROR_UnKnownError;
+        }
+        return false;
     }
 
 }

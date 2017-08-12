@@ -76,7 +76,8 @@ HEADERS += contactinfowidget/contactinfowidget.h \
     chatwindow/filetransmitter/filetransmissionlistwidget.h \
     chatwindow/filetransmitter/progressinfowidget.h \
     chatwindow/filetransmitter/clientfiletransmissionmanager.h \
-    chatwindow/filetransmitter/clientfiletransmissionpacketsparser.h
+    chatwindow/filetransmitter/clientfiletransmissionpacketsparser.h \
+    updatepassword/updatepasswordwidget.h
 SOURCES += contactinfowidget/contactinfowidget.cpp \
     informationtips/userinfotipwindow.cpp \
     chatwindow/groupchatwindow.cpp \
@@ -123,7 +124,8 @@ SOURCES += contactinfowidget/contactinfowidget.cpp \
     chatwindow/filetransmitter/filetransmissionlistwidget.cpp \
     chatwindow/filetransmitter/progressinfowidget.cpp \
     chatwindow/filetransmitter/clientfiletransmissionpacketsparser.cpp \
-    chatwindow/filetransmitter/clientfiletransmissionmanager.cpp
+    chatwindow/filetransmitter/clientfiletransmissionmanager.cpp \
+    updatepassword/updatepasswordwidget.cpp
 FORMS += contactinfowidget/contactinfowidget.ui \
     informationtips/userinfotipwindow.ui \
     chatwindow/contactchatwidget.ui \
@@ -143,7 +145,8 @@ FORMS += contactinfowidget/contactinfowidget.ui \
     imageviewer/animationcontroler.ui \
     imageviewer/imageviewercontroler.ui \
     chatwindow/filetransmitter/filetransmissionlistwidget.ui \
-    chatwindow/filetransmitter/progressinfowidget.ui
+    chatwindow/filetransmitter/progressinfowidget.ui \
+    updatepassword/updatepasswordwidget.ui
 RESOURCES += resources/images/emoticons/emoticons.qrc \
     resources/images/face/face.qrc \
     resources/images/chatmessagewindow/chatmessagewindow.qrc \

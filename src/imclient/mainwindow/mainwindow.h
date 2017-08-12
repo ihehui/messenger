@@ -154,8 +154,7 @@ private slots:
     void processCaptchaInfoPacket(const CaptchaInfoPacket &packet);
     void processFileTransferPacket(const FileTransferPacket &packet);
 
-    void slotProcessUpdatePasswordResult(const UpdatePasswordPacket &packet);
-
+    void slotChangPassword();
 
 
 

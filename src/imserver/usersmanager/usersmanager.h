@@ -77,7 +77,7 @@ public:
 
     void generateUserInfo(QString *userID, QString *password);
     bool registerNewUser(const QString &userID, const QString &password, IM::ErrorType *errorType, quint32 *sysID);
-    void updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
+    bool updateUserPassword(const QString &userID, const QString &newPassword, IM::ErrorType *errorType, QString *message = 0);
 
     QString searchContact(const QString &propertiesString, bool matchExactly, bool searchOnlineUsersOnly, bool searchWebcamUsersOnly, int startIndex);
     QString searchContact(const QString &keyword, quint8 searchOnlineUsersOnly,

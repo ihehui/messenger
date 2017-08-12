@@ -199,8 +199,6 @@ void ServerPacketsParser::parseIncomingPacketData(const PacketBase &packet)
 
     case quint8(IM::CMD_UpdatePassword): {
         UpdatePasswordPacket p(packet, sessionEncryptionKey);
-        p.AuthInfo.authMode = UsersManager::passwordUpdateAuthMode();
-
         processUpdatePasswordPacket(p);
         qDebug() << "~~CMD_UpdatePassword";
     }
@@ -579,21 +577,15 @@ void ServerPacketsParser::processRgeistrationPacket(const RgeistrationPacket &pa
 
 void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket &packet)
 {
+    QString userID = packet.getPeerID();
+    int peerSocketID = packet.getSocketID();
     UpdatePasswordPacket::PacketInfoType infoType = UpdatePasswordPacket::PacketInfoType(packet.getPacketSubType());
 
     //TODO
     switch (infoType) {
-    case UpdatePasswordPacket::INFO_TYPE_INIT_REQUEST: {
-        quint8 authMode = UsersManager::passwordUpdateAuthMode();
-        QByteArray captchaImage = QByteArray();
-        QString userID = packet.AuthInfo.userID;
-        QString securityQuestion = "";
-        QString email = "";
-        quint32 cellphoneNO = 0;
-        QString url = "";
+    case UpdatePasswordPacket::INFO_TYPE_UPDATE_MODE_INFO: {
 
-
-        UpdatePasswordPacket::AuthMode mode = UpdatePasswordPacket::AuthMode(authMode);
+        UpdatePasswordPacket::AuthMode mode = UpdatePasswordPacket::AuthMode(UsersManager::passwordUpdateAuthMode());
         switch (mode) {
         case UpdatePasswordPacket::AUTH_OLD_PWD_ONLY:
             break;
@@ -617,15 +609,12 @@ void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket
             break;
         }
 
-        sendUpdatePasswordAuthInfoPacket(packet.getSocketID(), userID, authMode, captchaImage, securityQuestion, email, cellphoneNO, url);
-    }
-    break;
-    case UpdatePasswordPacket::INFO_TYPE_CAPTCHA_REQUEST: {
+        UpdatePasswordPacket p(UpdatePasswordPacket::INFO_TYPE_UPDATE_MODE_INFO, getUserSessionEncryptionKey(userID));
+        p.UpdateModeInfo.authMode = mode;
+        sendUpdatePasswordPacket(peerSocketID, &p);
 
-    }
-    break;
-    case UpdatePasswordPacket::INFO_TYPE_CAPTCHA_IMAGE: {
-        //TODO
+
+        //sendUpdatePasswordAuthInfoPacket(packet.getSocketID(), userID, authMode, captchaImage, securityQuestion, email, cellphoneNO, url);
     }
     break;
 
@@ -634,34 +623,37 @@ void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket
     break;
 
     case UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_CLIENT: {
-        UpdatePasswordPacket::AuthMode mode = UpdatePasswordPacket::AuthMode(packet.AuthInfo.authMode);
-        switch (mode) {
-        case UpdatePasswordPacket::AUTH_OLD_PWD_ONLY: {
+        UserInfo *info = m_userSocketsHash.value(peerSocketID);
+        if(!info) {
+            return;
         }
-        break;
-        case UpdatePasswordPacket::AUTH_SECURITY_QUESTION: {
-        }
-        break;
-        case UpdatePasswordPacket::AUTH_EMAIL: {
-        }
-        break;
-        case UpdatePasswordPacket::AUTH_SMS: {
-        }
-        break;
-        case UpdatePasswordPacket::AUTH_HTTP: {
 
+        if(packet.AuthInfo.oldPassword != info->getPassword()){
+            UpdatePasswordPacket p(UpdatePasswordPacket::INFO_TYPE_AUTH_RESULT, getUserSessionEncryptionKey(userID));
+            p.AuthResult.result = 0;
+            p.AuthResult.errorCode = quint8(IM::ERROR_AuthenticationFailed);
+            sendUpdatePasswordPacket(peerSocketID, &p);
+            return;
         }
-        break;
-        default:
-            break;
-        }
+
+        IM::ErrorType errorType = IM::ERROR_NoError;
+        bool ok = updateUserPassword(userID, packet.AuthInfo.newPassword, &errorType);
+
+        UpdatePasswordPacket p(UpdatePasswordPacket::INFO_TYPE_UPDATE_RESULT, getUserSessionEncryptionKey(userID));
+        p.UpdateResult.result = ok;
+        p.UpdateResult.errorCode = quint8(errorType);
+        sendUpdatePasswordPacket(peerSocketID, &p);
+        return;
+
+        //out << packet.AuthInfo.oldPassword <<packet. AuthInfo.newPassword << packet.AuthInfo.securityAnswer;
+        //out << packet.AuthInfo.captcha << packet.AuthInfo.cellphoneNO << packet.AuthInfo.smsCaptcha << packet.AuthInfo.url;
+
     }
     break;
 
     case UpdatePasswordPacket::INFO_TYPE_AUTH_RESULT: {
     }
     break;
-
     case UpdatePasswordPacket::INFO_TYPE_UPDATE_RESULT: {
     }
     break;

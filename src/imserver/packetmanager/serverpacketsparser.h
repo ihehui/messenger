@@ -138,34 +138,15 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool sendUpdatePasswordAuthInfoPacket(int peerSocketID, const QString &userID, quint8 authMode, const QByteArray &captchaImage, const QString &securityQuestion, const QString &email, quint32 cellphoneNO, const QString &url)
+
+    bool sendUpdatePasswordPacket(int peerSocketID, UpdatePasswordPacket *packet)
     {
-        qWarning() << "--sendUpdatePasswordAuthInfoPacket(...)";
+        qWarning() << "--sendUpdatePasswordPacket(...)";
 
-        //TODO
-        UpdatePasswordPacket packet(UpdatePasswordPacket::INFO_TYPE_AUTH_INFO_FROM_SERVER, getUserSessionEncryptionKey(userID));
-        packet.AuthInfo.authMode = authMode;
-        packet.AuthInfo.captchaImage = captchaImage;
-        packet.AuthInfo.userID = userID;
-        packet.AuthInfo.securityQuestion = securityQuestion;
-        packet.AuthInfo.email = email;
-        packet.AuthInfo.cellphoneNO = cellphoneNO;
-        packet.AuthInfo.url = url;
-
-        QByteArray ba = packet.toByteArray();
+        QByteArray ba = packet->toByteArray();
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool sendClientUpdatePasswordResultPacket(int peerSocketID, const QString &userID, quint8 updateResult)
-    {
-        qDebug() << "--sendClientUpdatePasswordResultPacket(...)";
-
-        UpdatePasswordPacket packet(UpdatePasswordPacket::INFO_TYPE_UPDATE_RESULT, getUserSessionEncryptionKey(userID));
-        packet.AuthInfo.updateResult = updateResult;
-
-        QByteArray ba = packet.toByteArray();
-        return m_rtp->sendReliableData(peerSocketID, &ba);
-    }
 
     bool sendLoginServerInfoPacket(int peerSocketID, const QHostAddress &serverAddress, quint16 serverPort)
     {

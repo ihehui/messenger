@@ -23,15 +23,14 @@ LoginWidget::LoginWidget(QWidget *parent)
 {
     ui.setupUi(this);
 
+    movie = new QMovie(":/resources/images/verifying.gif");
+
+    switchUI(VERIFYING);
 
     user = IMUser::instance();
 
-
-    movie = new QMovie(":/resources/images/verifying.gif");
-
     localServer = new QLocalServer(this);
 
-    switchUI(VERIFYING);
 
     //ui.idComboBox->clear();
     //ui.idComboBox->insertItems(0, Settings::instance()->getRecentUser());
@@ -71,6 +70,7 @@ LoginWidget::LoginWidget(QWidget *parent)
     //        connect(clientPacketsParser, SIGNAL(signalLoginResultReceived(IM::ErrorType)), this, SLOT(slotProcessLoginResult(IM::ErrorType)), Qt::QueuedConnection);
 
 
+    switchUI(NORMAL);
 
 
 }
@@ -327,9 +327,8 @@ void LoginWidget::slotCheckAutoLogin()
 {
 
     if(autoLogin) {
-
         IMUser::instance()->setUserID(Settings::instance()->getRecentUser());
-        IMUser::instance()->setPassword(Settings::instance()->getRecentUserPassword(), true);
+        IMUser::instance()->setPassword(Settings::instance()->getRecentUserPassword(), false);
         IMUser::instance()->setOnlineState(invisibleLogin ? IM::ONLINESTATE_INVISIBLE : IM::ONLINESTATE_ONLINE);
         verifyUser();
 
@@ -402,19 +401,8 @@ void LoginWidget::on_toolButtonConfig_clicked(bool checked)
 
 void LoginWidget::on_loginToolButton_clicked()
 {
-    //    QString serverHostAddress = serverAddress();
-    //    if(serverHostAddress.isEmpty()){
-    //        QMessageBox::critical(this, tr("Error"), tr("Server Address Required!"));
-    //        localServer->close();
-    //        if(ui.groupBoxConfiguration->isHidden()){
-    //            ui.toolButtonConfig->setChecked(true);
-    //            ui.groupBoxConfiguration->setVisible(true);
-    //        }
-    //        if(!ui.comboBoxServerIP->count()){
-    //            ui.toolButtonServersManager->click();
-    //        }
-    //        return;
-    //    }
+
+    autoLogin = false;
 
     if(!checkServerAddress()) {
         return;

@@ -24,6 +24,8 @@
 
 #include "../../sharedim/constants_global_shared.h"
 
+#include "updatepassword/updatepasswordwidget.h"
+
 //#include "HHSharedCore/hdatabaseutility.h"
 //#include "HHSharedGUI/hloginbase.h"
 #include "HHSharedGUI/hguiinterface.h"
@@ -99,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent, HEHUI::WindowPosition positon) :
 
     //检查自动登陆
     //Check Auto Login
-    QTimer::singleShot(100, ui.loginPage, SLOT(slotCheckAutoLogin()));
+    QTimer::singleShot(2000, ui.loginPage, SLOT(slotCheckAutoLogin()));
     /*
     bool invisibleLogin = Settings::instance()->getInvisibleLogin();
     bool autoLogin = Settings::instance()->getAutoLogin();
@@ -267,7 +269,10 @@ void MainWindow::initUI()
     connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(slotQuit()));
 
     connect(ui.toolButtonSerach, SIGNAL(clicked()), this, SLOT(slotSearch()));
+    connect(ui.toolButtonChangePassword, SIGNAL(clicked()), this, SLOT(slotChangPassword()));
     connect(ui.lockToolButton, SIGNAL(clicked()), this, SLOT(slotLockUI()));
+
+
 
     ui.stackedWidget->setCurrentWidget(ui.loginPage);
     //登陆页验证完成后的信号处理
@@ -361,10 +366,12 @@ void MainWindow::startNetwork()
     connect(clientPacketsParser, SIGNAL(signalContactGroupsInfoPacketReceived(const ContactGroupsInfoPacket &)), this, SLOT(processContactGroupsInfoPacket(const ContactGroupsInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalInterestGroupsInfoPacketReceived(const InterestGroupsInfoPacket &)), this, SLOT(processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalContactInfoPacketReceived(const ContactInfoPacket &)), this, SLOT(processContactInfoPacket(const ContactInfoPacket &)), Qt::QueuedConnection);
+//    connect(clientPacketsParser, SIGNAL(signalUpdatePasswordResultReceived(const UpdatePasswordPacket &)), this, SLOT(slotProcessUpdatePasswordResult(const UpdatePasswordPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const SearchInfoPacket &)), this, SLOT(processSearchInfoPacket(const SearchInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalChatMessageReceivedFromContact(const ChatMessagePacket &)), this, SLOT(processChatMessagePacket(const ChatMessagePacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &)), this, SLOT(processCaptchaInfoPacket(const CaptchaInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
+
 
 
     connect(clientPacketsParser, SIGNAL(signalLoginResultReceived(quint8, const QString &)), this, SLOT(slotProcessLoginResult(quint8, const QString &)), Qt::QueuedConnection);
@@ -386,7 +393,6 @@ void MainWindow::startNetwork()
 
     connect(this, SIGNAL(signalMyOnlineStateChanged(int, quint8)), clientPacketsParser, SLOT(changeMyOnlineState(int, quint8)), Qt::QueuedConnection);
 
-    connect(clientPacketsParser, SIGNAL(signalUpdatePasswordResultReceived(const UpdatePasswordPacket &)), this, SLOT(slotProcessUpdatePasswordResult(const UpdatePasswordPacket &)), Qt::QueuedConnection);
 
     connect(clientPacketsParser, SIGNAL(signalClientLastLoginInfoPacketReceived(const QString &, const QString &, const QString &, const QString &)), this, SLOT(slotProcessClientLastLoginInfo(const QString &, const QString &, const QString &, const QString &)), Qt::QueuedConnection);
 
@@ -1911,10 +1917,18 @@ void MainWindow::slotDeleteContactResultReceived(const QString &contactID, bool 
     m_contactBox->addOrRemoveContactItem(contact, false);
 }
 
-void MainWindow::slotProcessUpdatePasswordResult(const UpdatePasswordPacket &packet)
+void MainWindow::slotChangPassword()
 {
-
-    QMessageBox::critical(this, tr("Error"), tr("Password Update Failed!"));
+    QDialog dlg;
+    QVBoxLayout vbLayout(&dlg);
+    vbLayout.setSizeConstraint(QVBoxLayout::SetFixedSize);
+    dlg.setLayout(&vbLayout);
+    UpdatePasswordWidget wgt(clientPacketsParser, this);
+    connect(&wgt, SIGNAL(closed()), &dlg, SLOT(accept()));
+    vbLayout.addWidget(&wgt);
+    dlg.updateGeometry();
+    dlg.setWindowTitle(tr("Update Password"));
+    dlg.exec();
 }
 
 void MainWindow::slotProcessLoginServerRedirected(const QString &serverAddress, quint16 serverPort, const QString &serverName)

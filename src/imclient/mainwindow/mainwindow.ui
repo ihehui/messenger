@@ -225,8 +225,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>237</width>
-                    <height>292</height>
+                    <width>238</width>
+                    <height>269</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -255,8 +255,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>76</height>
+                    <width>238</width>
+                    <height>269</height>
                    </rect>
                   </property>
                   <property name="focusPolicy">
@@ -295,8 +295,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>76</height>
+                    <width>238</width>
+                    <height>269</height>
                    </rect>
                   </property>
                   <property name="focusPolicy">
@@ -476,6 +476,20 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="3">
+            <widget class="QToolButton" name="toolButtonChangePassword">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/resources/images/password.png</normaloff>:/resources/images/password.png</iconset>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -491,7 +505,7 @@
      <x>0</x>
      <y>0</y>
      <width>301</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuView">
@@ -518,7 +532,7 @@
     </property>
     <widget class="QMenu" name="menuSubWindows">
      <property name="title">
-      <string>Subwindows</string>
+      <string>&amp;Subwindows</string>
      </property>
     </widget>
     <addaction name="actionCloseSubWindow"/>
@@ -622,7 +636,7 @@
      <normaloff>:/resources/images/about.png</normaloff>:/resources/images/about.png</iconset>
    </property>
    <property name="text">
-    <string>About</string>
+    <string>Ab&amp;out</string>
    </property>
    <property name="toolTip">
     <string>About</string>
@@ -640,7 +654,7 @@
      <normaloff>:/resources/images/bugreport.png</normaloff>:/resources/images/bugreport.png</iconset>
    </property>
    <property name="text">
-    <string>Bug Report</string>
+    <string>&amp;Bug Report</string>
    </property>
    <property name="toolTip">
     <string>Bug Report</string>
@@ -658,7 +672,7 @@
      <normaloff>:/resources/images/help.png</normaloff>:/resources/images/help.png</iconset>
    </property>
    <property name="text">
-    <string>Help</string>
+    <string>&amp;Help</string>
    </property>
    <property name="statusTip">
     <string>Help</string>
@@ -690,7 +704,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Close Window</string>
+    <string>&amp;Close Window</string>
    </property>
    <property name="toolTip">
     <string>Close the active window</string>
@@ -707,7 +721,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Close All Windows</string>
+    <string>Close &amp;All Windows</string>
    </property>
    <property name="toolTip">
     <string>Close all the windows</string>
@@ -724,7 +738,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Tile</string>
+    <string>&amp;Tile</string>
    </property>
    <property name="toolTip">
     <string>Arranges all child windows in a tile pattern.</string>
@@ -741,7 +755,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Cascade</string>
+    <string>Casca&amp;de</string>
    </property>
    <property name="toolTip">
     <string>Arranges all the child windows in a cascade pattern.</string>
@@ -798,7 +812,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Show Minimized</string>
+    <string>&amp;Show Minimized</string>
    </property>
    <property name="toolTip">
     <string>Shows the widget minimized, as an icon.</string>
@@ -815,7 +829,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Show Maximized</string>
+    <string>Show &amp;Maximized</string>
    </property>
    <property name="toolTip">
     <string>Shows the widget maximized.</string>
@@ -832,7 +846,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Show Normal</string>
+    <string>Show &amp;Normal</string>
    </property>
    <property name="toolTip">
     <string>Restores the widget after it has been maximized or minimized.</string>
@@ -849,7 +863,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Show Full-Screen</string>
+    <string>Show &amp;Full-Screen</string>
    </property>
    <property name="toolTip">
     <string>Shows the widget in full-screen mode.</string>
@@ -863,7 +877,7 @@
   </action>
   <action name="actionAboutQt">
    <property name="text">
-    <string>About Qt</string>
+    <string>&amp;About Qt</string>
    </property>
    <property name="toolTip">
     <string>About Qt</string>

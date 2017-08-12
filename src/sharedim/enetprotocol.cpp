@@ -18,13 +18,13 @@ ENETProtocol::ENETProtocol(QObject *parent) :
 
 void ENETProtocol::processReceivedData(SOCKETID peerID, QByteArray data)
 {
-    qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
+    //qDebug()<<"--ENETProtocolTest::processReceivedData(...) "<<"peerID:"<<peerID;
     convertDataToPacket(peerID, &data);
 }
 
 inline void ENETProtocol::convertDataToPacket(quint32 peerID, QByteArray *data)
 {
-    qDebug()<<"--ENETProtocol::convertDataToPacket";
+    //qDebug()<<"--ENETProtocol::convertDataToPacket";
 
     QString ip = "";
     quint16 port = 0;

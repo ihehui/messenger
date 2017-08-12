@@ -99,6 +99,12 @@ IMClientPacketsParser::~IMClientPacketsParser()
 
 }
 
+int IMClientPacketsParser::socketConnectedToServer()
+{
+    return m_socketConnectedToServer;
+}
+
+
 
 
 

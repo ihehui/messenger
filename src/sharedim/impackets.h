@@ -265,13 +265,12 @@ class SHAREDIMLIB_API UpdatePasswordPacket : public IMPacket
 public:
     enum PacketInfoType {
         INFO_TYPE_UNKNOWN = UserDefinedPacket + 1,
-        INFO_TYPE_INIT_REQUEST,
 
-        INFO_TYPE_CAPTCHA_REQUEST,
-        INFO_TYPE_CAPTCHA_IMAGE,
+        INFO_TYPE_UPDATE_MODE_INFO,
 
         INFO_TYPE_AUTH_INFO_FROM_SERVER,
         INFO_TYPE_AUTH_INFO_FROM_CLIENT,
+
         INFO_TYPE_AUTH_RESULT,
         INFO_TYPE_UPDATE_RESULT
     };
@@ -297,25 +296,35 @@ public:
 
     quint32 JobID;
 
-    struct AuthInfoStruct {
+    struct UpdateModeInfoStruct{
         quint8 authMode;
-        QByteArray captchaImage;
-        QString captcha;
+    } UpdateModeInfo;
 
-        QString userID;
+    struct AuthInfoFromServerStruct {
+        quint8 authMode;
+        QString securityQuestion;
+        QString url;
+    } AuthInfoFromServer;
+
+    struct AuthInfoFromClientStruct {
         QString oldPassword;
         QString newPassword;
-        QString securityQuestion;
         QString securityAnswer;
-        QString email;
+        QString captcha;
         quint32 cellphoneNO;
         QString smsCaptcha;
         QString url;
-
-        quint8 authResult;
-        quint8 updateResult;
     } AuthInfo;
 
+    struct AuthResultStruct{
+        quint8 result;
+        quint8 errorCode;
+    } AuthResult;
+
+    struct UpdateResultStruct{
+        quint8 result;
+        quint8 errorCode;
+    } UpdateResult;
 
 };
 ////////////////////////////////////////////////////////////////////////
