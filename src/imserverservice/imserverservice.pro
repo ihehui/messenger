@@ -35,6 +35,16 @@ HEADERS += \
 # INSTALLS += target
 RESOURCES += resources.qrc
 
+
+!build_pass:CONFIG(debug, debug|release|debug_and_release|build_all) {
+    message(Debug Build!)
+    DEFINES += DEBUG __DEBUG__
+}else{
+    message( "Release Build! No qDebug() output." )
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
+
 # win32:RC_FILE = iconresource.rc
 #win32:APP_ICON = resources/images/app.ico
 win32:RC_ICONS = resources/images/app.ico

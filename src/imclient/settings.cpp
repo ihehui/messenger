@@ -6,6 +6,8 @@
 
 #include "HHSharedCore/hcryptography.h"
 
+#include "HHSharedCore/MessageLogger"
+
 
 namespace HEHUI
 {
@@ -273,7 +275,6 @@ void Settings::setCurrentUser(const QString &userID)
 {
     this->m_currentUserID = userID;
 }
-
 
 
 

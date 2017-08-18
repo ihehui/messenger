@@ -9,7 +9,8 @@
 //#include "login/login.h"
 //#include "./networkmanager/clientresourcesmanager.h"
 
-#include "HHSharedCore/hlogdebug.h"
+#include "settings.h"
+
 
 
 using namespace std;
@@ -26,18 +27,37 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
+    QStringList arguments = QCoreApplication::arguments();
+
     app.setQuitOnLastWindowClosed(false);
 
 
     cout << qPrintable(QString(APP_NAME) + " Build " + QString(APP_VERSION)) << endl << endl;
 
 
-    for(int i = 0; i < argc; i++) {
-        if(QString(argv[i]).toLower() == "-log") {
-            qInstallMessageHandler(logDebug);
-            qAddPostRoutine(closeDebugLog);
-        }
+//    for(int i = 0; i < argc; i++) {
+//        if(QString(argv[i]).toLower() == "-log") {
+//            qInstallMessageHandler(logDebug);
+//            qAddPostRoutine(closeDebugLog);
+//        }
+//    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if(arguments.contains("-nolog", Qt::CaseInsensitive)){
+        Settings::instance()->enableLog(false);
+    }else{
+
+#ifdef DEBUG
+        Settings::instance()->enableLog(true, "messenger", true);
+#else
+        Settings::instance()->enableLog(true, "messenger", false);
+#endif
+
     }
+    qDebug()<<"Application started.";
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
     QDate date = QDate::currentDate();

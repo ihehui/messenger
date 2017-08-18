@@ -58,6 +58,16 @@ RESOURCES += resources.qrc
 
 DEFINES += SHAREDIMLIB_LIBRARY_EXPORT
 
+
+!build_pass:CONFIG(debug, debug|release|debug_and_release|build_all) {
+    message(Debug Build!)
+    DEFINES += DEBUG __DEBUG__
+}else{
+    message( "Release Build! No qDebug() output." )
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
+
 # ##
 unix:target.path += /usr/lib
 win32:target.path += %windir%/system32

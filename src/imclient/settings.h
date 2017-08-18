@@ -83,6 +83,9 @@ public:
 
     void setCurrentUser(const QString &userID);
 
+
+
+
     //	virtual void restoreState( QMainWindow* );
     //	virtual void saveState( QMainWindow* );
     //
@@ -98,6 +101,8 @@ private:
     //ResourcesManager *resourcesManager;
 
     QString m_currentUserID;
+
+
 
 };
 

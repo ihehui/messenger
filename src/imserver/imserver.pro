@@ -77,6 +77,14 @@ win32 {
 
 DEFINES += SERVERLIB_LIBRARY_EXPORT
 
+!build_pass:CONFIG(debug, debug|release|debug_and_release|build_all) {
+    message(Debug Build!)
+    DEFINES += DEBUG __DEBUG__
+}else{
+    message( "Release Build! No qDebug() output." )
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
 
 # ##
 unix:target.path += /usr/lib

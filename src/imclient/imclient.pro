@@ -157,6 +157,15 @@ RESOURCES += resources/images/emoticons/emoticons.qrc \
 
 INCLUDEPATH += chatwindow
 
+
+!build_pass:CONFIG(debug, debug|release|debug_and_release|build_all) {
+    message(Debug Build!)
+    DEFINES += DEBUG __DEBUG__
+}else{
+    message( "Release Build! No qDebug() output." )
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
 # win32:RC_FILE = iconresource.rc
 #win32:APP_ICON = resources/images/app.ico
 win32:RC_ICONS = resources/images/app.ico
@@ -166,6 +175,7 @@ mac:ICON = ./resources/images/app.icns
 unix:target.path += ../bin
 win32:target.path += %windir%/system32
 INSTALLS += target
+
 
 # define some usefull values
 # QMAKE_TARGET_COMPANY	= "He Hui"
