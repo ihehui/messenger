@@ -100,6 +100,47 @@ quint32 IMUserBase::defaultBlacklistContactGroupID()
     return ContactGroupBase::Group_Blacklist_ID;
 }
 
+void IMUserBase::setFileServerAddress(const QHostAddress &lanAddress, const QHostAddress &wanAddress)
+{
+    m_fileServerLANAddress = lanAddress;
+    m_fileServerWANAddress = wanAddress;
+}
+
+void IMUserBase::getFileServerAddress(QHostAddress *lanAddress, QHostAddress *wanAddress)
+{
+    if(lanAddress){
+        *lanAddress = m_fileServerLANAddress;
+    }
+
+    if(wanAddress){
+        *wanAddress = m_fileServerWANAddress;
+    }
+
+}
+
+void IMUserBase::setFileServerPort(quint16 tcpPort, quint16 rtpPort, quint16 wanPort)
+{
+    m_fileServerTCPPort = tcpPort;
+    m_fileServerRTPPort = rtpPort;
+    m_fileServerWANPort = wanPort;
+
+    emit signalFileServerPortUpdated();
+}
+
+void IMUserBase::getFileServerPort(quint16 *tcpPort, quint16 *rtpPort, quint16 *wanPort)
+{
+    if(tcpPort){
+        *tcpPort = m_fileServerTCPPort;
+    }
+
+    if(rtpPort){
+        *rtpPort = m_fileServerRTPPort;
+    }
+
+    if(wanPort){
+        *wanPort = m_fileServerWANPort;
+    }
+}
 
 void IMUserBase::init()
 {
@@ -148,6 +189,12 @@ void IMUserBase::init()
 
     m_socketID = INVALID_SOCK_ID;
 
+
+    m_fileServerLANAddress = QHostAddress::Null;
+    m_fileServerTCPPort = 0;
+    m_fileServerRTPPort = 0;
+    m_fileServerWANAddress = QHostAddress::Null;
+    m_fileServerWANPort = 0;
 
 }
 

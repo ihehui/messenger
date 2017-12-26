@@ -51,7 +51,7 @@ signals:
     void signalSendUploadingFileRequest(const QString &filePath, const QByteArray &fileMD5, bool offline = false);
     void signalCancelSendingUploadingFileRequest(const QByteArray &fileMD5);
     void signalAbortFileTransmission(const QByteArray &fileMD5);
-    void signalAcceptPeerUploadFileRequest(const QByteArray &fileMD5, const QString &localSavePath);
+    void signalAcceptPeerUploadFileRequest(const QByteArray &fileMD5, qint64 size, const QString &localSavePath);
     void signalDeclinePeerUploadFileRequest(const QByteArray &fileMD5);
 
 public slots:

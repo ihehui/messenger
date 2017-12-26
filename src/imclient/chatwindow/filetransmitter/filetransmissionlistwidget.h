@@ -50,7 +50,7 @@ public slots:
 
     void slotCancelSendingFileRequest(const QByteArray &fileMD5);
     void slotAbortFileTransmission(const QByteArray &fileMD5);
-    void slotAcceptFileRequest(const QByteArray &fileMD5, const QString &localSavePath);
+    void slotAcceptFileRequest(const QByteArray &fileMD5, qint64 size, const QString &localSavePath);
     void slotDeclineFileRequest(const QByteArray &fileMD5);
 
     void updateFileTransmissionProgress(const QByteArray &fileMD5, int percent);

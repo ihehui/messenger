@@ -40,27 +40,14 @@ namespace HEHUI
 ClientFileTransmissionPacketsParser::ClientFileTransmissionPacketsParser(const QString &myID, QObject *parent)
     : FileTransmissionPacketsParserBase(myID, parent)
 {
-
     m_socketConnectedToServer = INVALID_SOCK_ID;
-
-
 }
 
 ClientFileTransmissionPacketsParser::~ClientFileTransmissionPacketsParser()
 {
     // TODO Auto-generated destructor stub
-
-
-
-
 }
 
-int ClientFileTransmissionPacketsParser::connectToServer()
-{
-    IMUser *myself = IMUser::instance();
-    m_socketConnectedToServer = connectToPeer(QHostAddress(myself->getFileServerAddress()), myself->getFileServerPort());
-    return m_socketConnectedToServer;
-}
 
 
 

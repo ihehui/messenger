@@ -39,7 +39,7 @@
 
 
 #include "../sharedim/constants_global_shared.h"
-#include "../sharedim/filetransmitter/filetransmissionpacketsparser.h"
+#include "../sharedim/filetransmitter/filetransmissionpacketsparserbase.h"
 
 
 #include "../networkmanager/clientresourcesmanager.h"
@@ -65,7 +65,6 @@ public:
 
 
 public slots:
-    int connectToServer();
 
 //    virtual void parseOtherIncomingPacketData(Packet *packet);
 

@@ -30,50 +30,11 @@ ResourcesManager::ResourcesManager(QObject *parent)
     : QObject(parent)
 {
 
+//    m_myID = "";
 
-    //注册自定义类型，必须重载“<<”和“>>”, 见"packetstreamoperator.h"
-    //if(!QMetaType::isRegistered(QMetaType::type("HEHUI::Packet"))){
-    //    qRegisterMetaTypeStreamOperators<HEHUI::Packet>("HEHUI::Packet");
-    //}
+    m_networkManager = new NetworkManagerBase(this);
 
-
-
-
-    qRegisterMetaType<QHostAddress>("QHostAddress");
-
-    qRegisterMetaType<SOCKETID>("SOCKETID");
-
-    qRegisterMetaType<PacketBase>("PacketBase");
-    qRegisterMetaType<ServerDiscoveryPacket>("ServerDiscoveryPacket");
-    qRegisterMetaType<DataForwardPacket>("DataForwardPacket");
-    qRegisterMetaType<AnnouncementPacket>("AnnouncementPacket");
-    qRegisterMetaType<RgeistrationPacket>("RgeistrationPacket");
-    qRegisterMetaType<UpdatePasswordPacket>("UpdatePasswordPacket");
-    qRegisterMetaType<LoginPacket>("LoginPacket");
-    qRegisterMetaType<OnlineStateChangedPacket>("OnlineStateChangedPacket");
-    qRegisterMetaType<OnlineContacts>("OnlineContacts");
-    qRegisterMetaType<ContactGroupsInfoPacket>("ContactGroupsInfoPacket");
-    qRegisterMetaType<InterestGroupsInfoPacket>("InterestGroupsInfoPacket");
-    qRegisterMetaType<ContactInfoPacket>("ContactInfoPacket");
-    qRegisterMetaType<SearchInfoPacket>("SearchInfoPacket");
-    qRegisterMetaType<ChatMessagePacket>("ChatMessagePacket");
-    qRegisterMetaType<CaptchaInfoPacket>("CaptchaInfoPacket");
-    qRegisterMetaType<FileTransferPacket>("FileTransferPacket");
-
-
-
-    networkType = LAN;
-    communicationMode = P2P;
-
-    m_ipmcServer = 0;
-    m_udpServer = 0;
-//    udtProtocol = new UDTProtocol(true, 0, this);
-//    m_tcpServer = new TCPServer(this);
-
-    m_rtp = new RTP(this);
-
-    m_fileManager = 0;
-
+    m_fileTransmissionManager = 0;
 
 }
 
@@ -82,138 +43,22 @@ ResourcesManager::~ResourcesManager()
 
     qDebug() << "ResourcesManager::~ResourcesManager()";
 
-    if(m_ipmcServer) {
-        m_ipmcServer->close();
-        delete m_ipmcServer;
-        m_ipmcServer = 0;
+    if(m_networkManager){
+        delete m_networkManager;
     }
 
 
-    if(m_udpServer) {
-        m_udpServer->close();
-        delete m_udpServer;
-        m_udpServer = 0;
-    }
-
-    if(m_rtp) {
-        delete m_rtp;
-        m_rtp = 0;
-    }
-
-    if(m_fileManager) {
-        m_fileManager->exit();
-        delete m_fileManager;
-        m_fileManager = 0;
+    if(m_fileTransmissionManager){
+        delete m_fileTransmissionManager;
     }
 
 }
 
-void ResourcesManager::setNetworkType(NetworkType type)
+NetworkManagerBase * ResourcesManager::getNetworkManager()
 {
-    this->networkType = type;
-
+    return m_networkManager;
 }
 
-ResourcesManager::NetworkType ResourcesManager::getNetworkType() const
-{
-    return this->networkType;
-
-}
-
-void ResourcesManager::setCommunicationMode(CommunicationMode mode)
-{
-    this->communicationMode = mode;
-
-}
-
-ResourcesManager::CommunicationMode ResourcesManager::getCommunicationMode() const
-{
-    return this->communicationMode;
-
-}
-
-
-UDPServer *ResourcesManager::startIPMCServer(const QHostAddress &ipmcGroupAddress, quint16 ipmcGroupPort, QString *errorMessage)
-{
-
-
-    if(!m_ipmcServer) {
-        m_ipmcServer = new UDPServer(this);
-    }
-
-    if (m_ipmcServer->startIPMulticastListening(ipmcGroupAddress, ipmcGroupPort)) {
-        return m_ipmcServer;
-    } else {
-        if(errorMessage) {
-            *errorMessage = m_ipmcServer->errorString();
-        }
-
-        delete m_ipmcServer;
-        m_ipmcServer = 0;
-
-        return 0;
-    }
-
-    return m_ipmcServer;
-
-}
-
-UDPServer *ResourcesManager::startUDPServer(const QHostAddress &address, quint16 startPort, bool tryOtherPort, QString *errorMessage)
-{
-
-    if(!m_udpServer) {
-        m_udpServer = new UDPServer(this);
-    }
-
-    if((startPort != 0) && m_udpServer->localPort() == startPort) {
-        return m_udpServer;
-    }
-
-    if (m_udpServer->startSimpleListening(address, startPort)) {
-        return m_udpServer;
-    } else {
-        if(tryOtherPort) {
-            if (m_udpServer->startSimpleListening(address, 0)) {
-                return m_udpServer;
-            }
-        }
-
-        if(errorMessage) {
-            *errorMessage = m_udpServer->errorString();
-        }
-        delete m_udpServer;
-        m_udpServer = 0;
-
-        return 0;
-    }
-
-    return m_udpServer;
-
-}
-
-//UDTProtocol * ResourcesManager::startUDTProtocol(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage){
-
-//    if(!udtProtocol){
-//        udtProtocol = new UDTProtocol(true, 0, this);
-//    }
-
-//    UDTSOCKET socket = udtProtocol->listen(localPort, localAddress);
-//    if(socket == UDTProtocolBase::INVALID_UDT_SOCK && tryOtherPort){
-//        socket = udtProtocol->listen();
-//    }
-
-//    if(socket == UDTProtocolBase::INVALID_UDT_SOCK){
-//        if(errorMessage){
-//            *errorMessage = udtProtocol->getLastErrorMessage();
-//        }
-//        delete udtProtocol;
-//        udtProtocol = 0;
-//        return 0;
-//    }
-
-//    return udtProtocol;
-
-//}
 
 //TCPServer * ResourcesManager::startTCPServer(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage){
 
@@ -247,46 +92,29 @@ UDPServer *ResourcesManager::startUDPServer(const QHostAddress &address, quint16
 //}
 
 
-RTP *ResourcesManager::getRTP()
-{
-    return m_rtp;
-}
 
-RTP *ResourcesManager::startRTP(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage)
+
+bool ResourcesManager::initFileTransmission(const QString &myID)
 {
 
-    if(!m_rtp) {
-        m_rtp = new RTP(this);
+    if(!m_fileTransmissionManager) {
+        m_fileTransmissionManager = new FileTransmissionManagerBase(myID, this);
     }
 
-    m_rtp->startServers(localAddress, localPort, tryOtherPort, errorMessage);
-    return m_rtp;
-
+    return true;
 }
 
-FileManager *ResourcesManager::getFileManager()
+FileTransmissionManagerBase * ResourcesManager::getFileTransmissionManager()
 {
-
-    if(!m_fileManager) {
-        m_fileManager = new FileManager(this);
-    }
-    m_fileManager->start(QThread::LowestPriority);
-
-    return m_fileManager;
-
+    return m_fileTransmissionManager;
 }
 
-void ResourcesManager::stopFileManager()
+void ResourcesManager::getFileTransmissionServerPorts(quint16 *udpPort, quint16 *tcpPort, quint16 *rtpPort)
 {
-    if(!m_fileManager) {
-        return;
+    if(m_fileTransmissionManager){
+        m_fileTransmissionManager->getServerPorts(udpPort, tcpPort, rtpPort);
     }
-
-    m_fileManager->quit();
-    delete m_fileManager;
-    m_fileManager = 0;
 }
-
 
 
 

@@ -25,6 +25,8 @@ ProgressInfoWidget::ProgressInfoWidget(FileTransmissionListWidget *wgt, QWidget 
 
     Q_ASSERT(wgt);
 
+    m_fileSize = 0;
+
 }
 
 ProgressInfoWidget::~ProgressInfoWidget()
@@ -40,10 +42,11 @@ void ProgressInfoWidget::requestToSendFile(const QString &filePath, const QByteA
 
     QFileInfo info(filePath);
     qint64 size = info.size();
+    m_fileSize = size;
 
     ui->stackedWidget->setCurrentWidget(ui->pageWaitingForSending);
-    ui->labelStatus->setText(tr("Send File Request: %1").arg(getFileSizeString(size)));
     ui->labelFileName->setText(info.fileName());
+    ui->labelStatus->setText(tr("Send File Request: %1").arg(getFileSizeString(size)));
     ui->labelFileName->setToolTip(filePath);
 
     qDebug() << "---------------MD5:" << fileMD5.toHex();
@@ -55,6 +58,7 @@ void ProgressInfoWidget::requestToReceiveFile(const QString &fileName, qint64 si
     m_sendingMode = false;
     m_filePath = fileName;
     m_fileMD5 = fileMD5;
+    m_fileSize = size;
 
     ui->stackedWidget->setCurrentWidget(ui->pageWaitingForReceiving);
     ui->labelStatus->setText(tr("Accept File Request: %1").arg(getFileSizeString(size)));
@@ -95,7 +99,7 @@ void ProgressInfoWidget::on_toolButtonAbort_clicked()
 void ProgressInfoWidget::on_pushButtonAccept_clicked()
 {
 //    emit acceptFileRequest(m_fileMD5, "");
-    listWidget->slotAcceptFileRequest(m_fileMD5, "");
+    listWidget->slotAcceptFileRequest(m_fileMD5, m_fileSize, "");
 }
 
 void ProgressInfoWidget::on_pushButtonSaveAs_clicked()
@@ -106,7 +110,7 @@ void ProgressInfoWidget::on_pushButtonSaveAs_clicked()
                                                    );
     if(!fileName.isEmpty()) {
 //        emit acceptFileRequest(m_fileMD5, fileName);
-        listWidget->slotAcceptFileRequest(m_fileMD5, fileName);
+        listWidget->slotAcceptFileRequest(m_fileMD5, m_fileSize, fileName);
     }
 
 }

@@ -6,7 +6,7 @@
 #include "clientfiletransmissionpacketsparser.h"
 
 #include "../../../sharedim/filemanager.h"
-#include "../../../sharedim/filetransmitter/filetransmissionmanager.h"
+#include "../../../sharedim/filetransmitter/filetransmissionmanagerbase.h"
 
 #include "HHSharedCore/hsingleton.h"
 
@@ -19,7 +19,7 @@ class ClientFileTransmissionManager : public FileTransmissionManagerBase
     Q_OBJECT
 
 public:
-    explicit ClientFileTransmissionManager(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent = 0);
+    explicit ClientFileTransmissionManager(const QString &myID, QObject *parent = 0);
 
 
 private slots:

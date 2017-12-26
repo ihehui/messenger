@@ -10,8 +10,8 @@ namespace HEHUI
 {
 
 
-ServerFileTransmissionManager::ServerFileTransmissionManager(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent) :
-    FileTransmissionManagerBase(myID, fileTransmissionPacketsParser, parent)
+ServerFileTransmissionManager::ServerFileTransmissionManager(const QString &myID, QObject *parent) :
+    FileTransmissionManagerBase(myID, parent)
 {
 
 

@@ -68,10 +68,11 @@ signals:
 
     //FILE TX
     void signalRequestFileServerInfo();
-    void signalSendUploadingFileRequest(Contact *contact, const QString &filePath, const QByteArray &fileMD5);
-    void signalCancelSendingFileUploadingRequest(Contact *contact, const QByteArray &fileMD5);
+    void signalResponseFileServerInfo(quint32 lanAddress, quint16 tcpPort, quint16 rtpPort);
+//    void signalSendUploadingFileRequest(Contact *contact, const QString &filePath, const QByteArray &fileMD5);
+//    void signalCancelSendingFileUploadingRequest(Contact *contact, const QByteArray &fileMD5);
     //void signalAbortFileTransmission(const QString &fileMD5);
-    void signalAcceptPeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5, const QString &localSavePath);
+//    void signalAcceptPeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5, const QString &localSavePath);
     void signalDeclinePeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5);
 
 //    void signalCancelSendingFileRequest(const QString &fileMD5);
@@ -116,10 +117,11 @@ private slots:
     void switchToSeparatedView();
 
     //File TX
+    void processFileTransferPacket(const FileTransferPacket &packet);
     void sendUploadingFileRequest(const QString &filePath, const QByteArray &fileMD5, bool offline);
     void cancelSendingFileRequest(const QByteArray &fileMD5);
     void abortFileTransmission(const QByteArray &fileMD5);
-    void acceptPeerUploadFileRequest(const QByteArray &fileMD5, const QString &localSavePath);
+    void acceptPeerUploadFileRequest(const QByteArray &fileMD5, qint64 size, const QString &localSavePath);
     void declineFileRequest(const QByteArray &fileMD5);
 
 
@@ -155,8 +157,7 @@ private:
 //    QSize m_preferedSize;
 
 
-    ClientFileTransmissionManager *m_fileTransmissionManager;
-    ClientFileTransmissionPacketsParser *m_fileTransmissionPacketsParser;
+    FileTransmissionManagerBase *m_fileTransmissionManager;
     int m_socketConnectedToServer;
 //    QHostAddress serverAddress;
 //    quint16 serverPort;

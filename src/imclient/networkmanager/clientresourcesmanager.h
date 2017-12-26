@@ -12,6 +12,8 @@
 
 #include "../../sharedim/resourcesmanager.h"
 
+#include "filetransmitter/clientfiletransmissionmanager.h"
+
 
 #include "HHSharedCore/huser.h"
 #include "HHSharedCore/hsingleton.h"
@@ -32,6 +34,7 @@ public:
     virtual ~ClientResourcesManager();
 
 
+    void setForwardServerAddressInfo(const QHostAddress &address, quint16 tcpPort, quint16 rtpPort);
 
 signals:
 
@@ -42,9 +45,14 @@ public slots:
 
 
 private slots:
+//    bool initFileTransmission();
 
 private:
 
+
+    QHostAddress m_forwardServerAddress;
+    quint16 m_forwardServerTCPPort;
+    quint16 m_forwardServerRTPPort;
 
 
 };

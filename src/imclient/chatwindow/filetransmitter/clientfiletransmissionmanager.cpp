@@ -10,8 +10,8 @@ namespace HEHUI
 {
 
 
-ClientFileTransmissionManager::ClientFileTransmissionManager(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent) :
-    FileTransmissionManagerBase(myID, fileTransmissionPacketsParser, parent)
+ClientFileTransmissionManager::ClientFileTransmissionManager(const QString &myID, QObject *parent) :
+    FileTransmissionManagerBase(myID, parent)
 {
 
 
@@ -24,6 +24,8 @@ void ClientFileTransmissionManager::processPeerRequestUploadFilePacket(int socke
     //TODO
 
 }
+
+
 
 
 

@@ -544,6 +544,19 @@ public slots:
         return m_rtp->sendReliableData(serverSocketID, &ba);
     }
 
+    bool responseFileServerInfo(SOCKETID socketID, quint32 address, quint16 tcpPort, quint16 rtpPort)
+    {
+        FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, sessionEncryptionKey);
+        packet.ContactID = m_myUserID;
+        packet.FileServerInfo.request = false;
+        packet.FileServerInfo.lanAddress = address;
+        packet.FileServerInfo.tcpPort = tcpPort;
+        packet.FileServerInfo.rtpPort = rtpPort;
+
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
+    }
+
 
 
 

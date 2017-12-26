@@ -367,22 +367,23 @@ const FileManager::FileMetaInfo *FileManager::tryToSendFile( const QString &loca
 
 }
 
-const FileManager::FileMetaInfo *FileManager::tryToReceiveFile(QByteArray fileMD5Sum, const QString &localSavePath, quint64 size, QString *errorString/*, int pieceLength*/)
+const FileManager::FileMetaInfo *FileManager::tryToReceiveFile(QByteArray fileMD5Sum, const QString &localSavePath, quint64 size, quint8 *errorCode/*, int pieceLength*/)
 {
 
-    Q_ASSERT(errorString);
+    Q_ASSERT(errorCode);
 
     QString tempFilePath = localSavePath + SUFFIX_TEMP_FILE;
     QString infoFilePath = localSavePath + SUFFIX_INFO_FILE;
 
     QFileInfo fi(localSavePath);
     if(fi.exists()) {
-        *errorString = tr("File '%1' already exists!").arg(localSavePath);
+        *errorCode = ERROR_FILE_EXIST;
         //emit error(ERROR_FILE_EXIST, errString);
         return 0;
     } else {
         if(!fi.dir().mkpath(fi.absolutePath())) {
-            *errorString = tr("Can not create directory '%1'!").arg(fi.absolutePath());
+            *errorCode = DIR_CREATION_ERROR;
+            //*errorString = tr("Can not create directory '%1'!").arg(fi.absolutePath());
             return 0;
         }
     }
@@ -394,7 +395,8 @@ const FileManager::FileMetaInfo *FileManager::tryToReceiveFile(QByteArray fileMD
                 if(metaInfo->md5sum == fileMD5Sum ) {
                     return metaInfo;
                 } else {
-                    *errorString = tr("File '%1' is in use!").arg(localSavePath);
+                    *errorCode = ERROR_FILE_IN_USE;
+                    //*errorString = tr("File '%1' is in use!").arg(localSavePath);
                     //emit error(ERROR_FILE_EXIST, errString);
                     return 0;
                 }
@@ -404,7 +406,8 @@ const FileManager::FileMetaInfo *FileManager::tryToReceiveFile(QByteArray fileMD
 
     QFile *file = new QFile(tempFilePath);
     if (!file->open(QFile::ReadWrite)) {
-        *errorString = tr("Failed to open/create file %1: %2").arg(file->fileName()).arg(file->errorString());
+        *errorCode = FILE_READ_ERROR;
+        //*errorString = tr("Failed to open/create file %1: %2").arg(file->fileName()).arg(file->errorString());
         //emit error(FILE_READ_ERROR, errString);
         delete file;
         return 0;
@@ -417,7 +420,8 @@ const FileManager::FileMetaInfo *FileManager::tryToReceiveFile(QByteArray fileMD
     if(oldMD5 != fileMD5Sum || oldSize != size || file->size() == 0) {
         file->resize(0);
         if (!file->resize(size)) {
-            *errorString = tr("Failed to resize file %1: %2").arg(file->fileName()).arg(file->errorString());
+            *errorCode = FILE_WRITE_ERROR;
+            //*errorString = tr("Failed to resize file %1: %2").arg(file->fileName()).arg(file->errorString());
             //emit error(FILE_WRITE_ERROR, errString);
             delete file;
             return 0;

@@ -36,7 +36,7 @@
 #include <QtCore>
 #include <QObject>
 #include <QStringList>
-
+#include <QHostAddress>
 
 #include "constants_global_shared.h"
 #include "sharedimlib.h"
@@ -268,6 +268,14 @@ public:
     }
 
 
+    void setFileServerAddress(const QHostAddress &lanAddress, const QHostAddress &wanAddress);
+    void getFileServerAddress(QHostAddress *lanAddress, QHostAddress *wanAddress);
+    void setFileServerPort(quint16 tcpPort, quint16 rtpPort, quint16 wanPort);
+    void getFileServerPort(quint16 *tcpPort, quint16 *rtpPort, quint16 *wanPort);
+
+
+signals:
+    void signalFileServerPortUpdated();
 
 
 private:
@@ -374,7 +382,11 @@ private:
 
     int m_socketID;
 
-
+    QHostAddress m_fileServerLANAddress;
+    quint16 m_fileServerTCPPort;
+    quint16 m_fileServerRTPPort;
+    QHostAddress m_fileServerWANAddress;
+    quint16 m_fileServerWANPort;
 
 };
 

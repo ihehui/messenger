@@ -39,7 +39,7 @@
 
 
 #include "../sharedim/constants_global_shared.h"
-#include "../sharedim/filetransmitter/filetransmissionpacketsparser.h"
+#include "../sharedim/filetransmitter/filetransmissionpacketsparserbase.h"
 
 #include "../sharedim/resourcesmanagerinstance.h"
 #include "../usersmanager/userinfo.h"

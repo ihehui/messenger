@@ -30,7 +30,6 @@ ChatWindowManager::ChatWindowManager(QWidget *parent)
     //    m_preferedSize = size();
 
     m_fileTransmissionManager = 0;
-    m_fileTransmissionPacketsParser = 0;
     m_socketConnectedToServer = INVALID_SOCK_ID;
 
 
@@ -933,6 +932,131 @@ void ChatWindowManager::switchToSeparatedView()
     switchChatWindowDisplayStyle(SeparatedChatWindow);
 }
 
+void ChatWindowManager::processFileTransferPacket(const FileTransferPacket &packet)
+{
+    FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
+    switch (infoType) {
+    case FileTransferPacket::FT_FILE_SERVER_INFO: {
+        bool request = packet.FileServerInfo.request;
+        QHostAddress lanAddress = QHostAddress(packet.FileServerInfo.lanAddress);
+        quint16 tcpPort = packet.FileServerInfo.tcpPort;
+        quint16 rtpPort = packet.FileServerInfo.rtpPort;
+        QHostAddress wanAddress = QHostAddress(packet.FileServerInfo.wanAddress);
+        quint16 wanPort = packet.FileServerInfo.wanPort;
+
+        if(request){
+            if(!initFileTransmission()) {
+                qCritical()<<"Failed to init file transmission!";
+                return;
+            }
+
+            ClientResourcesManager::instance()->getFileTransmissionServerPorts(0, &tcpPort, &rtpPort);
+
+            QList<QHostAddress> list =  NetworkUtilities::validIPAddresses();
+            Q_ASSERT(list.size());
+            //TODO
+            emit signalResponseFileServerInfo(list.first().toIPv4Address(), tcpPort, rtpPort);
+
+        }else{
+            if(packet.ContactID.isEmpty()){
+                if(wanAddress.isNull()) {
+                    wanAddress = IMUser::instance()->getLoginServerAddress();
+                }
+                ClientResourcesManager::instance()->setForwardServerAddressInfo(wanAddress, tcpPort, rtpPort);
+            }else{
+                QString contactID = packet.getPeerID();
+                Contact *contact = ContactsManager::instance()->getUser(contactID);
+                if(!contact){
+                    qCritical()<<QString("No such contact '%1'!").arg(contactID);
+                    return;
+                }
+                contact->setFileServerAddress(lanAddress, wanAddress);
+                contact->setFileServerPort(tcpPort, rtpPort, wanPort);
+            }
+
+        }
+
+
+    }
+    break;
+
+    case FileTransferPacket::FT_FileSystemInfoRequest: {
+        //in >> FileSystemInfoRequest.parentDirPath;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileSystemInfoResponse: {
+        //in >> FileSystemInfoResponse.baseDirPath >> FileSystemInfoResponse.fileSystemInfoData;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDeletingRequest: {
+        //in >> FileDeletingRequest.baseDirPath >> FileDeletingRequest.files;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDeletingResponse: {
+        //in >> FileDeletingResponse.baseDirPath >> FileDeletingResponse.failedFiles;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileRenamingRequest: {
+        //in >> FileRenamingRequest.baseDirPath >> FileRenamingRequest.oldFileName >> FileRenamingRequest.newFileName;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileRenamingResponse: {
+        //in >> FileRenamingResponse.baseDirPath >> FileRenamingResponse.oldFileName >> FileRenamingResponse.renamed >> FileRenamingResponse.message;
+    }
+    break;
+
+    case FileTransferPacket::FileTransferPacket::FT_FileDownloadingRequest: {
+        //in >> FileDownloadingRequest.baseDir >> FileDownloadingRequest.fileName >> FileDownloadingRequest.dirToSaveFile;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDownloadingResponse: {
+        //in >> FileDownloadingResponse.accepted >> FileDownloadingResponse.baseDir >> FileDownloadingResponse.fileName >> FileDownloadingResponse.fileMD5Sum >> FileDownloadingResponse.size >> FileDownloadingResponse.errorCode;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileUploadingRequest: {
+        //in >> FileUploadingRequest.fileName >> FileUploadingRequest.fileMD5Sum >> FileUploadingRequest.size >> FileUploadingRequest.fileSaveDir;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileUploadingResponse: {
+        //in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileDataRequest: {
+        //in >> FileDataRequest.fileMD5 >> FileDataRequest.startPieceIndex >> FileDataRequest.endPieceIndex;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileData: {
+        //in >> FileDataResponse.fileMD5 >> FileDataResponse.pieceIndex >> FileDataResponse.data >> FileDataResponse.pieceMD5;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileTXStatus: {
+        //in >> FileTXStatus.fileMD5 >> FileTXStatus.status;
+    }
+    break;
+
+    case FileTransferPacket::FT_FileTXError: {
+        //in >> FileTXError.fileName >> FileTXError.fileMD5 >> FileTXError.errorCode >> FileTXError.message;
+    }
+    break;
+
+    default:
+        break;
+    }
+
+
+}
+
 void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const QByteArray &fileMD5, bool offline)
 {
 
@@ -941,6 +1065,8 @@ void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const 
         return;
     }
     Contact *contact = wgt->contact();
+    int socketID = INVALID_SOCK_ID;
+
     //TODO
 
     if(offline) {
@@ -964,12 +1090,29 @@ void ChatWindowManager::sendUploadingFileRequest(const QString &filePath, const 
 
         //            }
         //        }
-        QFileInfo info(filePath);
-        m_fileTransmissionPacketsParser->requestUploadFile(m_socketConnectedToServer, fileMD5, info.fileName(), info.size());
 
-    } else {
-        emit signalSendUploadingFileRequest(contact, filePath, fileMD5);
+
+//        QFileInfo info(filePath);
+//        m_fileTransmissionPacketsParser->requestUploadFile(m_socketConnectedToServer, fileMD5, info.fileName(), info.size());
+
+
+
+        socketID = m_socketConnectedToServer;
+
     }
+    else {
+//        emit signalSendUploadingFileRequest(contact, filePath, fileMD5);
+
+        socketID = contact->getSocketID();
+    }
+
+
+
+
+    QFileInfo info(filePath);
+//    m_fileTransmissionPacketsParser->requestUploadFile(socketID, fileMD5, info.fileName(), info.size());
+
+    m_fileTransmissionManager->requestUploadFilesToPeer(socketID, contact->getUserID(), info.absoluteDir().absolutePath(), QStringList()<<info.fileName(), "");
 
 }
 
@@ -982,7 +1125,7 @@ void ChatWindowManager::cancelSendingFileRequest(const QByteArray &fileMD5)
     }
     Contact *contact = wgt->contact();
 
-    emit signalCancelSendingFileUploadingRequest(contact, fileMD5);
+    m_fileTransmissionManager->cancelUploadFileRequest(contact->getSocketID(), contact->getUserID(), fileMD5);
 
 }
 
@@ -995,13 +1138,12 @@ void ChatWindowManager::abortFileTransmission(const QByteArray &fileMD5)
     }
     Contact *contact = wgt->contact();
 
-    //m_fileTransmissionManagerBase->abortFileTransmission();
 
-    //TODO
+    m_fileTransmissionManager->abortFileTransmission(contact->getSocketID(), contact->getUserID(), fileMD5);
 
 }
 
-void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, const QString &localSavePath)
+void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, qint64 size, const QString &localSavePath)
 {
 
     ContactChatWidget *wgt = qobject_cast<ContactChatWidget *>(sender());
@@ -1010,11 +1152,10 @@ void ChatWindowManager::acceptPeerUploadFileRequest(const QByteArray &fileMD5, c
     }
     Contact *contact = wgt->contact();
 
-    emit signalAcceptPeerUploadFileRequest(contact, fileMD5, localSavePath);
+//    emit signalAcceptPeerUploadFileRequest(contact, fileMD5, localSavePath);
 
 
-
-
+    m_fileTransmissionManager->acceptFileUploadRequest(contact->getSocketID(), contact->getUserID(), fileMD5, size, localSavePath);
 
 }
 
@@ -1100,7 +1241,7 @@ ContactChatWidget *ChatWindowManager::createContactChatWindow(Contact *contact)
     connect(contactChatWindow, SIGNAL(signalSendUploadingFileRequest(const QString &, const QByteArray &, bool)), this, SLOT(sendUploadingFileRequest(const QString &, const QByteArray &, bool)) );
     connect(contactChatWindow, SIGNAL(signalCancelSendingUploadingFileRequest(const QByteArray &)), this, SLOT(cancelSendingFileRequest(const QByteArray &)) );
     connect(contactChatWindow, SIGNAL(signalAbortFileTransmission(const QByteArray &)), this, SLOT(abortFileTransmission(const QByteArray &)) );
-    connect(contactChatWindow, SIGNAL(signalAcceptPeerUploadFileRequest(const QByteArray &, const QString &)), this, SLOT(acceptPeerUploadFileRequest(const QByteArray &, const QString &)) );
+    connect(contactChatWindow, SIGNAL(signalAcceptPeerUploadFileRequest(const QByteArray &, qint64, const QString &)), this, SLOT(acceptPeerUploadFileRequest(const QByteArray &, qint64, const QString &)) );
     connect(contactChatWindow, SIGNAL(signalDeclinePeerUploadFileRequest(const QByteArray &)), this, SLOT(declineFileRequest(const QByteArray &)) );
 
 
@@ -1230,44 +1371,47 @@ GroupChatWindow *ChatWindowManager::findInterestGroupChatTabWidget(InterestGroup
 bool ChatWindowManager::initFileTransmission()
 {
 
-    if(!m_fileTransmissionPacketsParser) {
-
+    if(!m_fileTransmissionManager) {
         IMUser *myself = IMUser::instance();
         QString myID = myself->getUserID();
 
-        //TODO:Get File Server Info
-        emit signalRequestFileServerInfo();
+        ClientResourcesManager::instance()->initFileTransmission(myID);
+        m_fileTransmissionManager = ClientResourcesManager::instance()->getFileTransmissionManager();
 
-        int n = 0;
-        while (myself->getFileServerPort() == 0) {
-            Utilities::msleep(500);
-            qApp->processEvents();
 
-            n++;
-            if(10 == n) {
-                QMessageBox::critical(this, tr("Error"), tr("Timeout! Can not get file server info!"));
-                return false;
-            }
-        }
 
-        m_fileTransmissionPacketsParser = new ClientFileTransmissionPacketsParser(myID, this);
-        m_fileTransmissionManager = new ClientFileTransmissionManager(myID, m_fileTransmissionPacketsParser, this);
+
+//        //TODO:Get File Server Info
+//        emit signalRequestFileServerInfo();
+
+//        int n = 0;
+//        while (myself->getFileServerPort() == 0) {
+//            Utilities::msleep(500);
+//            qApp->processEvents();
+
+//            n++;
+//            if(10 == n) {
+//                QMessageBox::critical(this, tr("Error"), tr("Timeout! Can not get file server info!"));
+//                return false;
+//            }
+//        }
+
 
     }
 
-    while (m_socketConnectedToServer == INVALID_SOCK_ID) {
-        m_socketConnectedToServer = m_fileTransmissionPacketsParser->connectToServer();
+//    while (m_socketConnectedToServer == INVALID_SOCK_ID) {
+//        m_socketConnectedToServer = m_fileTransmissionPacketsParser->connectToServer();
 
-        if(m_socketConnectedToServer == INVALID_SOCK_ID) {
-            int btn = QMessageBox::critical(this, tr("Connection Failed"), tr("Can not connect to file server!"),
-                                            QMessageBox::Retry | QMessageBox::Cancel,
-                                            QMessageBox::Retry
-                                            );
-            if(btn == QMessageBox::Cancel) {
-                return false;
-            }
-        }
-    }
+//        if(m_socketConnectedToServer == INVALID_SOCK_ID) {
+//            int btn = QMessageBox::critical(this, tr("Connection Failed"), tr("Can not connect to file server!"),
+//                                            QMessageBox::Retry | QMessageBox::Cancel,
+//                                            QMessageBox::Retry
+//                                            );
+//            if(btn == QMessageBox::Cancel) {
+//                return false;
+//            }
+//        }
+//    }
 
 
     return true;

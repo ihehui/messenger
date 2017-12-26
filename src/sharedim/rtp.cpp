@@ -74,8 +74,14 @@ void RTP::startServers(const QHostAddress &localAddress, quint16 localPort, bool
 //        err += " " + m_tcpServer->errorString();
 //    }
 
-    startTCPServer(localAddress, localPort, tryOtherPort, &err);
-    startENETProtocol(localAddress, localPort, tryOtherPort, &err);
+    quint16 preferedPort = localPort;
+
+    startTCPServer(localAddress, preferedPort, tryOtherPort, &err);
+    if(!localPort){
+        preferedPort = m_tcpServer->getTCPServerListeningPort();
+    }
+
+    startENETProtocol(localAddress, preferedPort, tryOtherPort, &err);
 
     if(errorMessage) {
         *errorMessage = err;
@@ -135,7 +141,12 @@ quint16 RTP::getUDTServerPort()
     return 0;
 }
 
-TCPServer *RTP::startTCPServer(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage)
+TCPServer * RTP::getTCPServer()
+{
+    return m_tcpServer;
+}
+
+TCPServer * RTP::startTCPServer(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage)
 {
     //qDebug() << "--RTP::startTCPServer(...)";
 
@@ -175,7 +186,12 @@ quint16 RTP::getTCPServerPort()
     return port;
 }
 
-ENETProtocol *RTP::startENETProtocol(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage)
+ENETProtocol * RTP::getENETProtocol()
+{
+    return m_enetProtocol;
+}
+
+ENETProtocol * RTP::startENETProtocol(const QHostAddress &address, quint16 port, bool tryOtherPort, QString *errorMessage)
 {
 
     if(!m_enetProtocol) {
@@ -445,6 +461,11 @@ bool RTP::sendReliableData(SOCKETID socketID, const QByteArray *byteArray)
 
     return ok;
 
+}
+
+QString RTP::lastErrorString() const
+{
+    return m_lastErrorString;
 }
 
 void RTP::tcpPeerConnected(SOCKETID socketID, const QString &address, quint16 port)

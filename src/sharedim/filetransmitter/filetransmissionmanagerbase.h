@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "filetransmissionpacketsparser.h"
+#include "filetransmissionpacketsparserbase.h"
 
 #include "../filemanager.h"
 
@@ -20,25 +20,29 @@ class SHAREDIMLIB_API FileTransmissionManagerBase : public QObject//, public Sin
     //friend class Singleton<FileTransmissionManagerBase> ;
 
 public:
-    explicit FileTransmissionManagerBase(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent = 0);
+    explicit FileTransmissionManagerBase(const QString &myID, QObject *parent = 0);
     virtual ~FileTransmissionManagerBase();
 
     bool queryFileTransmissionInfo(const QString &peerID, const QByteArray &fileMD5Sum, float *progress, float *speed);
     void setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey);
 
+    void getServerPorts(quint16 *udpPort, quint16 *tcpPort, quint16 *rtpPort);
+
 
 signals:
 
-    //void signalPeerRequestUploadFile(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir);
+    void signalPeerRequestUploadFile(int socketID, const QString &contactID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir);
     void signalPeerCanceledUploadFileRequest(int socketID, const QString &contactID, const QByteArray &fileMD5Sum);
 
-    void signalPeerRequestDownloadFile(int socketID, const QString &contactID, const QString &filePath);
+    void signalPeerRequestDownloadFile(int socketID, const QString &contactID, const QString &baseDir, const QString &fileName);
     void signalPeerCanceledDownloadFileRequest(int socketID, const QString &contactID, const QString &fileName);
 
 
-    void signalFileDownloadRequestAccepted(int socketID, const QString &peerID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size);
-    void signalFileDownloadRequestDenied(int socketID, const QString &contactID, const QString &remoteFileName, const QString &message);
-    void signalFileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, const QString &message);
+    //void signalFileDownloadRequestAccepted(int socketID, const QString &peerID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size);
+    //void signalFileDownloadRequestDenied(int socketID, const QString &contactID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint8 errorCode);
+    void signalFileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, quint8 errorCode);
+    void signalFileDownloadRequestResponsed(int socketID, const QString &peerID, bool accepted, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size, quint8 errorCode);
+
 
     void signalFileTransmissionAborted(int socketID, const QString &peerID, const QByteArray &fileMD5Sum);
     void signalFileTransmissionDone(int socketID, const QString &peerID, const QByteArray &fileMD5Sum);
@@ -74,8 +78,8 @@ private slots:
 
 
     void fileDownloadRequestAccepted(int socketID, const QString &peerID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint64 size);
-    void fileDownloadRequestDenied(int socketID, const QString &peerID, const QString &remoteFileName, const QString &message);
-    void fileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, const QString &message);
+    void fileDownloadRequestDenied(int socketID, const QString &peerID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint8 errorCode);
+    void fileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, quint8 errorCode);
 
 
 
@@ -84,11 +88,12 @@ private slots:
     void startFileManager();
     void stopFileManager();
 
-    virtual void processPeerRequestUploadFilePacket(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir) = 0;
+    virtual void processPeerRequestUploadFilePacket(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir);
     void processPeerCanceledUploadFileRequestPacket(int socketID, const QString &contactID, const QByteArray &fileMD5Sum);
 
     void processPeerRequestDownloadFilePacket(int socketID, const QString &contactID, const QString &fileName);
     void processPeerCanceledDownloadFileRequestPacket(int socketID, const QString &contactID, const QString &fileName);
+
 
     void processFileDataRequestPacket(int socketID, const QString &peerID, const QByteArray &fileMD5, int startPieceIndex, int endPieceIndex);
     void processFileDataReceivedPacket(int socketID, const QString &peerID, const QByteArray &fileMD5, int pieceIndex, const QByteArray &data, const QByteArray &hash);
@@ -111,6 +116,8 @@ private slots:
 
     FileTransmissionInfo *getFileTransmissionInfo(const QString &peerID, const QByteArray &md5);
 
+
+
 private:
 
     enum FileTXStatus {
@@ -128,7 +135,6 @@ private:
     FileTransmissionPacketsParserBase *m_fileTransmissionPacketsParser;
     QTimer *m_idleTimer;
 
-    ResourcesManager *m_resourcesManager;
     FileManager *m_fileManager;
 
 //    QHash<int/*File TX Request ID*/, int/*Socket ID*/> fileTXRequestHash;
@@ -139,6 +145,9 @@ private:
     QMultiHash<QByteArray/*File MD5*/, FileTransmissionInfo *> fileTXInfoHash;
 
     QMultiHash<QString/*Peer ID*/, FileTransmissionInfo *> peerFileTXInfoHash;
+
+
+
 
 
 };

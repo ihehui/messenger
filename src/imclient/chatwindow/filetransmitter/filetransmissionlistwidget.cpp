@@ -93,10 +93,10 @@ void FileTransmissionListWidget::slotAbortFileTransmission(const QByteArray &fil
     slotCloseProgressInfoWidget(fileMD5);
 }
 
-void FileTransmissionListWidget::slotAcceptFileRequest(const QByteArray &fileMD5, const QString &localSavePath)
+void FileTransmissionListWidget::slotAcceptFileRequest(const QByteArray &fileMD5, qint64 size, const QString &localSavePath)
 {
 //    emit acceptFileRequest(fileMD5, localSavePath);
-    emit m_contactChatWidget->signalAcceptPeerUploadFileRequest(fileMD5, localSavePath);
+    emit m_contactChatWidget->signalAcceptPeerUploadFileRequest(fileMD5, size, localSavePath);
 }
 
 void FileTransmissionListWidget::slotDeclineFileRequest(const QByteArray &fileMD5)

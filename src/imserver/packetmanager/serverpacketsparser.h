@@ -54,13 +54,8 @@ class ServerPacketsParser : public QObject, public UsersManager
 {
     Q_OBJECT
 public:
-    ServerPacketsParser(ResourcesManagerInstance *resourcesManager, QObject *parent = 0);
+    ServerPacketsParser(QObject *parent = 0);
     virtual ~ServerPacketsParser();
-
-
-
-
-
 
 
 
@@ -81,7 +76,7 @@ public slots:
         packet.tcpPort = 0;
         packet.serverInstanceID = m_serverInstanceID;
 
-        return m_ipmcServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
+        return m_udpServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
     }
 
     bool forwardData(int peerSocketID, const QByteArray &data, const QByteArray &sessionEncryptionKey)
@@ -106,7 +101,7 @@ public slots:
         packet.AnnouncementInfo.announcementID = id;
         packet.AnnouncementInfo.content = announcement;
 
-        return m_ipmcServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
+        return m_udpServer->sendDatagram(packet.toByteArray(), peerAddress, peerPort);
     }
 
 
@@ -533,11 +528,30 @@ public slots:
         return m_rtp->sendReliableData(peerSocketID, &ba);
     }
 
-    bool responseFileServerInfo(SOCKETID socketID, const QString &serverAddress, quint16 serverPort, const QByteArray &sessionEncryptionKey)
+
+    //File TX
+    bool requestFileServerInfo(SOCKETID socketID, const QByteArray &sessionEncryptionKey)
     {
         FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, sessionEncryptionKey);
-        packet.FileServerInfo.address = serverAddress;
-        packet.FileServerInfo.port = serverPort;
+        packet.ContactID = "";
+        packet.FileServerInfo.request = true;
+        //packet.FileServerInfo.address = "";
+        //packet.FileServerInfo.port = 0;
+
+        QByteArray ba = packet.toByteArray();
+        return m_rtp->sendReliableData(socketID, &ba);
+    }
+    bool responseFileServerInfo(SOCKETID socketID, const QString &contactID, quint32 serverLanAddress, quint16 tcpPort, quint16 rtpPort, quint32 wanAddress, quint16 wanPort, const QByteArray &sessionEncryptionKey)
+    {
+        FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, sessionEncryptionKey);
+        packet.ContactID = contactID;
+        packet.FileServerInfo.request = false;
+        packet.FileServerInfo.lanAddress = serverLanAddress;
+        packet.FileServerInfo.tcpPort = tcpPort;
+        packet.FileServerInfo.rtpPort = rtpPort;
+        packet.FileServerInfo.wanAddress = wanAddress;
+        packet.FileServerInfo.wanPort = wanPort;
+
 
         QByteArray ba = packet.toByteArray();
         return m_rtp->sendReliableData(socketID, &ba);
@@ -666,7 +680,7 @@ private:
     QString m_chatImageCacheDir;
 
 
-    UDPServer *m_ipmcServer;
+    UDPServer *m_udpServer;
     RTP *m_rtp;
 //    UDTProtocol *m_udtProtocol;
     TCPServer *m_tcpServer;

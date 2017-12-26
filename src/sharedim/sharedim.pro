@@ -33,11 +33,12 @@ HEADERS += \
     contactgroupbase.h \
     interestgroupbase.h \
     imgroupbase.h \
-    filetransmitter/filetransmissionmanager.h \
-    filetransmitter/filetransmissionpacketsparser.h \
     resourcesmanagerinstance.h \
     impackets.h \
-    enetprotocol.h
+    enetprotocol.h \
+    filetransmitter/filetransmissionpacketsparserbase.h \
+    networkmanagerbase.h \
+    filetransmitter/filetransmissionmanagerbase.h
 SOURCES += \
     imuserbase.cpp \
     udtprotocol.cpp \
@@ -48,11 +49,12 @@ SOURCES += \
     contactgroupbase.cpp \
     interestgroupbase.cpp \
     imgroupbase.cpp \
-    filetransmitter/filetransmissionmanager.cpp \
-    filetransmitter/filetransmissionpacketsparser.cpp \
     resourcesmanagerinstance.cpp \
     impackes.cpp \
-    enetprotocol.cpp
+    enetprotocol.cpp \
+    filetransmitter/filetransmissionpacketsparserbase.cpp \
+    networkmanagerbase.cpp \
+    filetransmitter/filetransmissionmanagerbase.cpp
 FORMS += 
 RESOURCES += resources.qrc
 

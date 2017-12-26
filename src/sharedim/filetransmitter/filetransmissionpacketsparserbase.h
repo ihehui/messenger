@@ -39,7 +39,7 @@
 
 
 #include "../constants_global_shared.h"
-#include "../resourcesmanager.h"
+#include "../networkmanagerbase.h"
 #include "../imuserbase.h"
 #include "../impackets.h"
 
@@ -112,23 +112,40 @@ public slots:
 
 
     ///////////////////////////////////////////////
-    bool requestFileServerInfo(SOCKETID socketID)
+    bool requestFileServerInfo(RTP * rtp, SOCKETID socketID, const QString &contactID)
     {
+        if(!rtp){
+            qCritical()<<"Invalid RTP Server!";
+            return false;
+        }
+
         FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, getSessionEncryptionKey(socketID));
+        packet.ContactID = contactID;
+        packet.FileServerInfo.request = true;
         //packet.FileServerInfo.address = "";
         //packet.FileServerInfo.port = 0;
 
         QByteArray ba = packet.toByteArray();
-        return m_rtp->sendReliableData(socketID, &ba);
+        return rtp->sendReliableData(socketID, &ba);
     }
-    bool responseFileServerInfo(SOCKETID socketID, const QString &address, quint16 port)
+    bool responseFileServerInfo(RTP * rtp, SOCKETID socketID, quint32 address, quint16 tcpPort, quint16 rtpPort, quint16 externalPort)
     {
+        if(!rtp){
+            qCritical()<<"Invalid RTP Server!";
+            return false;
+        }
+
         FileTransferPacket packet(FileTransferPacket::FT_FILE_SERVER_INFO, getSessionEncryptionKey(socketID));
-        packet.FileServerInfo.address = address;
-        packet.FileServerInfo.port = port;
+        packet.ContactID = m_myID;
+        packet.FileServerInfo.request = false;
+        packet.FileServerInfo.lanAddress = address;
+        packet.FileServerInfo.tcpPort = tcpPort;
+        packet.FileServerInfo.rtpPort = rtpPort;
+        packet.FileServerInfo.wanPort = externalPort;
+
 
         QByteArray ba = packet.toByteArray();
-        return m_rtp->sendReliableData(socketID, &ba);
+        return rtp->sendReliableData(socketID, &ba);
     }
 
     bool requestFileSystemInfo(SOCKETID socketID, const QString &parentDirPath)
@@ -229,12 +246,12 @@ public slots:
         return m_rtp->sendReliableData(socketID, &ba);
     }
 
-    bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, const QString &message)
+    bool responseFileUploadRequest(SOCKETID socketID, bool accepted, const QByteArray &fileMD5Sum, quint8 errorCode)
     {
         FileTransferPacket packet(FileTransferPacket::FT_FileUploadingResponse, getSessionEncryptionKey(socketID));
         packet.FileUploadingResponse.fileMD5Sum = fileMD5Sum;
         packet.FileUploadingResponse.accepted = accepted;
-        packet.FileUploadingResponse.message = message;
+        packet.FileUploadingResponse.errorCode = errorCode;
 
         QByteArray ba = packet.toByteArray();
         return m_rtp->sendReliableData(socketID, &ba);
@@ -311,6 +328,8 @@ public:
 
     void setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey);
 
+    void getServerPorts(quint16 *udpPort, quint16 *tcpPort, quint16 *rtpPort);
+
 private slots:
     void peerDisconnected(SOCKETID socketID);
 
@@ -327,8 +346,7 @@ private:
     QHash<QString/*Contact's ID*/, QByteArray/*Session Encryption Key*/> sessionEncryptionKeyWithPeerHash;
     QHash<QString/*Contact's ID*/, int/*Socket ID*/> peerSocketHash;
 
-
-    ResourcesManager *m_resourcesManager;
+    NetworkManagerBase *m_networkManager;
 
 
     UDPServer *m_udpServer;

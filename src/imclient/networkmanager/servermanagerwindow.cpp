@@ -53,11 +53,11 @@ ServerManagerWindow::ServerManagerWindow(QWidget *parent)
     connect(ui.tableViewServers, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(slotServerSelected(const QModelIndex &)));
 
 
-    clientNetworkManager = ClientResourcesManager::instance();
+    clientNetworkManager = ClientResourcesManager::instance()->getNetworkManager();
     //connect(clientNetworkManager, SIGNAL(signalServerDeclarePacketReceived(const QString&, quint16, quint16, const QString&, const QString&)), this, SLOT(serverFound(const QString& , quint16, quint16, const QString&, const QString&)), Qt::QueuedConnection);
 
 
-    if(clientNetworkManager->getNetworkType() == ClientResourcesManager::LAN) {
+    if(clientNetworkManager->getNetworkType() == NetworkManagerBase::LAN) {
         ui.lineEditIP->setText(QString(IM_SERVER_IPMC_ADDRESS));
         ui.spinBoxPort->setValue(IM_SERVER_IPMC_LISTENING_PORT);
         ui.toolButtonSearchServer->show();

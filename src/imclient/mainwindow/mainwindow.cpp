@@ -344,14 +344,14 @@ void MainWindow::startNetwork()
     }
 
     QString errorMessage = "";
-    m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
+    m_udpServer = m_resourcesManager->getNetworkManager()->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
     if(!m_udpServer) {
         QMessageBox::critical(this, tr("Error"), tr("Can not start UDP listening! %1").arg(errorMessage));
     } else {
         qWarning() << QString("UDP listening on port %1!").arg(m_udpServer->localPort());
     }
 
-    m_rtp = m_resourcesManager->startRTP(QHostAddress::Any, 0, true, &errorMessage);
+    m_rtp = m_resourcesManager->getNetworkManager()->startRTP(QHostAddress::Any, 0, true, &errorMessage);
     if(!errorMessage.isEmpty()) {
         QMessageBox::critical(this, tr("Error"), errorMessage);
     }
@@ -370,7 +370,7 @@ void MainWindow::startNetwork()
     connect(clientPacketsParser, SIGNAL(signalSearchContactsResultPacketReceived(const SearchInfoPacket &)), this, SLOT(processSearchInfoPacket(const SearchInfoPacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalChatMessageReceivedFromContact(const ChatMessagePacket &)), this, SLOT(processChatMessagePacket(const ChatMessagePacket &)), Qt::QueuedConnection);
     connect(clientPacketsParser, SIGNAL(signalCaptchaInfoPacketReceived(const CaptchaInfoPacket &)), this, SLOT(processCaptchaInfoPacket(const CaptchaInfoPacket &)), Qt::QueuedConnection);
-    connect(clientPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
+    connect(clientPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), m_chatWindowManager, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
 
 
 
@@ -435,10 +435,12 @@ void MainWindow::startNetwork()
 
     //File TX
     connect(m_chatWindowManager, SIGNAL(signalRequestFileServerInfo()), this, SLOT(slotRequestFileServerInfo()), Qt::QueuedConnection);
-    connect(m_chatWindowManager, SIGNAL(signalSendUploadingFileRequest(Contact *, const QString &, const QByteArray &)), this, SLOT(slotSendUploadingFileRequest(Contact *, const QString &, const QByteArray &)), Qt::QueuedConnection);
-    connect(m_chatWindowManager, SIGNAL(signalCancelSendingFileUploadingRequest(Contact *, const QByteArray &)), this, SLOT(slotCancelSendingFileRequest(Contact *, const QByteArray &)), Qt::QueuedConnection);
-    connect(m_chatWindowManager, SIGNAL(signalAcceptPeerUploadFileRequest(Contact *, const QByteArray &, const QString &)), this, SLOT(slotAcceptPeerUploadFileRequest(Contact *, const QByteArray &, const QString &)), Qt::QueuedConnection);
-    connect(m_chatWindowManager, SIGNAL(signalDeclinePeerUploadFileRequest(Contact *, const QByteArray &)), this, SLOT(slotDeclinePeerUploadFileRequest(Contact *, const QByteArray &)), Qt::QueuedConnection);
+    connect(m_chatWindowManager, SIGNAL(signalResponseFileServerInfo(quint32, quint16, quint16)), this, SLOT(slotResponseFileServerInfo(quint32, quint16, quint16)), Qt::QueuedConnection);
+
+//    connect(m_chatWindowManager, SIGNAL(signalSendUploadingFileRequest(Contact *, const QString &, const QByteArray &)), this, SLOT(slotSendUploadingFileRequest(Contact *, const QString &, const QByteArray &)), Qt::QueuedConnection);
+//    connect(m_chatWindowManager, SIGNAL(signalCancelSendingFileUploadingRequest(Contact *, const QByteArray &)), this, SLOT(slotCancelSendingFileRequest(Contact *, const QByteArray &)), Qt::QueuedConnection);
+//    connect(m_chatWindowManager, SIGNAL(signalAcceptPeerUploadFileRequest(Contact *, const QByteArray &, const QString &)), this, SLOT(slotAcceptPeerUploadFileRequest(Contact *, const QByteArray &, const QString &)), Qt::QueuedConnection);
+//    connect(m_chatWindowManager, SIGNAL(signalDeclinePeerUploadFileRequest(Contact *, const QByteArray &)), this, SLOT(slotDeclinePeerUploadFileRequest(Contact *, const QByteArray &)), Qt::QueuedConnection);
 
     //Single Process Thread
     //QtConcurrent::run(clientPacketsParser, &ClientPacketsParser::run);
@@ -1435,6 +1437,12 @@ void MainWindow::slotRequestFileServerInfo()
 {
     qDebug() << "--MainWindow::slotRequestFileServerInfo()";
     clientPacketsParser->requestFileServerInfo(m_socketConnectedToServer);
+}
+
+void MainWindow::slotResponseFileServerInfo(quint32 lanAddress, quint16 tcpPort, quint16 rtpPort)
+{
+    qDebug() << "--MainWindow::slotRequestFileServerInfo()";
+    clientPacketsParser->responseFileServerInfo(m_socketConnectedToServer, lanAddress, tcpPort, rtpPort);
 }
 
 void MainWindow::slotSendUploadingFileRequest(Contact *contact, const QString &filePath, const QByteArray &fileMD5)
@@ -3130,100 +3138,6 @@ void MainWindow::processCaptchaInfoPacket(const CaptchaInfoPacket &packet)
     break;
 
 
-
-    default:
-        break;
-    }
-
-
-}
-
-void MainWindow::processFileTransferPacket(const FileTransferPacket &packet)
-{
-    FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
-    switch (infoType) {
-    case FileTransferPacket::FT_FILE_SERVER_INFO: {
-        QString address = packet.FileServerInfo.address;
-        quint16 port = packet.FileServerInfo.port;
-        if(address.trimmed().isEmpty()) {
-            m_myself->setFileServerAddress(m_myself->getLoginServerAddress());
-        } else {
-            m_myself->setFileServerAddress(address);
-        }
-
-        m_myself->setFileServerPort(port);
-    }
-    break;
-
-    case FileTransferPacket::FT_FileSystemInfoRequest: {
-        //in >> FileSystemInfoRequest.parentDirPath;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileSystemInfoResponse: {
-        //in >> FileSystemInfoResponse.baseDirPath >> FileSystemInfoResponse.fileSystemInfoData;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileDeletingRequest: {
-        //in >> FileDeletingRequest.baseDirPath >> FileDeletingRequest.files;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileDeletingResponse: {
-        //in >> FileDeletingResponse.baseDirPath >> FileDeletingResponse.failedFiles;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileRenamingRequest: {
-        //in >> FileRenamingRequest.baseDirPath >> FileRenamingRequest.oldFileName >> FileRenamingRequest.newFileName;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileRenamingResponse: {
-        //in >> FileRenamingResponse.baseDirPath >> FileRenamingResponse.oldFileName >> FileRenamingResponse.renamed >> FileRenamingResponse.message;
-    }
-    break;
-
-    case FileTransferPacket::FileTransferPacket::FT_FileDownloadingRequest: {
-        //in >> FileDownloadingRequest.baseDir >> FileDownloadingRequest.fileName >> FileDownloadingRequest.dirToSaveFile;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileDownloadingResponse: {
-        //in >> FileDownloadingResponse.accepted >> FileDownloadingResponse.baseDir >> FileDownloadingResponse.fileName >> FileDownloadingResponse.fileMD5Sum >> FileDownloadingResponse.size >> FileDownloadingResponse.errorCode;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileUploadingRequest: {
-        //in >> FileUploadingRequest.fileName >> FileUploadingRequest.fileMD5Sum >> FileUploadingRequest.size >> FileUploadingRequest.fileSaveDir;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileUploadingResponse: {
-        //in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileDataRequest: {
-        //in >> FileDataRequest.fileMD5 >> FileDataRequest.startPieceIndex >> FileDataRequest.endPieceIndex;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileData: {
-        //in >> FileDataResponse.fileMD5 >> FileDataResponse.pieceIndex >> FileDataResponse.data >> FileDataResponse.pieceMD5;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileTXStatus: {
-        //in >> FileTXStatus.fileMD5 >> FileTXStatus.status;
-    }
-    break;
-
-    case FileTransferPacket::FT_FileTXError: {
-        //in >> FileTXError.fileName >> FileTXError.fileMD5 >> FileTXError.errorCode >> FileTXError.message;
-    }
-    break;
 
     default:
         break;

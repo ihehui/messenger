@@ -1855,8 +1855,13 @@ void FileTransferPacket::init()
 {
     ContactID = "";
 
-    FileServerInfo.address = "";
-    FileServerInfo.port = 0;
+    FileServerInfo.request = true;
+    FileServerInfo.lanAddress = 0;
+    FileServerInfo.tcpPort = 0;
+    FileServerInfo.rtpPort = 0;
+    FileServerInfo.wanAddress = 0;
+    FileServerInfo.wanPort = 0;
+
 
     FileSystemInfoRequest.parentDirPath = "";
 
@@ -1897,7 +1902,7 @@ void FileTransferPacket::init()
 
     FileUploadingResponse.fileMD5Sum = QByteArray();
     FileUploadingResponse.accepted = 1;
-    FileUploadingResponse.message = "";
+    FileUploadingResponse.errorCode = quint8(IM::ERROR_NoError);
 
     FileDataRequest.fileMD5 = QByteArray();
     FileDataRequest.startPieceIndex = 0;
@@ -1927,7 +1932,7 @@ void FileTransferPacket::parsePacketBody(QByteArray &packetBody)
     PacketInfoType InfoType = PacketInfoType(getPacketSubType());
     switch (InfoType) {
     case FT_FILE_SERVER_INFO: {
-        in >> FileServerInfo.address >> FileServerInfo.port;
+        in >> FileServerInfo.request >> FileServerInfo.lanAddress >> FileServerInfo.tcpPort >> FileServerInfo.rtpPort >> FileServerInfo.wanAddress >> FileServerInfo.wanPort;
     }
     break;
 
@@ -1977,7 +1982,7 @@ void FileTransferPacket::parsePacketBody(QByteArray &packetBody)
     break;
 
     case FT_FileUploadingResponse: {
-        in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
+        in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.errorCode;
     }
     break;
 
@@ -2021,7 +2026,7 @@ QByteArray FileTransferPacket::packBodyData()
 
     switch (InfoType) {
     case FT_FILE_SERVER_INFO: {
-        out << FileServerInfo.address << FileServerInfo.port;
+        out << FileServerInfo.request << FileServerInfo.lanAddress << FileServerInfo.tcpPort << FileServerInfo.rtpPort << FileServerInfo.wanAddress << FileServerInfo.wanPort;
     }
     break;
 
@@ -2071,7 +2076,7 @@ QByteArray FileTransferPacket::packBodyData()
     break;
 
     case FT_FileUploadingResponse: {
-        out << FileUploadingResponse.accepted << FileUploadingResponse.fileMD5Sum << FileUploadingResponse.message;
+        out << FileUploadingResponse.accepted << FileUploadingResponse.fileMD5Sum << FileUploadingResponse.errorCode;
     }
     break;
 

@@ -31,17 +31,11 @@ public:
     UDTProtocol *startUDTProtocol(const QHostAddress &localAddress = QHostAddress::Any, quint16 localPort = 0, bool tryOtherPort = true, QString *errorMessage = 0);
     quint16 getUDTServerPort();
 
-    TCPServer *getTCPServer()
-    {
-        return m_tcpServer;
-    }
+    TCPServer *getTCPServer();
     TCPServer *startTCPServer(const QHostAddress &address = QHostAddress::Any, quint16 port = 0, bool tryOtherPort = true, QString *errorMessage = 0);
     quint16 getTCPServerPort();
 
-    ENETProtocol *getENETProtocol()
-    {
-        return m_enetProtocol;
-    }
+    ENETProtocol *getENETProtocol();
     ENETProtocol *startENETProtocol(const QHostAddress &address = QHostAddress::Any, quint16 port = 0, bool tryOtherPort = true, QString *errorMessage = 0);
     quint16 getENETProtocolPort();
 
@@ -53,10 +47,7 @@ public:
     QString socketProtocolString(SOCKETID socketID);
 
     bool sendReliableData(SOCKETID socketID, const QByteArray *byteArray);
-    QString lastErrorString()
-    {
-        return m_lastErrorString;
-    }
+    QString lastErrorString() const;
 
 signals:
 //    void connected (int socketID, const QString &peerAddress, quint16 peerPort);

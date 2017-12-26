@@ -61,6 +61,7 @@ private:
     //bool m_transmitting;
     QString m_filePath;
     QByteArray m_fileMD5;
+    qint64 m_fileSize;
 
     FileTransmissionListWidget *listWidget;
 

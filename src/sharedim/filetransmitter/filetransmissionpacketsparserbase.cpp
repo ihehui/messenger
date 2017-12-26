@@ -27,7 +27,7 @@
  ***************************************************************************
  */
 
-#include "filetransmissionpacketsparser.h"
+#include "filetransmissionpacketsparserbase.h"
 
 
 #include <QNetworkInterface>
@@ -43,21 +43,22 @@ FileTransmissionPacketsParserBase::FileTransmissionPacketsParserBase(const QStri
 
     cryptography = new Cryptography();
 
-    m_resourcesManager = new ResourcesManager(this);
+    m_networkManager = new NetworkManagerBase(this);
 
     QString errorMessage = "";
-    m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
-    if(!m_udpServer) {
-        qCritical() << tr("ERROR! Can not start UDP listening! %1").arg(errorMessage);
-    } else {
-        qWarning() << QString("UDP listening on port %1 for file transmission!").arg(m_udpServer->localPort());
-    }
-    //m_udpServer = m_resourcesManager->getUDPServer();
-    Q_ASSERT(m_udpServer);
-    connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
+    m_udpServer = 0;
+//    m_udpServer = m_resourcesManager->startUDPServer(QHostAddress::Any, 0, true, &errorMessage);
+//    if(!m_udpServer) {
+//        qCritical() << tr("ERROR! Can not start UDP listening! %1").arg(errorMessage);
+//    } else {
+//        qWarning() << QString("UDP listening on port %1 for file transmission!").arg(m_udpServer->localPort());
+//    }
+//    //m_udpServer = m_resourcesManager->getUDPServer();
+//    Q_ASSERT(m_udpServer);
+//    connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
 
-    m_rtp = m_resourcesManager->startRTP(QHostAddress::Any, 0, true, &errorMessage);
+    m_rtp = m_networkManager->startRTP(QHostAddress::Any, 0, true, &errorMessage);
     if(!errorMessage.isEmpty()) {
         qCritical() << errorMessage;
     }
@@ -111,9 +112,8 @@ FileTransmissionPacketsParserBase::~FileTransmissionPacketsParserBase()
     }
 
 
-
-    delete m_resourcesManager;
-    m_resourcesManager = 0;
+    delete m_networkManager;
+    m_networkManager = 0;
 
 
 }
@@ -217,6 +217,22 @@ QString FileTransmissionPacketsParserBase::lastErrorMessage() const
 void FileTransmissionPacketsParserBase::setPeerSessionEncryptionKey(const QString &peerID, const QByteArray &encryptionKey)
 {
     sessionEncryptionKeyWithPeerHash[peerID] = encryptionKey;
+}
+
+void FileTransmissionPacketsParserBase::getServerPorts(quint16 *udpPort, quint16 *tcpPort, quint16 *rtpPort)
+{
+    if(udpPort && m_udpServer){
+        *udpPort = m_udpServer->localPort();
+    }
+
+    if(tcpPort && m_tcpServer){
+        *tcpPort = m_tcpServer->getTCPServerListeningPort();
+    }
+
+    if(rtpPort && m_enetProtocol){
+        m_enetProtocol->getLocalListeningAddressInfo(0, rtpPort);
+    }
+
 }
 
 void FileTransmissionPacketsParserBase::peerDisconnected(SOCKETID socketID)

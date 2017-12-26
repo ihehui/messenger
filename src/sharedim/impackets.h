@@ -906,8 +906,13 @@ public:
     QString ContactID;
 
     struct FileServerInfoStruct {
-        QString address;
-        quint16 port;
+        quint8 request;
+        quint32 lanAddress;
+        quint16 tcpPort;
+        quint16 rtpPort;
+
+        quint32 wanAddress;
+        quint16 wanPort;
     } FileServerInfo;
 
     struct FileSystemInfoRequestStruct {
@@ -962,7 +967,7 @@ public:
     struct FileUploadingResponseStruct {
         QByteArray fileMD5Sum;
         quint8 accepted;
-        QString message;
+        quint8 errorCode;
     } FileUploadingResponse;
 
     struct FileDataRequestStruct {

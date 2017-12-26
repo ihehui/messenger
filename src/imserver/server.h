@@ -65,6 +65,7 @@ public:
 
     bool startIMServer();
     bool startFileServer();
+    void stopFileServer();
 
 signals:
 
@@ -90,15 +91,9 @@ private:
 
 private:
 
-    ResourcesManagerInstance *m_resourcesManager;
     ServerPacketsParser *serverPacketsParser;
 
-    ServerFileTransmissionPacketsParser *m_fileTransmissionPacketsParser;
     ServerFileTransmissionManager *m_fileTransmissionManager;
-
-    UDPServer *m_udpServer;
-    RTP *m_rtp;
-
 
 
     DatabaseUtility *databaseUtility;

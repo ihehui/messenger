@@ -48,11 +48,11 @@ IMClientPacketsParser::IMClientPacketsParser(ClientResourcesManager *resourcesMa
 
     Q_ASSERT(resourcesManager);
 
-    m_udpServer = resourcesManager->getUDPServer();
+    m_udpServer = resourcesManager->getNetworkManager()->getUDPServer();
     Q_ASSERT_X(m_udpServer, "IMClientPacketsParser::IMClientPacketsParser(...)", "Invalid UDPServer!");
     connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
-    m_rtp = resourcesManager->getRTP();
+    m_rtp = resourcesManager->getNetworkManager()->getRTP();
     Q_ASSERT(m_rtp);
 
 //    m_udtProtocol = m_rtp->getUDTProtocol();

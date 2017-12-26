@@ -40,21 +40,30 @@ namespace HEHUI
 {
 
 
-ServerPacketsParser::ServerPacketsParser(ResourcesManagerInstance *resourcesManager, QObject *parent)
+ServerPacketsParser::ServerPacketsParser(QObject *parent)
     : QObject(parent), UsersManager(parent)
 {
 
-    Q_ASSERT(resourcesManager);
-
-    m_ipmcServer = resourcesManager->getIPMCServer();
-    if(!m_ipmcServer){
-        m_ipmcServer = resourcesManager->getUDPServer();
+    QString errorMessage = "";
+    NetworkManagerBase *nm = ResourcesManagerInstance::instance()->getNetworkManager();
+    m_udpServer = nm->startIPMCServer(QHostAddress(IM_SERVER_IPMC_ADDRESS), quint16(IM_SERVER_IPMC_LISTENING_PORT), &errorMessage);
+    if(!m_udpServer) {
+        qCritical() << QString("Can not start IP Multicast listening on address '%1', port %2! %3").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT).arg(errorMessage);
+        m_udpServer = nm->startUDPServer(QHostAddress::AnyIPv4, quint16(IM_SERVER_IPMC_LISTENING_PORT), true, &errorMessage);
+        if(!m_udpServer) {
+            qCritical()<< QString("Can not start UDP listening! %1").arg(errorMessage);
+        } else {
+            qWarning() << QString("UDP listening on port %1!").arg(m_udpServer->localPort());
+        }
+    } else {
+        qWarning() << QString("IP Multicast listening on address '%1', port %2!").arg(IM_SERVER_IPMC_ADDRESS).arg(IM_SERVER_IPMC_LISTENING_PORT);
     }
-    Q_ASSERT_X(m_ipmcServer, "ServerPacketsParser::ServerPacketsParser(...)", "Invalid IP MC Server!");
-    connect(m_ipmcServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
 
+    if(m_udpServer){
+        connect(m_udpServer, SIGNAL(packetReceived(const PacketBase &)), this, SLOT(parseIncomingPacketData(const PacketBase &)), Qt::QueuedConnection);
+    }
 
-    m_rtp = resourcesManager->getRTP();
+    m_rtp = nm->startRTP(QHostAddress::Any, IM_SERVER_RTP_LISTENING_PORT, true, &errorMessage);
     Q_ASSERT(m_rtp);
     connect(m_rtp, SIGNAL(disconnected(SOCKETID)), this, SLOT(peerDisconnected(SOCKETID)));
 
@@ -102,6 +111,10 @@ ServerPacketsParser::~ServerPacketsParser()
     // TODO Auto-generated destructor stub
 
     QMutexLocker locker(&mutex);
+
+
+    ResourcesManagerInstance::cleanInstance();
+
 
     if(checkIMUsersOnlineStateTimer) {
         checkIMUsersOnlineStateTimer->stop();
@@ -1500,9 +1513,35 @@ void ServerPacketsParser::processFileTransferPacket(const FileTransferPacket &pa
     switch (infoType) {
     case FileTransferPacket::FT_FILE_SERVER_INFO: {
         //TODO
-        QString address = "";
-        quint16 port = 0;
-        responseFileServerInfo(packet.getSocketID(), address, port, userInfo->getSessionEncryptionKey());
+
+        bool request = packet.FileServerInfo.request;
+        QHostAddress lanAddress = QHostAddress(packet.FileServerInfo.lanAddress);
+        quint16 tcpPort = packet.FileServerInfo.tcpPort;
+        quint16 rtpPort = packet.FileServerInfo.rtpPort;
+        QHostAddress wanAddress = QHostAddress(packet.FileServerInfo.wanAddress);
+        quint16 wanPort = packet.FileServerInfo.wanPort;
+
+        if(request){
+            UserInfo *contactInfo = getOnlineUserInfo(packet.ContactID);
+            if(!contactInfo){return;}
+
+            userInfo->getFileServerAddress(&lanAddress, &wanAddress);
+            userInfo->getFileServerPort(&tcpPort, &rtpPort, &wanPort);
+
+            if(tcpPort == 0 && (rtpPort ==0)){
+                requestFileServerInfo(contactInfo->getSocketID(), contactInfo->getSessionEncryptionKey());
+            }else{
+                responseFileServerInfo(packet.getSocketID(), packet.ContactID, lanAddress.toIPv4Address(), tcpPort, rtpPort, wanAddress.toIPv4Address(), wanPort, userInfo->getSessionEncryptionKey());
+            }
+
+        }else{
+            QHostAddress wanAddress = packet.getPeerHostAddress();
+            quint16 wanPort = packet.getPeerHostPort();
+
+            userInfo->setFileServerAddress(lanAddress, wanAddress);
+            userInfo->setFileServerPort(tcpPort, rtpPort, wanPort);
+        }
+
     }
     break;
 

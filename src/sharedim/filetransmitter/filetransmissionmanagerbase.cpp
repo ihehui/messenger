@@ -1,4 +1,4 @@
-#include "filetransmissionmanager.h"
+#include "filetransmissionmanagerbase.h"
 
 
 #include "HHSharedCore/hutilities.h"
@@ -40,19 +40,16 @@ public:
 };
 
 
-FileTransmissionManagerBase::FileTransmissionManagerBase(const QString &myID, FileTransmissionPacketsParserBase *fileTransmissionPacketsParser, QObject *parent) :
-    QObject(parent), m_fileTransmissionPacketsParser(fileTransmissionPacketsParser)
+FileTransmissionManagerBase::FileTransmissionManagerBase(const QString &myID, QObject *parent) :
+    QObject(parent)
 {
 
-    if(!m_fileTransmissionPacketsParser) {
-        m_fileTransmissionPacketsParser = new FileTransmissionPacketsParserBase(myID, this);
-    }
+    m_fileTransmissionPacketsParser = new FileTransmissionPacketsParserBase(myID, this);
     connect(m_fileTransmissionPacketsParser, SIGNAL(signalFileTransferPacketReceived(const FileTransferPacket &)), this, SLOT(processFileTransferPacket(const FileTransferPacket &)), Qt::QueuedConnection);
 
 
     m_idleTimer = 0;
 
-    m_resourcesManager = 0;
     m_fileManager = 0;
 
 //    //File TX
@@ -74,6 +71,7 @@ FileTransmissionManagerBase::FileTransmissionManagerBase(const QString &myID, Fi
 //    connect(m_fileTransmissionPacketsParser, SIGNAL(signalPeerDisconnected(const QString &)), this, SLOT(peerDisconnected(const QString &)), Qt::QueuedConnection);
 
 
+
 }
 
 FileTransmissionManagerBase::~FileTransmissionManagerBase()
@@ -85,16 +83,10 @@ FileTransmissionManagerBase::~FileTransmissionManagerBase()
         m_idleTimer = 0;
     }
 
-    if(m_resourcesManager){
-        delete m_resourcesManager;
-        m_resourcesManager = 0;
-    }
+    delete m_fileTransmissionPacketsParser;
 
-    if(m_fileManager){
-        delete m_fileManager;
-        m_fileManager = 0;
-    }
 
+    stopFileManager();
 
     foreach (FileTransmissionInfo *info, fileTXInfoHash.values()) {
         delete info;
@@ -102,7 +94,6 @@ FileTransmissionManagerBase::~FileTransmissionManagerBase()
     }
     fileTXInfoHash.clear();
     peerFileTXInfoHash.clear();
-
 
 }
 
@@ -139,13 +130,27 @@ void FileTransmissionManagerBase::setPeerSessionEncryptionKey(const QString &pee
     m_fileTransmissionPacketsParser->setPeerSessionEncryptionKey(peerID, encryptionKey);
 }
 
+void FileTransmissionManagerBase::getServerPorts(quint16 *udpPort, quint16 *tcpPort, quint16 *rtpPort)
+{
+    m_fileTransmissionPacketsParser->getServerPorts(udpPort, tcpPort, rtpPort);
+}
+
 void FileTransmissionManagerBase::processFileTransferPacket(const FileTransferPacket &packet)
 {
+    int socketID = packet.getSocketID();
+    QString contactID = packet.getPeerID();
+
     FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {
     case FileTransferPacket::FT_FILE_SERVER_INFO: {
-        QString address = packet.FileServerInfo.address;
-        quint16 port = packet.FileServerInfo.port;
+        bool request = packet.FileServerInfo.request;
+        quint32 lanAddress = packet.FileServerInfo.lanAddress;
+        quint16 tcpPort = packet.FileServerInfo.tcpPort;
+        quint16 rtpPort = packet.FileServerInfo.rtpPort;
+        quint32 wanAddress = packet.FileServerInfo.wanAddress;
+        quint16 wanPort = packet.FileServerInfo.wanPort;
+
+
         //TODO
 
     }
@@ -181,43 +186,43 @@ void FileTransmissionManagerBase::processFileTransferPacket(const FileTransferPa
     }
     break;
 
-    case FileTransferPacket::FileTransferPacket::FT_FileDownloadingRequest: {
-        //in >> FileDownloadingRequest.baseDir >> FileDownloadingRequest.fileName >> FileDownloadingRequest.dirToSaveFile;
+    case FileTransferPacket::FT_FileDownloadingRequest: {
+        emit signalPeerRequestDownloadFile(socketID, contactID, packet.FileDownloadingRequest.baseDir, packet.FileDownloadingRequest.fileName);
     }
     break;
 
     case FileTransferPacket::FT_FileDownloadingResponse: {
-        //in >> FileDownloadingResponse.accepted >> FileDownloadingResponse.baseDir >> FileDownloadingResponse.fileName >> FileDownloadingResponse.fileMD5Sum >> FileDownloadingResponse.size >> FileDownloadingResponse.errorCode;
+        emit signalFileDownloadRequestResponsed(socketID, contactID, packet.FileDownloadingResponse.accepted, packet.FileDownloadingResponse.fileName, packet.FileDownloadingResponse.fileMD5Sum, packet.FileDownloadingResponse.size, packet.FileDownloadingResponse.errorCode);
     }
     break;
 
     case FileTransferPacket::FT_FileUploadingRequest: {
-        //in >> FileUploadingRequest.fileName >> FileUploadingRequest.fileMD5Sum >> FileUploadingRequest.size >> FileUploadingRequest.fileSaveDir;
+        emit signalPeerRequestUploadFile(socketID, contactID, packet.FileUploadingRequest.fileMD5Sum, packet.FileUploadingRequest.fileName, packet.FileUploadingRequest.size, packet.FileUploadingRequest.fileSaveDir);
     }
     break;
 
     case FileTransferPacket::FT_FileUploadingResponse: {
-        //in >> FileUploadingResponse.accepted >> FileUploadingResponse.fileMD5Sum >> FileUploadingResponse.message;
+        emit signalFileUploadRequestResponsed(socketID, contactID, packet.FileUploadingResponse.fileMD5Sum, packet.FileUploadingResponse.accepted, packet.FileUploadingResponse.errorCode);
     }
     break;
 
     case FileTransferPacket::FT_FileDataRequest: {
-        //in >> FileDataRequest.fileMD5 >> FileDataRequest.startPieceIndex >> FileDataRequest.endPieceIndex;
+        processFileDataRequestPacket(socketID, contactID, packet.FileDataRequest.fileMD5, packet.FileDataRequest.startPieceIndex, packet.FileDataRequest.endPieceIndex);
     }
     break;
 
     case FileTransferPacket::FT_FileData: {
-        //in >> FileDataResponse.fileMD5 >> FileDataResponse.pieceIndex >> FileDataResponse.data >> FileDataResponse.pieceMD5;
+        processFileDataReceivedPacket(socketID, contactID, packet.FileDataResponse.fileMD5, packet.FileDataResponse.pieceIndex, packet.FileDataResponse.data, packet.FileDataResponse.pieceMD5);
     }
     break;
 
     case FileTransferPacket::FT_FileTXStatus: {
-        //in >> FileTXStatus.fileMD5 >> FileTXStatus.status;
+        processFileTXStatusChangedPacket(socketID, contactID, packet.FileTXStatus.fileMD5, packet.FileTXStatus.status);
     }
     break;
 
     case FileTransferPacket::FT_FileTXError: {
-        //in >> FileTXError.fileName >> FileTXError.fileMD5 >> FileTXError.errorCode >> FileTXError.message;
+        processFileTXErrorFromPeer(socketID, contactID, packet.FileTXError.fileMD5, packet.FileTXError.errorCode, packet.FileTXError.message);
     }
     break;
 
@@ -291,6 +296,7 @@ void FileTransmissionManagerBase::cancelUploadFileRequest(int socketID, const QS
         return;
     }
 
+    //TODO
     m_fileTransmissionPacketsParser->stopFileTX(socketID, "", fileMD5Sum);
     tryToCloseFile(peerID, fileMD5Sum);
 }
@@ -341,12 +347,12 @@ void FileTransmissionManagerBase::acceptFileUploadRequest(int socketID, const QS
 
     startFileManager();
 
-    QString errorString;
-    const FileManager::FileMetaInfo *info = m_fileManager->tryToReceiveFile(fileMD5Sum, localSavePath, size, &errorString);
+    quint8 errorCode;
+    const FileManager::FileMetaInfo *info = m_fileManager->tryToReceiveFile(fileMD5Sum, localSavePath, size, &errorCode);
     if(!info) {
         //TODO
-        m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum, errorString);
-        qCritical() << QString("ERROR! Can not upload file '%1'! %2").arg(localSavePath).arg(errorString);
+        m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum, errorCode);
+        qCritical() << QString("ERROR! Can not upload file '%1'! Error code:%2").arg(localSavePath).arg(errorCode);
         return;
     }
 
@@ -368,7 +374,7 @@ void FileTransmissionManagerBase::declineFileUploadRequest(int socketID, const Q
     }
 
 
-    m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum,  "");
+    m_fileTransmissionPacketsParser->responseFileUploadRequest(socketID, false, fileMD5Sum,  IM::ERROR_RequestDenied);
 }
 
 void FileTransmissionManagerBase::acceptFileDownloadRequest(int socketID, const QString &peerID, const QString &fileName, const QByteArray &fileMD5Sum, quint64 size)
@@ -479,8 +485,8 @@ void FileTransmissionManagerBase::fileDownloadRequestAccepted(int socketID, cons
 
     QString localPath = "./" + remoteFileName;
 
-    QString errorString;
-    const FileManager::FileMetaInfo *info = m_fileManager->tryToReceiveFile(fileMD5Sum, localPath, size, &errorString);
+    quint8 errorCode;
+    const FileManager::FileMetaInfo *info = m_fileManager->tryToReceiveFile(fileMD5Sum, localPath, size, &errorCode);
     if(!info) {
         //TODO
         qCritical() << tr("ERROR! Failed to download file '%1'!").arg(remoteFileName);
@@ -495,18 +501,21 @@ void FileTransmissionManagerBase::fileDownloadRequestAccepted(int socketID, cons
 
     initFileTransmissionInfo(socketID, peerID, fileMD5Sum, size, info->hashSums.size());
 
-    emit signalFileDownloadRequestAccepted(socketID, peerID, remoteFileName, fileMD5Sum, size);
+    //emit signalFileDownloadRequestAccepted(socketID, peerID, remoteFileName, fileMD5Sum, size);
+    emit signalFileDownloadRequestResponsed(socketID, peerID, true, remoteFileName, fileMD5Sum, size, IM::ERROR_NoError);
 
 }
 
-void FileTransmissionManagerBase::fileDownloadRequestDenied(int socketID, const QString &peerID, const QString &remoteFileName, const QString &message)
+void FileTransmissionManagerBase::fileDownloadRequestDenied(int socketID, const QString &peerID, const QString &remoteFileName, const QByteArray &fileMD5Sum, quint8 errorCode)
 {
     //TODO
 
-    emit signalFileDownloadRequestDenied(socketID, peerID, remoteFileName, message);
+    //emit signalFileDownloadRequestDenied(socketID, peerID, remoteFileName, message);
+    emit signalFileDownloadRequestResponsed(socketID, peerID, false, remoteFileName, fileMD5Sum, 0, errorCode);
+
 }
 
-void FileTransmissionManagerBase::fileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, const QString &message)
+void FileTransmissionManagerBase::fileUploadRequestResponsed(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, bool accepted, quint8 errorCode)
 {
 
     Q_ASSERT(m_fileManager);
@@ -515,10 +524,10 @@ void FileTransmissionManagerBase::fileUploadRequestResponsed(int socketID, const
 
     } else {
         tryToCloseFile(peerID, fileMD5Sum);
-        qCritical() << tr("ERROR! Can not send file! %1").arg(message);
+        qCritical() << tr("ERROR! Can not send file! Error Code:%1").arg(errorCode);
     }
 
-    emit signalFileUploadRequestResponsed(socketID, peerID, fileMD5Sum, accepted, message);
+    emit signalFileUploadRequestResponsed(socketID, peerID, fileMD5Sum, accepted, errorCode);
 
 }
 
@@ -526,22 +535,26 @@ void FileTransmissionManagerBase::fileUploadRequestResponsed(int socketID, const
 void FileTransmissionManagerBase::startFileManager()
 {
 
-    if(!m_fileManager) {
-        m_resourcesManager = new ResourcesManager(this);
-        m_fileManager = m_resourcesManager->getFileManager();
+    if(!m_fileManager) {        
+        m_fileManager = new FileManager(this);
         connect(m_fileManager, SIGNAL(dataRead(int , const QByteArray &, int , const QByteArray &, const QByteArray &)), this, SLOT(fileDataRead(int , const QByteArray &, int , const QByteArray &, const QByteArray &)), Qt::QueuedConnection);
         connect(m_fileManager, SIGNAL(error(int , const QByteArray &, quint8, const QString &)), this, SLOT(fileTXError(int , const QByteArray &, quint8, const QString &)), Qt::QueuedConnection);
         connect(m_fileManager, SIGNAL(pieceVerified(const QByteArray &, int , bool , int )), this, SLOT(pieceVerified(const QByteArray &, int , bool , int )), Qt::QueuedConnection);
-
     }
+    m_fileManager->start(QThread::LowestPriority);
 
     checkFileTransmissionList();
-
 }
 
 void FileTransmissionManagerBase::stopFileManager()
 {
-    m_resourcesManager->stopFileManager();
+    if(!m_fileManager) {
+        return;
+    }
+
+    m_fileManager->quit();
+    delete m_fileManager;
+    m_fileManager = 0;
 }
 
 //void FileTransmissionManagerBase::processPeerRequestUploadFilePacket(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir){
@@ -553,6 +566,11 @@ void FileTransmissionManagerBase::stopFileManager()
 //    //emit signalPeerRequestUploadFile(socketID, contactID, fileMD5Sum, fileName, size, localFileSaveDir);
 //}
 
+void FileTransmissionManagerBase::processPeerRequestUploadFilePacket(int socketID, const QString &peerID, const QByteArray &fileMD5Sum, const QString &fileName, quint64 size, const QString &localFileSaveDir)
+{
+    //TODO
+}
+
 void FileTransmissionManagerBase::processPeerCanceledUploadFileRequestPacket(int socketID, const QString &contactID, const QByteArray &fileMD5Sum)
 {
 
@@ -563,7 +581,7 @@ void FileTransmissionManagerBase::processPeerRequestDownloadFilePacket(int socke
 {
 
 
-    emit signalPeerRequestDownloadFile(socketID, contactID, fileName);
+//    emit signalPeerRequestDownloadFile(socketID, contactID, fileName);
 
 //    startFileManager();
 
@@ -922,6 +940,9 @@ FileTransmissionInfo *FileTransmissionManagerBase::getFileTransmissionInfo(const
 
     return 0;
 }
+
+
+
 
 
 

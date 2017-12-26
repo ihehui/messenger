@@ -152,7 +152,6 @@ private slots:
     void processSearchInfoPacket(const SearchInfoPacket &packet);
     void processChatMessagePacket(const ChatMessagePacket &packet);
     void processCaptchaInfoPacket(const CaptchaInfoPacket &packet);
-    void processFileTransferPacket(const FileTransferPacket &packet);
 
     void slotChangPassword();
 
@@ -217,6 +216,8 @@ private slots:
 //////////////////////////////
     //FILE TX
     void slotRequestFileServerInfo();
+    void slotResponseFileServerInfo(quint32 lanAddress, quint16 tcpPort, quint16 rtpPort);
+
     void slotSendUploadingFileRequest(Contact *contact, const QString &filePath, const QByteArray &fileMD5);
     void slotCancelSendingFileRequest(Contact *contact, const QByteArray &fileMD5);
     void slotAcceptPeerUploadFileRequest(Contact *contact, const QByteArray &fileMD5, const QString &localSavePath);
