@@ -6,7 +6,7 @@
 #include <limits>
 
 #include "sharedimlib.h"
-#include "udtprotocol.h"
+//#include "udtprotocol.h"
 #include "tcpserver.h"
 #include "enetprotocol.h"
 
@@ -19,7 +19,7 @@ class SHAREDIMLIB_API RTP : public QObject
 {
     Q_OBJECT
 public:
-    enum Protocol {AUTO = 0, TCP, ENET, UDT};
+    enum Protocol {AUTO = 0, TCP, ENET/*, UDT*/};
 
     explicit RTP(QObject *parent = 0);
     ~RTP();
@@ -28,8 +28,8 @@ public:
     void stopServers();
 
 //    UDTProtocol * getUDTProtocol(){return m_udtProtocol;}
-    UDTProtocol *startUDTProtocol(const QHostAddress &localAddress = QHostAddress::Any, quint16 localPort = 0, bool tryOtherPort = true, QString *errorMessage = 0);
-    quint16 getUDTServerPort();
+//    UDTProtocol *startUDTProtocol(const QHostAddress &localAddress = QHostAddress::Any, quint16 localPort = 0, bool tryOtherPort = true, QString *errorMessage = 0);
+//    quint16 getUDTServerPort();
 
     TCPServer *getTCPServer();
     TCPServer *startTCPServer(const QHostAddress &address = QHostAddress::Any, quint16 port = 0, bool tryOtherPort = true, QString *errorMessage = 0);
@@ -59,13 +59,13 @@ public slots:
 private slots:
     void tcpPeerConnected(SOCKETID socketID, const QString &address, quint16 port);
     void enetPeerConnected(SOCKETID socketID, const QString &address, quint16 port);
-    void udtPeerConnected(SOCKETID socketID, const QString &address, quint16 port);
+//    void udtPeerConnected(SOCKETID socketID, const QString &address, quint16 port);
 
 private:
 
     QHash<SOCKETID /*socketID*/, Protocol> m_socketInfoHash;
 
-    UDTProtocol *m_udtProtocol;
+//    UDTProtocol *m_udtProtocol;
     TCPServer *m_tcpServer;
     ENETProtocol *m_enetProtocol;
 

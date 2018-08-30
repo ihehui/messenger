@@ -18,7 +18,7 @@ include( ../config.pri )
 HHSharedLibs += HHSharedCore \
     HHSharedGUI \
     HHSharedNetwork \
-    HHSharedUDT \
+#    HHSharedUDT \
     HHSharedENET
 include(../../HHSharedLibs.pri)
 
@@ -156,7 +156,7 @@ RESOURCES += resources/images/emoticons/emoticons.qrc \
 
 
 INCLUDEPATH += chatwindow
-z
+
 
 !build_pass:CONFIG(debug, debug|release|debug_and_release|build_all) {
     message(Debug Build!)

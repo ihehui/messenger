@@ -13,7 +13,7 @@ RTP::RTP(QObject *parent) :
     QObject(parent)
 {
 
-    m_udtProtocol = 0;
+//    m_udtProtocol = 0;
 //    m_udtProtocol = new UDTProtocol(true, 0, this);
 //    connect(m_udtProtocol, SIGNAL(disconnected(int)), this, SIGNAL(disconnected(int)));
 
@@ -33,11 +33,11 @@ RTP::~RTP()
 {
     qDebug() << "--RTP::~RTP()";
 
-    if(m_udtProtocol) {
-        //m_udtProtocol->close();
-        delete m_udtProtocol;
-        m_udtProtocol = 0;
-    }
+//    if(m_udtProtocol) {
+//        //m_udtProtocol->close();
+//        delete m_udtProtocol;
+//        m_udtProtocol = 0;
+//    }
 
     if(m_tcpServer) {
         m_tcpServer->closeServer();
@@ -92,9 +92,9 @@ void RTP::startServers(const QHostAddress &localAddress, quint16 localPort, bool
 
 void RTP::stopServers()
 {
-    if(m_udtProtocol) {
-        m_udtProtocol->close();
-    }
+//    if(m_udtProtocol) {
+//        m_udtProtocol->close();
+//    }
 
     if(m_tcpServer) {
         m_tcpServer->closeServer();
@@ -106,40 +106,40 @@ void RTP::stopServers()
 
 }
 
-UDTProtocol *RTP::startUDTProtocol(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage)
-{
+//UDTProtocol *RTP::startUDTProtocol(const QHostAddress &localAddress, quint16 localPort, bool tryOtherPort, QString *errorMessage)
+//{
 
-    if(!m_udtProtocol) {
-        m_udtProtocol = new UDTProtocol(true, 0, this);
-        connect(m_udtProtocol, SIGNAL(connected(quint32, const QString &, quint16)), this, SLOT(udtPeerConnected(quint32, const QString &, quint16)));
-        connect(m_udtProtocol, SIGNAL(disconnected(SOCKETID/*, const QString &, quint16*/)), this, SIGNAL(disconnected(SOCKETID/*, const QString &, quint16*/)));
-    }
+//    if(!m_udtProtocol) {
+//        m_udtProtocol = new UDTProtocol(true, 0, this);
+//        connect(m_udtProtocol, SIGNAL(connected(quint32, const QString &, quint16)), this, SLOT(udtPeerConnected(quint32, const QString &, quint16)));
+//        connect(m_udtProtocol, SIGNAL(disconnected(SOCKETID/*, const QString &, quint16*/)), this, SIGNAL(disconnected(SOCKETID/*, const QString &, quint16*/)));
+//    }
 
-    UDTSOCKET socket = m_udtProtocol->listen(localPort, localAddress);
-    if(socket == UDTProtocolBase::INVALID_UDT_SOCK && tryOtherPort) {
-        socket = m_udtProtocol->listen();
-    }
+//    UDTSOCKET socket = m_udtProtocol->listen(localPort, localAddress);
+//    if(socket == UDTProtocolBase::INVALID_UDT_SOCK && tryOtherPort) {
+//        socket = m_udtProtocol->listen();
+//    }
 
-    if(socket == UDTProtocolBase::INVALID_UDT_SOCK) {
-        if(errorMessage) {
-            *errorMessage = m_udtProtocol->getLastErrorMessage();
-        }
-        delete m_udtProtocol;
-        m_udtProtocol = 0;
-        return 0;
-    }
+//    if(socket == UDTProtocolBase::INVALID_UDT_SOCK) {
+//        if(errorMessage) {
+//            *errorMessage = m_udtProtocol->getLastErrorMessage();
+//        }
+//        delete m_udtProtocol;
+//        m_udtProtocol = 0;
+//        return 0;
+//    }
 
-    return m_udtProtocol;
+//    return m_udtProtocol;
 
-}
+//}
 
-quint16 RTP::getUDTServerPort()
-{
-    if(m_udtProtocol) {
-        return m_udtProtocol->getUDTListeningPort();
-    }
-    return 0;
-}
+//quint16 RTP::getUDTServerPort()
+//{
+//    if(m_udtProtocol) {
+//        return m_udtProtocol->getUDTListeningPort();
+//    }
+//    return 0;
+//}
 
 TCPServer * RTP::getTCPServer()
 {
@@ -253,6 +253,7 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
         }
     }
     break;
+
     case TCP: {
         if(!m_tcpServer) {
             err = tr("TCP server not running.");
@@ -269,6 +270,7 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
         }
     }
     break;
+
     case ENET: {
         if(!m_enetProtocol) {
             err = tr("ENET not running.");
@@ -283,22 +285,24 @@ SOCKETID RTP::connectToHost( const QHostAddress &hostAddress, quint16 port, int 
 
     }
     break;
-    case UDT: {
-        if(!m_udtProtocol) {
-            err = tr("UDT not running.");
-            break;
-        }
-        UDTSOCKET udtSocketID = m_udtProtocol->connectToHost(hostAddress, port, 0, true, waitMsecs);
-        if( (udtSocketID == UDTProtocolBase::INVALID_UDT_SOCK) || (!m_udtProtocol->isSocketConnected(udtSocketID)) ) {
-            err += tr("Can not connect to host %1:%2 via UDT! %3").arg(hostAddress.toString()).arg(port).arg(m_udtProtocol->getLastErrorMessage());
-            qCritical() << err;
-        } else {
-            socketID = (SOCKETID)udtSocketID;
-            connected = true;
-            qDebug() << QString("Peer %1:%2 connected via UDT! ").arg(hostAddress.toString()).arg(port);
-        }
-    }
-    break;
+
+//    case UDT: {
+//        if(!m_udtProtocol) {
+//            err = tr("UDT not running.");
+//            break;
+//        }
+//        UDTSOCKET udtSocketID = m_udtProtocol->connectToHost(hostAddress, port, 0, true, waitMsecs);
+//        if( (udtSocketID == UDTProtocolBase::INVALID_UDT_SOCK) || (!m_udtProtocol->isSocketConnected(udtSocketID)) ) {
+//            err += tr("Can not connect to host %1:%2 via UDT! %3").arg(hostAddress.toString()).arg(port).arg(m_udtProtocol->getLastErrorMessage());
+//            qCritical() << err;
+//        } else {
+//            socketID = (SOCKETID)udtSocketID;
+//            connected = true;
+//            qDebug() << QString("Peer %1:%2 connected via UDT! ").arg(hostAddress.toString()).arg(port);
+//        }
+//    }
+//    break;
+
     default:
         break;
     }
@@ -342,14 +346,17 @@ void RTP::closeSocket(SOCKETID socketID)
         Q_ASSERT(m_tcpServer);
         m_tcpServer->disconnectFromHost(socketID);
         break;
+
     case ENET:
         Q_ASSERT(m_enetProtocol);
         m_enetProtocol->disconnect(socketID);
         break;
-    case UDT:
-        Q_ASSERT(m_udtProtocol);
-        m_udtProtocol->closeSocket(socketID);
-        break;
+
+//    case UDT:
+//        Q_ASSERT(m_udtProtocol);
+//        m_udtProtocol->closeSocket(socketID);
+//        break;
+
     default:
         break;
     }
@@ -388,12 +395,15 @@ bool RTP::getAddressInfoFromSocket(SOCKETID socketID, QString *address, quint16 
     case TCP:
         return m_tcpServer->getAddressInfoFromSocket(socketID, address, port, getPeerInfo);
         break;
+
     case ENET:
         return m_enetProtocol->getAddressInfoFromSocket(socketID, address, port, getPeerInfo);
         break;
-    case UDT:
-        return m_udtProtocol->getAddressInfoFromSocket(socketID, address, port, getPeerInfo);
-        break;
+
+//    case UDT:
+//        return m_udtProtocol->getAddressInfoFromSocket(socketID, address, port, getPeerInfo);
+//        break;
+
     default:
         break;
     }
@@ -413,12 +423,15 @@ QString RTP::socketProtocolString(SOCKETID socketID)
     case TCP:
         str = "TCP";
         break;
+
     case ENET:
         str = "ENET";
         break;
-    case UDT:
-        str = "UDT";
-        break;
+
+//    case UDT:
+//        str = "UDT";
+//        break;
+
     default:
         break;
     }
@@ -437,16 +450,19 @@ bool RTP::sendReliableData(SOCKETID socketID, const QByteArray *byteArray)
         ok = m_tcpServer->sendData(socketID, byteArray);
         m_lastErrorString = m_tcpServer->socketErrorString(socketID);
         break;
+
     case ENET:
         Q_ASSERT(m_enetProtocol);
         ok = m_enetProtocol->sendData(socketID, byteArray);
         m_lastErrorString = m_enetProtocol->errorString();
         break;
-    case UDT:
-        Q_ASSERT(m_udtProtocol);
-        ok = m_udtProtocol->sendData(socketID, byteArray);
-        m_lastErrorString = m_udtProtocol->getLastErrorMessage();
-        break;
+
+//    case UDT:
+//        Q_ASSERT(m_udtProtocol);
+//        ok = m_udtProtocol->sendData(socketID, byteArray);
+//        m_lastErrorString = m_udtProtocol->getLastErrorMessage();
+//        break;
+
     default:
         break;
     }
@@ -498,20 +514,20 @@ void RTP::enetPeerConnected(SOCKETID socketID, const QString &address, quint16 p
 
 }
 
-void RTP::udtPeerConnected(SOCKETID socketID, const QString &address, quint16 port)
-{
-    qDebug() << "RTP::udtPeerConnected(...)";
+//void RTP::udtPeerConnected(SOCKETID socketID, const QString &address, quint16 port)
+//{
+//    qDebug() << "RTP::udtPeerConnected(...)";
 
-    if(m_socketInfoHash.contains(socketID)) {
-        Protocol ptl = m_socketInfoHash.value(socketID);
-        if(ptl != UDT) {
-            m_udtProtocol->closeSocket(socketID);
-        }
-    } else {
-        m_socketInfoHash.insert(socketID, UDT);
-    }
+//    if(m_socketInfoHash.contains(socketID)) {
+//        Protocol ptl = m_socketInfoHash.value(socketID);
+//        if(ptl != UDT) {
+//            m_udtProtocol->closeSocket(socketID);
+//        }
+//    } else {
+//        m_socketInfoHash.insert(socketID, UDT);
+//    }
 
-}
+//}
 
 
 

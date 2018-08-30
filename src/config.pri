@@ -3,9 +3,9 @@
 include( ../config_global.pri )
 
 
-VER_MAJ = 2017
-VER_MIN = 8
-VER_PAT = 18
+VER_MAJ = 2018
+VER_MIN = 5
+VER_PAT = 25
 VER_CMP = 1
 
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}.$${VER_CMP}
@@ -15,7 +15,7 @@ VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}.$${VER_CMP}
 QMAKE_TARGET_COMPANY	= "He Hui"
 QMAKE_TARGET_PRODUCT	= "He Hui"
 QMAKE_TARGET_DESCRIPTION    = "Crossplatform Tools Based On Qt Of LGPL Edition"
-QMAKE_TARGET_COPYRIGHT	= "Copyright (C) 2007 - 2017 He Hui"
+QMAKE_TARGET_COPYRIGHT	= "Copyright (C) 2007 - 2018 He Hui"
 
 APP_ORG = "He Hui"
 APP_AUTHOR = "He Hui"

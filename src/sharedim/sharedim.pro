@@ -16,7 +16,7 @@ include(../config.pri)
 
 HHSharedLibs += HHSharedCore \
     HHSharedNetwork \
-    HHSharedUDT \
+    #HHSharedUDT \
     HHSharedENET
 include(../../HHSharedLibs.pri)
 
@@ -25,7 +25,6 @@ HEADERS += \
     constants_global_shared.h \
     imuserbase.h \
     sharedimlib.h \
-    udtprotocol.h \
     tcpserver.h \
     rtp.h \
     resourcesmanager.h \
@@ -41,7 +40,6 @@ HEADERS += \
     filetransmitter/filetransmissionmanagerbase.h
 SOURCES += \
     imuserbase.cpp \
-    udtprotocol.cpp \
     tcpserver.cpp \
     rtp.cpp \
     resourcesmanager.cpp \
@@ -57,6 +55,12 @@ SOURCES += \
     filetransmitter/filetransmissionmanagerbase.cpp
 FORMS += 
 RESOURCES += resources.qrc
+
+UDT_ENABLED{
+    HEADERS += udtprotocol.h
+    SOURCES += udtprotocol.cpp
+}
+
 
 DEFINES += SHAREDIMLIB_LIBRARY_EXPORT
 

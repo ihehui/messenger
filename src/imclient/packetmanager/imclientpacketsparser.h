@@ -198,7 +198,7 @@ public slots:
 //        }
 //        qWarning() << "My User ID:" << m_myUserID;
 
-        login(serverSocketID);
+        return login(serverSocketID);
     }
 
     bool changeMyOnlineState(int serverSocketID, quint8 onlineStateCode)

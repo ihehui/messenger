@@ -29,7 +29,7 @@
 
 
 #include <QMessageBox>
-
+#include <QHeaderView>
 
 #include "contactbox.h"
 
