@@ -142,7 +142,7 @@ void ServerPacketsParser::parseIncomingPacketData(const PacketBase &packet)
     //    qDebug()<<"----ServerPacketsParser::parseIncomingPacketData(Packet packet)";
 
 
-    QString peerID = packet.getPeerID();
+    QString peerID = packet.getSenderID();
 
     QHostAddress peerAddress = packet.getPeerHostAddress();
     quint16 peerPort = packet.getPeerHostPort();
@@ -476,7 +476,7 @@ void ServerPacketsParser::processServerDiscoveryPacket(const ServerDiscoveryPack
 {
 
     int socketID = packet.getSocketID();
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     QHostAddress peerAddress = packet.getPeerHostAddress();
     quint16 peerPort = packet.getPeerHostPort();
 
@@ -590,7 +590,7 @@ void ServerPacketsParser::processRgeistrationPacket(const RgeistrationPacket &pa
 
 void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     int peerSocketID = packet.getSocketID();
     UpdatePasswordPacket::PacketInfoType infoType = UpdatePasswordPacket::PacketInfoType(packet.getPacketSubType());
 
@@ -682,7 +682,7 @@ void ServerPacketsParser::processUpdatePasswordPacket(const UpdatePasswordPacket
 void ServerPacketsParser::processLoginPacket(const LoginPacket &packet)
 {
     int socketID = packet.getSocketID();
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     QHostAddress peerAddress = packet.getPeerHostAddress();
     quint16 peerPort = packet.getPeerHostPort();
 
@@ -840,7 +840,7 @@ void ServerPacketsParser::processLoginPacket(const LoginPacket &packet)
 
 void ServerPacketsParser::processContactGroupsInfoPacket(const ContactGroupsInfoPacket &packet)
 {
-    UserInfo *userInfo = getUserInfo(packet.getPeerID());
+    UserInfo *userInfo = getUserInfo(packet.getSenderID());
     if(!userInfo) {
         return;
     }
@@ -894,7 +894,7 @@ void ServerPacketsParser::processContactGroupsInfoPacket(const ContactGroupsInfo
 
 void ServerPacketsParser::processInterestGroupsInfoPacket(const InterestGroupsInfoPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;
@@ -1058,7 +1058,7 @@ void ServerPacketsParser::processInterestGroupsInfoPacket(const InterestGroupsIn
 
 void ServerPacketsParser::processContactInfoPacket(const ContactInfoPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;
@@ -1233,7 +1233,7 @@ void ServerPacketsParser::processContactInfoPacket(const ContactInfoPacket &pack
 
 void ServerPacketsParser::processSearchInfoPacket(const SearchInfoPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;
@@ -1292,7 +1292,7 @@ void ServerPacketsParser::processSearchInfoPacket(const SearchInfoPacket &packet
 
 void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;
@@ -1468,7 +1468,7 @@ void ServerPacketsParser::processChatMessagePacket(const ChatMessagePacket &pack
 
 void ServerPacketsParser::processCaptchaInfoPacket(const CaptchaInfoPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;
@@ -1503,7 +1503,7 @@ void ServerPacketsParser::processCaptchaInfoPacket(const CaptchaInfoPacket &pack
 
 void ServerPacketsParser::processFileTransferPacket(const FileTransferPacket &packet)
 {
-    QString userID = packet.getPeerID();
+    QString userID = packet.getSenderID();
     UserInfo *userInfo = getUserInfo(userID);
     if(!userInfo) {
         return;

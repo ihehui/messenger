@@ -165,7 +165,7 @@ void ServerManagerWindow::serverFound(const ServerDiscoveryPacket &packet)
     switch (serverType) {
     case ServerDiscoveryPacket::SERVER_GATE:{
         qWarning();
-        qWarning() << "Server Found!" << " Address:" << serverAddress << " RTP Port:" << serverRTPListeningPort << " Name:" << packet.getPeerID() << " Version:" << packet.version;
+        qWarning() << "Server Found!" << " Address:" << serverAddress << " RTP Port:" << serverRTPListeningPort << " Name:" << packet.getSenderID() << " Version:" << packet.version;
         qWarning();
 
         ServerInfo *info;

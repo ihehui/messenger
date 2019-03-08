@@ -964,7 +964,7 @@ void ChatWindowManager::processFileTransferPacket(const FileTransferPacket &pack
                 }
                 ClientResourcesManager::instance()->setForwardServerAddressInfo(wanAddress, tcpPort, rtpPort);
             }else{
-                QString contactID = packet.getPeerID();
+                QString contactID = packet.getSenderID();
                 Contact *contact = ContactsManager::instance()->getUser(contactID);
                 if(!contact){
                     qCritical()<<QString("No such contact '%1'!").arg(contactID);

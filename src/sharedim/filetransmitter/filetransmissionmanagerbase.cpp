@@ -138,7 +138,7 @@ void FileTransmissionManagerBase::getServerPorts(quint16 *udpPort, quint16 *tcpP
 void FileTransmissionManagerBase::processFileTransferPacket(const FileTransferPacket &packet)
 {
     int socketID = packet.getSocketID();
-    QString contactID = packet.getPeerID();
+    QString contactID = packet.getSenderID();
 
     FileTransferPacket::PacketInfoType infoType = FileTransferPacket::PacketInfoType(packet.getPacketSubType());
     switch (infoType) {

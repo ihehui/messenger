@@ -114,7 +114,7 @@ void IMClientPacketsParser::parseIncomingPacketData(const PacketBase &packet)
 
     //QByteArray packetBody = packet.getPacketBody();
     quint8 packetType = packet.getPacketType();
-    QString peerID = packet.getPeerID();
+    QString peerID = packet.getSenderID();
 
     QHostAddress peerAddress = packet.getPeerHostAddress();
     quint16 peerPort = packet.getPeerHostPort();
@@ -365,7 +365,7 @@ void IMClientPacketsParser::processLoginPacket(const LoginPacket &packet)
         QString errorMessage = "";
 
         if(loggedin) {
-            m_serverName = packet.getPeerID();
+            m_serverName = packet.getSenderID();
             m_socketConnectedToServer = packet.getSocketID();
 
             uint serverTime = packet.AuthResultInfo.serverTime;

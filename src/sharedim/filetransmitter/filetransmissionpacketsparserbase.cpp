@@ -126,7 +126,7 @@ void FileTransmissionPacketsParserBase::parseIncomingPacketData(const PacketBase
     //    qDebug()<<"----IMClientPacketsParser::parseIncomingPacketData(Packet packet)";
 
     quint8 packetType = packet.getPacketType();
-    QString peerID = packet.getPeerID();
+    QString peerID = packet.getSenderID();
 
     QHostAddress peerAddress = packet.getPeerHostAddress();
     quint16 peerPort = packet.getPeerHostPort();
