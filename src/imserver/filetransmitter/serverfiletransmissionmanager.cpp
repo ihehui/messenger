@@ -1,7 +1,7 @@
 #include "serverfiletransmissionmanager.h"
 
 
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedCore/CoreUtilities"
 
 
 

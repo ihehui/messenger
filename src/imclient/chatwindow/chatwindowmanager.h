@@ -19,8 +19,7 @@
 //#include "../../sharedim/filetransmitter/filetransmissionmanager.h"
 #include "filetransmitter/clientfiletransmissionmanager.h"
 
-//#include "../../shared/core/singleton.h"
-#include "HHSharedCore/hsingleton.h"
+#include "HHSharedCore/Singleton"
 
 
 

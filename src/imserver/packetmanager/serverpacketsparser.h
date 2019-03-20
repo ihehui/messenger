@@ -42,7 +42,7 @@
 #include "../sharedim/resourcesmanagerinstance.h"
 #include "../sharedim/impackets.h"
 
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/Cryptography"
 
 
 

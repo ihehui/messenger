@@ -105,7 +105,7 @@
 #endif
 
 
-#include "HHSharedNetwork/hglobal_network.h"
+#include "HHSharedNetwork/Global_Network"
 
 
 

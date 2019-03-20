@@ -14,7 +14,7 @@
 #include <QCoreApplication>
 
 
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/Cryptography"
 
 #ifndef FILE_PIECE_LENGTH
     #define FILE_PIECE_LENGTH 10240 //10 KB

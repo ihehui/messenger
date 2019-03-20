@@ -46,7 +46,7 @@
 //#include "../../../shared/gui/databaseconnecter/databaseconnecter.h"
 //#include "../../../shared/core/user.h"
 
-#include "HHSharedCore/hdatabaseutility.h"
+#include "HHSharedCore/DatabaseUtility"
 
 
 

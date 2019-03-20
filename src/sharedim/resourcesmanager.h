@@ -22,8 +22,7 @@
 #include "./filetransmitter/filetransmissionmanagerbase.h"
 #include "./filetransmitter/filetransmissionpacketsparserbase.h"
 
-#include "HHSharedNetwork/hudpsocket.h"
-#include "HHSharedUDT/hudtprotocolforfiletransmission.h"
+#include "HHSharedNetwork/UDPSocket"
 
 
 

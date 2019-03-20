@@ -16,12 +16,9 @@
 
 #include "../servertime/servertime.h"
 
-//#include "../../shared/core/database/databaseutility.h"
-//#include "../../shared/core/user.h"
-//#include "../../shared/gui/databaseconnecter/databaseconnecter.h"
-#include "HHSharedCore/hdatabaseutility.h"
-#include "HHSharedCore/huser.h"
-#include "HHSharedGUI/hdatabaseconnecter.h"
+#include "HHSharedCore/DatabaseUtility"
+#include "HHSharedCore/User"
+#include "HHSharedGUI/DatabaseConnecter"
 
 
 

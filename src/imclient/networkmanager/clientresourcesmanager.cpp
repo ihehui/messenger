@@ -16,8 +16,8 @@
 
 //#include "../../shared/core/user.h"
 //#include "../../shared/core/utilities.h"
-#include "HHSharedCore/huser.h"
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedCore/User"
+#include "HHSharedCore/CoreUtilities"
 
 
 namespace HEHUI

@@ -4,7 +4,7 @@
 
 #include "settings.h"
 
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/Cryptography"
 
 #include "HHSharedCore/MessageLogger"
 

@@ -27,6 +27,7 @@
  ***************************************************************************
  */
 
+
 #ifndef CLIENTFILETXPACKETSPARSER_H_
 #define CLIENTFILETXPACKETSPARSER_H_
 
@@ -46,8 +47,8 @@
 #include "imuser.h"
 #include "../../contactsmanager/contact.h"
 
-#include "HHSharedCore/hcryptography.h"
-#include "HHSharedNetwork/hnetworkutilities.h"
+#include "HHSharedCore/Cryptography"
+#include "HHSharedNetwork/NetworkUtilities"
 
 
 
@@ -93,5 +94,6 @@ private:
 };
 
 }
+
 
 #endif /* CLIENTFILETXPACKETSPARSER_H_ */

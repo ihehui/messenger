@@ -14,10 +14,7 @@
 
 #include "impackets.h"
 
-#include "HHSharedNetwork/hnetworkutilities.h"
-//#include "HHSharedNetwork/hpacketstreamoperator.h"
-
-
+#include "HHSharedNetwork/NetworkUtilities"
 
 
 

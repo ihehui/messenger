@@ -15,10 +15,9 @@
 #include "app_constants_client.h"
 #include "../settings.h"
 
-//#include "../../shared/gui/databaseconnecter/databaseconnecter.h"
-//#include "../../shared/core/utilities.h"
 
-#include "HHSharedGUI/hdatabaseconnecter.h"
+#include "HHSharedGUI/DatabaseConnecter"
+
 
 namespace HEHUI
 {
@@ -28,8 +27,6 @@ Login::Login(IMUser *user, QObject *parent)
 {
 
     //localServer = new QLocalServer(this);
-
-
 
 }
 

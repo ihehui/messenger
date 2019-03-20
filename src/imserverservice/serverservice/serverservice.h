@@ -34,7 +34,7 @@
 
 #include "../../imserver/server.h"
 
-#include "HHSharedService/hservice.h"
+#include "HHSharedService/Service"
 
 
 

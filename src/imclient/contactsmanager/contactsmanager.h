@@ -19,13 +19,8 @@
 #include "../../sharedim/contactgroupbase.h"
 
 
-
-
-//#include "../../../shared/core/global_core.h"
-//#include "../../../shared/core/singleton.h"
-//#include "../../shared/gui/widgetbase/expandlistview/expandlistview.h"
-#include "HHSharedCore/hglobal_core.h"
-#include "HHSharedCore/hsingleton.h"
+#include "HHSharedCore/GlobalCore"
+#include "HHSharedCore/Singleton"
 #include "HHSharedGUI/ItemBox"
 
 

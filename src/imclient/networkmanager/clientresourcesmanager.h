@@ -15,8 +15,8 @@
 #include "filetransmitter/clientfiletransmissionmanager.h"
 
 
-#include "HHSharedCore/huser.h"
-#include "HHSharedCore/hsingleton.h"
+#include "HHSharedCore/User"
+#include "HHSharedCore/Singleton"
 
 namespace HEHUI
 {

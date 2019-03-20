@@ -15,9 +15,8 @@
 
 #include "../servertime/servertime.h"
 
-//#include "imageresource.h"
-//#include "../../shared/gui/imageresourcebase.h"
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedCore/CoreUtilities"
+
 
 namespace HEHUI
 {
@@ -975,7 +974,7 @@ void ChatMessageWindow::insertImage()
     }
 
 
-    QString md5String = Utilities::getFileMD5EncodedWithHex(fileName);
+    QString md5String = CoreUtilities::getFileMD5EncodedWithHex(fileName);
     if(md5String.trimmed().isEmpty()) {
         QMessageBox::critical(this, tr("Error"), tr("Can not get image's MD5 hash!"));
         return;
@@ -1045,7 +1044,7 @@ void ChatMessageWindow::screenshotDone(const QImage &image)
     }
 
 
-    QString md5String = Utilities::getFileMD5EncodedWithHex(fileName);
+    QString md5String = CoreUtilities::getFileMD5EncodedWithHex(fileName);
     if(md5String.trimmed().isEmpty()) {
         QMessageBox::critical(this, tr("Screenshot"), tr("Can not get image's MD5 hash!"));
         return;

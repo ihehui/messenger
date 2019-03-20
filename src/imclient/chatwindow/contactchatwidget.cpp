@@ -3,7 +3,7 @@
 #include <QMessageBox>
 
 
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/Cryptography"
 
 
 namespace HEHUI

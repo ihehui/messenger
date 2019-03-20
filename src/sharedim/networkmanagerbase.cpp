@@ -2,7 +2,7 @@
 
 #include "impackets.h"
 
-#include "HHSharedNetwork/hnetworkutilities.h"
+#include "HHSharedNetwork/NetworkUtilities"
 
 
 namespace HEHUI
@@ -151,24 +151,22 @@ UDPServer * NetworkManagerBase::startUDPServer(const QHostAddress &address, quin
 
     if (m_udpServer->startSimpleListening(address, startPort)) {
         return m_udpServer;
-    } else {
-        if(tryOtherPort) {
-            if (m_udpServer->startSimpleListening(address, 0)) {
-                return m_udpServer;
-            }
-        }
-
-        if(errorMessage) {
-            *errorMessage = m_udpServer->errorString();
-        }
-        delete m_udpServer;
-        m_udpServer = 0;
-
-        return 0;
     }
 
-    return m_udpServer;
+    if(tryOtherPort) {
+        if (m_udpServer->startSimpleListening(address, 0)) {
+            return m_udpServer;
+        }
+    }
 
+    if(errorMessage) {
+        *errorMessage = m_udpServer->errorString();
+    }
+    delete m_udpServer;
+    m_udpServer = 0;
+
+
+    return m_udpServer;
 }
 
 RTP * NetworkManagerBase::getRTP()

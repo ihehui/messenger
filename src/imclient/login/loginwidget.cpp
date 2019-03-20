@@ -733,7 +733,7 @@ bool LoginWidget::canLogin()
 
     //标志字符串,防止本机重复登陆
     //Flag String
-    QString flagString = user->getUserID() + "@" + Utilities::currentUserNameOfOS();
+    QString flagString = user->getUserID() + "@" + CoreUtilities::currentUserNameOfOS();
     QString title = QString(tr("Error"));
     QString text = QString(tr("An error occurred!"));
     QString errorMessage = QString(tr("User '%1' had sign in before!\n").arg(user->getUserID()));

@@ -40,8 +40,8 @@
 #include "interestgroup.h"
 
 
-#include "HHSharedCore/hsingleton.h"
-#include "HHSharedCore/hdatabaseutility.h"
+#include "HHSharedCore/Singleton"
+#include "HHSharedCore/DatabaseUtility"
 
 namespace HEHUI
 {

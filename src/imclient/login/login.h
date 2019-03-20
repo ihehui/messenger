@@ -13,7 +13,7 @@
 #include "../imuser.h"
 
 //#include "../../shared/gui/login/loginbase.h"
-#include "HHSharedGUI/hloginbase.h"
+#include "HHSharedGUI/LoginBase"
 
 
 namespace HEHUI

@@ -60,7 +60,7 @@ QT_END_NAMESPACE
 #include "imageviewercontroler.h"
 #include "animationcontroler.h"
 
-#include "HHSharedCore/hsingleton.h"
+#include "HHSharedCore/Singleton"
 
 
 class ImageViewer : public QWidget, public Singleton<ImageViewer>

@@ -9,7 +9,7 @@
 
 #include "../imageresource.h"
 
-
+#include "HHSharedGUI/GUIUtilities"
 
 
 namespace HEHUI
@@ -32,7 +32,7 @@ ContactInfoWidget::ContactInfoWidget(IMUserBase *user, QWidget *parent, Qt::Wind
     on_pushButtonGeneralInformation_clicked();
 
 
-    moveWindow(HEHUI::Center);
+    GUIUtilities::moveWindow(this, GUIUtilities::CENTER);
 
 }
 

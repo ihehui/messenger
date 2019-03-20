@@ -8,7 +8,7 @@
 #include "../../../sharedim/filemanager.h"
 #include "../../../sharedim/filetransmitter/filetransmissionmanagerbase.h"
 
-#include "HHSharedCore/hsingleton.h"
+#include "HHSharedCore/Singleton"
 
 namespace HEHUI
 {

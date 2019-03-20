@@ -13,13 +13,12 @@
 #include "../contactsmanager/contact.h"
 #include "contactsmanager/interestgroup.h"
 
-//#include "contactsmanager/contactgroup.h"
 #include "../../sharedim/contactgroupbase.h"
 
 #include "../imuser.h"
 
 
-#include "HHSharedGUI/hscreenshot.h"
+#include "HHSharedGUI/Screenshot"
 
 
 class QTextBrowser;

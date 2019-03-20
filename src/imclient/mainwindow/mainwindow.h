@@ -21,9 +21,9 @@
 #include "deletecontactdialog/deletecontactdialog.h"
 #include "../contactbox/contactbox.h"
 
-#include "HHSharedCore/hdatabaseutility.h"
-#include "HHSharedGUI/hmainwindowbase.h"
-#include "HHSharedGUI/hsystemtrayiconbase.h"
+#include "HHSharedCore/DatabaseUtility"
+#include "HHSharedGUI/MainwindowBase"
+#include "HHSharedGUI/SystemTrayIconBase"
 
 
 
@@ -38,7 +38,7 @@ class MainWindow: public MainWindowBase
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0, HEHUI::WindowPosition positon = HEHUI::Center);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 
@@ -238,7 +238,8 @@ private:
     //退出前的清理工作
     void aboutToQuit();
 
-    void savePreferedStyle(const QString &preferedStyle, bool useStylePalette);
+    void savePreferedStyle(const QString &preferedStyle);
+    void saveUsingStylePalette(bool useStylePalette);
     void savePreferedLanguage(const QString &preferedLanguage);
 
     void showDeleteContactDialog(Contact *contact, bool blacklistMode = false);

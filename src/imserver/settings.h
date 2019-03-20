@@ -9,8 +9,8 @@
 #include "app_constants_server.h"
 
 
-#include "HHSharedCore/hsettingscore.h"
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/SettingsCore"
+#include "HHSharedCore/Cryptography"
 
 #include "serverlib.h"
 

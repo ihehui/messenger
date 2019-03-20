@@ -7,7 +7,7 @@
 #include "../../sharedim/imuserbase.h"
 
 
-#include "HHSharedGUI/hwidgetbase.h"
+#include "HHSharedGUI/WidgetBase"
 
 namespace HEHUI
 {

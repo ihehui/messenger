@@ -1,7 +1,7 @@
 #include "filetransmissionmanagerbase.h"
 
 
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedCore/CoreUtilities"
 
 
 
@@ -110,7 +110,7 @@ bool FileTransmissionManagerBase::queryFileTransmissionInfo(const QString &peerI
             *progress = (float)info->curPieceIndex / (info->totalPieces);
         }
         if(speed) {
-            quint64 curTime = Utilities::timeGet();
+            quint64 curTime = CoreUtilities::timeGet();
             Q_ASSERT(curTime > info->timeBase);
 
             *speed = (float)info->transmittedSize / (curTime - info->timeBase);
@@ -890,7 +890,7 @@ void FileTransmissionManagerBase::initFileTransmissionInfo(int socketID, const Q
 {
 
     FileTransmissionInfo *ftInfo = new FileTransmissionInfo(socketID, peerID, fileMD5, size, pieces);
-    ftInfo->timeBase = Utilities::timeGet();
+    ftInfo->timeBase = CoreUtilities::timeGet();
     fileTXInfoHash.insert(fileMD5, ftInfo);
     peerFileTXInfoHash.insert(peerID, ftInfo);
 

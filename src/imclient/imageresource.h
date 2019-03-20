@@ -15,8 +15,7 @@
 #include "app_constants_client.h"
 #include "../sharedim/constants_global_shared.h"
 
-//#include "../../shared/gui/imageresourcebase.h"
-#include "HHSharedGUI/himageresourcebase.h"
+#include "HHSharedGUI/ImageResourceBase"
 
 
 namespace HEHUI

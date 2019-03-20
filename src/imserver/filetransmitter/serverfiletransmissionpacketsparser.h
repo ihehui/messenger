@@ -44,8 +44,8 @@
 #include "../sharedim/resourcesmanagerinstance.h"
 #include "../usersmanager/userinfo.h"
 
-#include "HHSharedCore/hcryptography.h"
-#include "HHSharedNetwork/hnetworkutilities.h"
+#include "HHSharedCore/Cryptography"
+#include "HHSharedNetwork/NetworkUtilities"
 
 
 

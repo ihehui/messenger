@@ -42,8 +42,7 @@
 
 #include "../sharedim/resourcesmanagerinstance.h"
 
-#include "HHSharedCore/hdatabaseutility.h"
-//#include "HHSharedNetwork/hnetworkmanagerbase.h"
+#include "HHSharedCore/DatabaseUtility"
 
 
 

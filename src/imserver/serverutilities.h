@@ -17,15 +17,15 @@
 
 //#include "../../../shared/core/global_core.h"
 
-#include "HHSharedCore/hutilities.h"
-#include "HHSharedNetwork/hnetworkutilities.h"
-#include "HHSharedCore/hdatabaseutility.h"
+#include "HHSharedCore/CoreUtilities"
+#include "HHSharedNetwork/NetworkUtilities"
+#include "HHSharedCore/DatabaseUtility"
 
 
 namespace HEHUI
 {
 
-class ServerUtilities: public Utilities, public HEHUI::NetworkUtilities
+class ServerUtilities: public CoreUtilities, public HEHUI::NetworkUtilities
 {
 public:
     ServerUtilities();

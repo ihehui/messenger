@@ -8,8 +8,8 @@
 
 //#include "../../shared/core/singleton.h"
 //#include "../../shared/gui/settingsbase.h"
-#include "HHSharedCore/hsingleton.h"
-#include "HHSharedGUI/hsettingsbase.h"
+#include "HHSharedCore/Singleton"
+#include "HHSharedGUI/SettingsBase"
 
 
 //#include "mysharedlib_global.h"

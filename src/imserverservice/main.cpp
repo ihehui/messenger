@@ -10,8 +10,8 @@
 #include "../imserver/server.h"
 #include "../imserver/settings.h"
 
-#include "HHSharedCore/hlogdebug.h"
-#include "HHSharedCore/hglobal_core.h"
+#include "HHSharedCore/LogDebug"
+#include "HHSharedCore/GlobalCore"
 
 
 

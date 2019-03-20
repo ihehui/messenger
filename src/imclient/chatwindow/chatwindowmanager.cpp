@@ -8,7 +8,7 @@
 
 #include "../contactsmanager/contactsmanager.h"
 
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedCore/CoreUtilities"
 
 
 namespace HEHUI

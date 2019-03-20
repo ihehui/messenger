@@ -44,8 +44,8 @@
 
 
 
-#include "HHSharedCore/huser.h"
-#include "HHSharedCore/hglobal_core.h"
+#include "HHSharedCore/User"
+#include "HHSharedCore/GlobalCore"
 
 
 

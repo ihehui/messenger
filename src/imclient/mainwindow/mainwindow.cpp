@@ -28,9 +28,9 @@
 
 //#include "HHSharedCore/hdatabaseutility.h"
 //#include "HHSharedGUI/hloginbase.h"
-#include "HHSharedGUI/hguiinterface.h"
-#include "HHSharedGUI/hpluginmanagerwindow.h"
-#include "HHSharedCore/hutilities.h"
+#include "HHSharedGUI/GUIInterface"
+#include "HHSharedGUI/PluginManagerWindow"
+#include "HHSharedGUI/GUIUtilities"
 
 
 
@@ -38,7 +38,7 @@ namespace HEHUI
 {
 
 
-MainWindow::MainWindow(QWidget *parent, HEHUI::WindowPosition positon) :
+MainWindow::MainWindow(QWidget *parent) :
     MainWindowBase(parent)
 {
 
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent, HEHUI::WindowPosition positon) :
     } else {
         //使窗口居中
         //Center the window
-        moveWindow(positon);
+        GUIUtilities::moveWindow(this, GUIUtilities::CENTER);
     }
 
     loadPlugins();
@@ -247,7 +247,7 @@ void MainWindow::initUI()
 {
 
     ui.menuView->addSeparator();
-    ui.menuView->addMenu(getStyleMenu(Settings::instance()->getStyle(), Settings::instance()->getPalette()));
+    ui.menuView->addMenu(getStyleMenu(Settings::instance()->getStyle(), Settings::instance()->isUsingStylesPalette()));
     QString qmLocale = Settings::instance()->getLanguage();
     QString qmPath = QApplication::applicationDirPath() + QDir::separator () + QString(LANGUAGE_FILE_DIR);
     ui.menuView->addMenu(getLanguageMenu(qmPath, qmLocale));
@@ -1104,17 +1104,19 @@ void MainWindow::aboutToQuit()
 
 }
 
-void MainWindow::savePreferedStyle(const QString &preferedStyle, bool useStylePalette)
+void MainWindow::savePreferedStyle(const QString &preferedStyle)
 {
     Settings::instance()->setStyle(preferedStyle);
-    Settings::instance()->setPalette(useStylePalette);
+}
 
+void MainWindow::saveUsingStylePalette(bool useStylePalette)
+{
+    Settings::instance()->setUseStylesPalette(useStylePalette);
 }
 
 void MainWindow::savePreferedLanguage(const QString &preferedLanguage)
 {
     Settings::instance()->setLanguage(preferedLanguage);
-
 }
 
 void MainWindow::showDeleteContactDialog(Contact *contact, bool blacklistMode)

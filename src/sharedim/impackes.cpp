@@ -2,7 +2,7 @@
 
 #include "constants_global_shared.h"
 #include "HHSharedNetwork/PacketBase"
-#include "HHSharedCore/hcryptography.h"
+#include "HHSharedCore/Cryptography"
 
 
 namespace HEHUI

@@ -12,9 +12,8 @@
 
 #include "../../sharedim/impackets.h"
 
-#include "HHSharedCore/hsingleton.h"
-#include "HHSharedCore/hutilities.h"
-//#include "HHSharedGUI/hdatabaseconnecter.h"
+#include "HHSharedCore/Singleton"
+#include "HHSharedCore/CoreUtilities"
 
 
 namespace HEHUI

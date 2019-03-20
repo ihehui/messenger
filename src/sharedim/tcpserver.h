@@ -3,7 +3,7 @@
 
 #include "sharedimlib.h"
 
-#include "HHSharedNetwork/htcpbase.h"
+#include "HHSharedNetwork/TCPBase"
 #include "HHSharedNetwork/PacketBase"
 
 namespace HEHUI
