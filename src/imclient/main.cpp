@@ -59,14 +59,6 @@ int main(int argc, char *argv[])
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-    QDate date = QDate::currentDate();
-    if(date.year() != 2017) {
-        QMessageBox::critical(0, QObject::tr("Error"), QObject::tr("Application has expired!"));
-        qDebug() << "Application has expired!";
-        return 0;
-    }
-
     app.addLibraryPath(QCoreApplication::applicationDirPath());
     app.addLibraryPath(QCoreApplication::applicationDirPath() + QDir::separator () + QString(PLUGINS_MAIN_DIR));
     app.addLibraryPath(QCoreApplication::applicationDirPath() + QDir::separator () + QString(MYLIBS_DIR));
@@ -92,7 +84,7 @@ int main(int argc, char *argv[])
 
     //创建主窗口
     //Create the main window
-    MainWindow mw;
+    MainWindow mw(Settings::instance()->fileName());
     mw.show();
 
     //结束Splash Screen

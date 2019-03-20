@@ -38,7 +38,7 @@ class MainWindow: public MainWindowBase
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(const QString &settingsFile, QWidget *parent = 0);
     ~MainWindow();
 
 
@@ -237,10 +237,6 @@ private:
 
     //退出前的清理工作
     void aboutToQuit();
-
-    void savePreferedStyle(const QString &preferedStyle);
-    void saveUsingStylePalette(bool useStylePalette);
-    void savePreferedLanguage(const QString &preferedLanguage);
 
     void showDeleteContactDialog(Contact *contact, bool blacklistMode = false);
 

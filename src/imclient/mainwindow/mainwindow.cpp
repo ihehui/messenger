@@ -38,8 +38,8 @@ namespace HEHUI
 {
 
 
-MainWindow::MainWindow(QWidget *parent) :
-    MainWindowBase(parent)
+MainWindow::MainWindow(const QString &settingsFile, QWidget *parent) :
+    MainWindowBase(settingsFile, parent)
 {
 
     ui.setupUi(this);
@@ -247,10 +247,14 @@ void MainWindow::initUI()
 {
 
     ui.menuView->addSeparator();
-    ui.menuView->addMenu(getStyleMenu(Settings::instance()->getStyle(), Settings::instance()->isUsingStylesPalette()));
-    QString qmLocale = Settings::instance()->getLanguage();
-    QString qmPath = QApplication::applicationDirPath() + QDir::separator () + QString(LANGUAGE_FILE_DIR);
-    ui.menuView->addMenu(getLanguageMenu(qmPath, qmLocale));
+    ui.menuView->addMenu(getStyleMenu());
+
+    QStringList qmPathList;
+    qmPathList.append(QApplication::applicationDirPath() + QDir::separator () + QString(LANGUAGE_FILE_DIR));
+    qmPathList.append(":/translations");
+    QString qmLocale = guiUtilities()->getPreferedLanguage();
+    guiUtilities()->setTranslationFileDirList(qmPathList);
+    ui.menuView->addMenu(getLanguageMenu());
 
     pluginsMenu = getPluginsMenu();
     menuBar()->insertMenu(ui.menuHelp->menuAction(), pluginsMenu);
@@ -1102,21 +1106,6 @@ void MainWindow::aboutToQuit()
     }
 
 
-}
-
-void MainWindow::savePreferedStyle(const QString &preferedStyle)
-{
-    Settings::instance()->setStyle(preferedStyle);
-}
-
-void MainWindow::saveUsingStylePalette(bool useStylePalette)
-{
-    Settings::instance()->setUseStylesPalette(useStylePalette);
-}
-
-void MainWindow::savePreferedLanguage(const QString &preferedLanguage)
-{
-    Settings::instance()->setLanguage(preferedLanguage);
 }
 
 void MainWindow::showDeleteContactDialog(Contact *contact, bool blacklistMode)
